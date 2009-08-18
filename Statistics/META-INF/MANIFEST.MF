@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Statistics Plug-in
+Bundle-SymbolicName: Waelti.Statistics; singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: waelti.statistics.Activator
+Bundle-Vendor: Waelti Michael
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ ch.elexis,
+ ch.rgw.utility;bundle-version="2.0.0"
+Eclipse-LazyStart: true
