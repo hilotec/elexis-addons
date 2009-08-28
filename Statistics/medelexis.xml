@@ -2,8 +2,9 @@
 <service:service category="feature" id="Waelti.Statistics" name="Statistics M. Wälti" provider="support@medelexis.ch" type="Statistik" version="1.0.0" xmlns:service="http://www.medelexis.ch/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ">
   <service:conditions>
   	<service:roles>
-  		<service:role>
-  			<service:pricePerDB amount="50.00" /></service:role>
+  		<service:role priceClass="fixed-basic">
+  			<service:pricePerDB amount="50.00" />
+  		</service:role>
   	</service:roles>
   </service:conditions>
   <service:description>Einige einfache Statistik-Abfragen</service:description>
