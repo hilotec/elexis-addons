@@ -8,4 +8,5 @@
   	</service:roles>
   </service:conditions>
   <service:description>Einige einfache Statistik-Abfragen</service:description>
+  <service:depends>ch.medelexis.nucleus</service:depends>
 </service:service>
