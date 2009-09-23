@@ -112,7 +112,7 @@ public class OutputView extends ViewPart {
 	 */
 	public void setHeader(String headerText){
 		this.header.setText(headerText);
-		header.setFont(new Font(Desk.theDisplay, "Helvetica", 11, SWT.BOLD));
+		header.setFont(new Font(Desk.getDisplay(), "Helvetica", 11, SWT.BOLD));
 		this.parent.layout();
 	}
 	
