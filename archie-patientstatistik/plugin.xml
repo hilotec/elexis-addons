@@ -3,6 +3,12 @@
 <plugin>
    <extension
          point="org.eclipse.ui.views">
+      <view
+            class="ch.elexis.archie.patientstatistik.VerrechnungsStatistikView"
+            id="ch.elexis.archie.patientstatistik.view1"
+            name="Verrechnungsstatistik"
+            restorable="true">
+      </view>
    </extension>
 	<view
  	   id="ch.elexis.archie.patientstatistik.view"
