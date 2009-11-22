@@ -4,6 +4,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
+
+import ch.elexis.Desk;
 import ch.elexis.data.Fall;
 import ch.elexis.data.IVerrechenbar;
 import ch.elexis.data.Konsultation;
@@ -12,13 +20,70 @@ import ch.elexis.data.Query;
 import ch.elexis.data.Verrechnet;
 import ch.rgw.tools.TimeTool;
 
-public class Counter {
+public class Counter extends Job{
+	private static final int tasksum=1000000;
+	private int perCase=tasksum;
+	private int perKons=1;
+	private HashMap<IVerrechenbar, List<Verrechnet>> result;
+	private Patient p;
+	private TimeTool von;
+	private TimeTool bis;
+	
+	public interface IJobFinishedListener{
+		public void jobFinished(Counter counter);
+	}
+	
+	public HashMap<IVerrechenbar, List<Verrechnet>> getValues(){
+		return result;
+	}
+	
+	public Counter(final Patient p, final TimeTool von, final TimeTool bis, final IJobFinishedListener lis) {
+		super("Verrechnungszähler");
+		setUser(true);
+		setSystem(false);
+		setPriority(Job.LONG);
+		this.p=p;
+		this.von=von;
+		this.bis=bis;
+		if(lis!=null){
+			addJobChangeListener(new IJobChangeListener() {
+				
+				public void sleeping(IJobChangeEvent event) {
+				}
+				
+				public void scheduled(IJobChangeEvent event) {
+				}
+				
+				public void running(IJobChangeEvent event) {
+				}
+				
+				public void done(IJobChangeEvent event) {
+					Desk.getDisplay().asyncExec(new Runnable(){
+						public void run() {
+							lis.jobFinished(Counter.this);
+							
+						}});
+				}
+				
+				public void awake(IJobChangeEvent event) {								
+				}
+				
+				public void aboutToRun(IJobChangeEvent event) {
 
-	public HashMap<IVerrechenbar, List<Verrechnet>> calculate(
-			Patient p, TimeTool von, TimeTool bis) {
-		HashMap<IVerrechenbar, List<Verrechnet>> ret = new HashMap<IVerrechenbar, List<Verrechnet>>();
+					
+				}
+			});
+		}
+	}
+
+	@Override
+	protected IStatus run(IProgressMonitor monitor) {
+
+		monitor.beginTask("Zähle Verrechnungen", tasksum);
+		result = new HashMap<IVerrechenbar, List<Verrechnet>>();
 		Fall[] faelle = p.getFaelle();
 		if (faelle.length > 0) {
+			perCase=tasksum/faelle.length;
 			Query<Konsultation> qbe = new Query<Konsultation>(
 					Konsultation.class);
 			qbe.startGroup();
@@ -37,19 +102,25 @@ public class Counter {
 						.toString(TimeTool.DATE_COMPACT));
 			}
 			List<Konsultation> kk = qbe.execute();
+			perKons=perCase/kk.size();
 			for(Konsultation k:kk){
 				List<Verrechnet> lv=k.getLeistungen();
 				for(Verrechnet v:lv){
 					IVerrechenbar iv=v.getVerrechenbar();
-					List<Verrechnet> liv=ret.get(iv);
+					List<Verrechnet> liv=result.get(iv);
 					if(liv==null){
 						liv=new LinkedList<Verrechnet>();
-						ret.put(iv, liv);
+						result.put(iv, liv);
 					}
 					liv.add(v);
 				}
+				monitor.worked(perKons);
+				if(monitor.isCanceled()){
+					return Status.CANCEL_STATUS;
+				}
 			}
 		}
-		return ret;
+		monitor.done();
+		return Status.OK_STATUS;
 	}
 }
