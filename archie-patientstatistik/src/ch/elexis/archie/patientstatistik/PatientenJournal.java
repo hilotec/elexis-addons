@@ -26,21 +26,11 @@ import ch.unibe.iam.scg.archie.ui.widgets.WidgetTypes;
 
 public class PatientenJournal extends AbstractTimeSeries {
 	String[] headings={"Name","Konsultationen","Kosten"};
-	Patient pat=null;
 	
 	public PatientenJournal(){
 		super("Patienten");
 	}
 	
-	@GetProperty(name="Patient", widgetType=WidgetTypes.VENDOR, vendorClass=PatientSelector.class)
-	public Patient getPatient(){
-		return null;
-	}
-	
-	@SetProperty(name="Patient")
-	public void setPatient(Patient p){
-		
-	}
 	@Override
 	protected List<String> createHeadings(){
 		return Arrays.asList(headings);
@@ -52,7 +42,7 @@ public class PatientenJournal extends AbstractTimeSeries {
 	}
 	@Override
 	protected IStatus createContent(IProgressMonitor monitor){
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 	
