@@ -117,6 +117,7 @@ SelectionListener, Counter.IJobFinishedListener {
 		Patient pat = GlobalEvents.getSelectedPatient();
 		if (pat != null) {
 			final Counter counter = new Counter(pat, null, null, this);
+			table.removeAll();
 			counter.schedule();
 		}
 	}
@@ -124,7 +125,7 @@ SelectionListener, Counter.IJobFinishedListener {
 	public void jobFinished(final Counter counter){
 		HashMap<IVerrechenbar, List<Verrechnet>> cnt = counter.getValues();
 		HashMap<String, Money> totals = new HashMap<String, Money>();
-		table.removeAll();
+		
 		
 		// TreeSet<IVerrechenbar> set=new
 		// TreeSet<IVerrechenbar>(cnt.keySet());
