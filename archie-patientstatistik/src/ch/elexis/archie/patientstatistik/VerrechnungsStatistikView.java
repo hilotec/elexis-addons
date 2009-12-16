@@ -20,6 +20,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.part.ViewPart;
 
 import ch.elexis.Desk;
+import ch.elexis.StringConstants;
 import ch.elexis.actions.GlobalEvents;
 import ch.elexis.actions.GlobalEvents.ActivationListener;
 import ch.elexis.actions.GlobalEvents.SelectionListener;
@@ -33,13 +34,19 @@ import ch.rgw.tools.ExHandler;
 import ch.rgw.tools.Money;
 import ch.rgw.tools.StringTool;
 
+/**
+ * This view summarizes all services to the currently selected patient
+ * @author gerry
+ *
+ */
 public class VerrechnungsStatistikView extends ViewPart implements ActivationListener,
 SelectionListener, Counter.IJobFinishedListener {
 	private Action recalcAction, exportCSVAction;
 	Form form;
 	Table table;
+	
 	String[] tableHeaders = {
-		"Codesystem", "Code", "Text", "Anzahl", "Gesamtbetrag"
+		Messages.VerrechnungsStatistikView_CODESYSTEM, Messages.VerrechnungsStatistikView_CODE, Messages.VerrechnungsStatistikView_TEXT, Messages.VerrechnungsStatistikView_NUMBER, Messages.VerrechnungsStatistikView_AMOUNT
 	};
 	int[] columnWidths = new int[] {
 		130, 60, 160, 40, 50
@@ -49,6 +56,11 @@ SelectionListener, Counter.IJobFinishedListener {
 		
 	}
 	
+	/**
+	 * The Eclipse View is created: We use a Form with an SWT Table to display the data. Then we create a local menu and toolbar
+	 * and finally, we attach ourselves as ActivationListener at Elexis' Event scheduler to be informed when we become visible to
+	 * the user.
+	 */
 	@Override
 	public void createPartControl(Composite parent){
 		form = Desk.getToolkit().createForm(parent);
@@ -70,6 +82,9 @@ SelectionListener, Counter.IJobFinishedListener {
 		GlobalEvents.getInstance().addActivationListener(this, this);
 	}
 	
+	/**
+	 * Important: On disposal of the View, the ActivationListener MUST be removed.
+	 */
 	@Override
 	public void dispose(){
 		GlobalEvents.getInstance().removeActivationListener(this, this);
@@ -82,11 +97,18 @@ SelectionListener, Counter.IJobFinishedListener {
 		
 	}
 	
+	/**
+	 * Method from ActivationListener - We are not interested
+	 */
 	public void activation(boolean mode){
 		// TODO Auto-generated method stub
 		
 	}
 	
+	/**
+	 * Method from ActivationListener. If we get visible, we attach ourselves as SelectionListener to Elexis' Event scheduler to
+	 * be informed as the user selects a patient. When we become invisible, we detach the listener again.
+	 */
 	public void visible(boolean mode){
 		if (mode) {
 			GlobalEvents.getInstance().addSelectionListener(this);
@@ -97,15 +119,21 @@ SelectionListener, Counter.IJobFinishedListener {
 		
 	}
 	
+	/**
+	 * Method from SelectionListener
+	 */
 	public void clearEvent(Class<? extends PersistentObject> template){
 		// TODO Auto-generated method stub
 		
 	}
 	
+	/**
+	 * Method from SelectionListener. The user selected a new Patient
+	 */
 	public void selectionEvent(PersistentObject obj){
 		Patient pat = GlobalEvents.getSelectedPatient();
 		if (pat == null) {
-			form.setText("Kein Patient ausgewählt");
+			form.setText(Messages.VerrechnungsStatistikView_NoPatientSelected);
 		} else {
 			form.setText(pat.getLabel());
 			recalc();
@@ -178,18 +206,18 @@ SelectionListener, Counter.IJobFinishedListener {
 		Money sumAll = new Money();
 		for (String n : totals.keySet()) {
 			TableItem ti = new TableItem(table, SWT.NONE);
-			ti.setText(0, "Summe " + n);
+			ti.setText(0, Messages.VerrechnungsStatistikView_SUM + n);
 			Money sumClass = totals.get(n);
 			ti.setText(4, sumClass.getAmountAsString());
 			sumAll.addMoney(sumClass);
 		}
 		TableItem ti = new TableItem(table, SWT.BOLD);
-		ti.setText(0, "Summe total ");
+		ti.setText(0, Messages.VerrechnungsStatistikView_SUMTOTAL);
 		ti.setText(4, sumAll.getAmountAsString());
 	}
 	
 	private void makeActions(){
-		recalcAction = new Action("Neu einlesen", Desk.getImageDescriptor(Desk.IMG_REFRESH)) {
+		recalcAction = new Action(Messages.VerrechnungsStatistikView_REFRESH, Desk.getImageDescriptor(Desk.IMG_REFRESH)) {
 			@Override
 			public void run(){
 				recalc();
@@ -197,25 +225,25 @@ SelectionListener, Counter.IJobFinishedListener {
 			
 		};
 		exportCSVAction =
-			new Action("Nach CSV exportieren", Desk.getImageDescriptor(Desk.IMG_EXPORT)) {
+			new Action(Messages.VerrechnungsStatistikView_ExportToCSV, Desk.getImageDescriptor(Desk.IMG_EXPORT)) {
 			@Override
 			public void run(){
 				FileDialog fd = new FileDialog(getViewSite().getShell(), SWT.SAVE);
 				fd.setFilterExtensions(new String[] {
 					"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 				fd.setFilterNames(new String[] {
-					"CSV", "Alle Dateien"}); //$NON-NLS-1$ //$NON-NLS-2$
+					"CSV", Messages.VerrechnungsStatistikView_AllFiles}); //$NON-NLS-1$ 
 				fd.setFileName("elexis-verr.csv"); //$NON-NLS-1$
 				String fname = fd.open();
 				if (fd != null) {
 					try {
 						FileWriter fw = new FileWriter(fname);
-						fw.write(StringTool.join(tableHeaders, ";")+"\r\n");
+						fw.write(StringTool.join(tableHeaders, StringConstants.SEMICOLON)+StringConstants.CRLF);
 						for (TableItem it : table.getItems()) {
 							StringBuilder sb = new StringBuilder();
-							sb.append(it.getText(0)).append(";").append(it.getText(1)).append(
-							";").append(it.getText(2)).append(";").append(it.getText(3))
-							.append(";").append(it.getText(4)).append("\r\n");
+							sb.append(it.getText(0)).append(StringConstants.SEMICOLON).append(it.getText(1)).append(
+							StringConstants.SEMICOLON).append(it.getText(2)).append(StringConstants.SEMICOLON).append(it.getText(3))
+							.append(StringConstants.SEMICOLON).append(it.getText(4)).append(StringConstants.CRLF);
 							fw.write(sb.toString());
 						}
 						fw.close();
