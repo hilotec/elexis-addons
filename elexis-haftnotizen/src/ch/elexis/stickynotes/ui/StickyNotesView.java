@@ -8,7 +8,7 @@
  * Contributors:
  *    G. Weirich - initial implementation
  *    J, Kurath - Sponsoring
- *    
+ * 
  * $Id: StickyNotesView.java 5518 2009-07-04 14:02:31Z rgw_ch $
  *******************************************************************************/
 
@@ -39,31 +39,31 @@ import ch.elexis.text.EnhancedTextField;
 import ch.elexis.util.SWTHelper;
 
 public class StickyNotesView extends ViewPart implements IActivationListener,
-		HeartListener {
+HeartListener {
 	private ScrolledForm form;
 	EnhancedTextField etf;
 	Patient actPatient;
 	StickyNote actNote;
 	SettingsPreferenceStore prefs;
-
-	private ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(
-			Patient.class) {
+	
+	private final ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(
+		Patient.class) {
 		@Override
 		public void runInUi(ElexisEvent ev) {
 			doSelect((Patient) ev.getObject());
 		}
 	};
-
-	private ElexisEventListenerImpl eeli_user = new ElexisEventListenerImpl(
-			Anwender.class, ElexisEvent.EVENT_USER_CHANGED) {
-
+	
+	private final ElexisEventListenerImpl eeli_user = new ElexisEventListenerImpl(
+		Anwender.class, ElexisEvent.EVENT_USER_CHANGED) {
+		
 		@Override
 		public void catchElexisEvent(ElexisEvent ev) {
 			prefs = new SettingsPreferenceStore(Hub.userCfg);
 		}
-
+		
 	};
-
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		prefs = new SettingsPreferenceStore(Hub.userCfg);
@@ -74,20 +74,20 @@ public class StickyNotesView extends ViewPart implements IActivationListener,
 		etf = new EnhancedTextField(body);
 		etf.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		GlobalEventDispatcher.addActivationListener(this, this);
-
+		
 	}
-
+	
 	@Override
 	public void dispose() {
 		GlobalEventDispatcher.removeActivationListener(this, this);
 		super.dispose();
 	}
-
+	
 	@Override
 	public void setFocus() {
 		etf.setFocus();
 	}
-
+	
 	public void activation(boolean mode) {
 		if ((mode == false) && etf.isDirty()) {
 			if (actPatient != null) {
@@ -97,24 +97,24 @@ public class StickyNotesView extends ViewPart implements IActivationListener,
 				actNote.setText(etf.getDocumentAsText());
 			}
 		}
-
+		
 	}
-
+	
 	public void visible(boolean mode) {
 		if (mode) {
-			eeli_pat.catchElexisEvent(ElexisEvent.changePatientEvent);
-			eeli_user.catchElexisEvent(ElexisEvent.changeUserEvent);
+			eeli_pat.catchElexisEvent(ElexisEvent.createPatientEvent());
+			eeli_user.catchElexisEvent(ElexisEvent.createUserEvent());
 			ElexisEventDispatcher.getInstance().addListeners(eeli_pat,
-					eeli_user);
+				eeli_user);
 			Hub.heart.addListener(this);
 		} else {
 			ElexisEventDispatcher.getInstance().removeListeners(eeli_pat,
-					eeli_user);
+				eeli_user);
 			Hub.heart.removeListener(this);
 		}
-
+		
 	}
-
+	
 	public void clearEvent(Class<? extends PersistentObject> template) {
 		if (template.equals(Patient.class)) {
 			actNote = null;
@@ -123,9 +123,9 @@ public class StickyNotesView extends ViewPart implements IActivationListener,
 			// form.setText(Messages.StickyNotesView_NoPatientSelected);
 			setPartName("Haftnotizen");
 		}
-
+		
 	}
-
+	
 	public void doSelect(Patient pat) {
 		actPatient = pat;
 		actNote = StickyNote.load(actPatient);
@@ -133,7 +133,7 @@ public class StickyNotesView extends ViewPart implements IActivationListener,
 		// form.setText(actPatient.getLabel());
 		setPartName("Haftnotizen - " + actPatient.getLabel());
 		RGB rgb = PreferenceConverter
-				.getColor(prefs, Preferences.COLBACKGROUND);
+		.getColor(prefs, Preferences.COLBACKGROUND);
 		Desk.getColorRegistry().put(Preferences.COLBACKGROUND, rgb);
 		Color back = Desk.getColorRegistry().get(Preferences.COLBACKGROUND);
 		rgb = PreferenceConverter.getColor(prefs, Preferences.COLFOREGROUND);
@@ -141,9 +141,9 @@ public class StickyNotesView extends ViewPart implements IActivationListener,
 		Color fore = Desk.getColorRegistry().get(Preferences.COLFOREGROUND);
 		etf.getControl().setBackground(back);
 		etf.getControl().setForeground(fore);
-
+		
 	}
-
+	
 	public void heartbeat() {
 		if (actPatient == null) {
 			actPatient = ElexisEventDispatcher.getSelectedPatient();
@@ -154,9 +154,9 @@ public class StickyNotesView extends ViewPart implements IActivationListener,
 			}
 			if (actNote != null) {
 				// TODO handle conflicts
-
+				
 			}
 		}
 	}
-
+	
 }
