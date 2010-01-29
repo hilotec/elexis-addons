@@ -21,9 +21,11 @@ import org.eclipse.ui.part.ViewPart;
 
 import ch.elexis.Desk;
 import ch.elexis.StringConstants;
-import ch.elexis.actions.GlobalEvents;
-import ch.elexis.actions.GlobalEvents.ActivationListener;
-import ch.elexis.actions.GlobalEvents.SelectionListener;
+import ch.elexis.actions.ElexisEvent;
+import ch.elexis.actions.ElexisEventDispatcher;
+import ch.elexis.actions.ElexisEventListenerImpl;
+import ch.elexis.actions.GlobalEventDispatcher;
+import ch.elexis.actions.GlobalEventDispatcher.IActivationListener;
 import ch.elexis.data.IVerrechenbar;
 import ch.elexis.data.Patient;
 import ch.elexis.data.PersistentObject;
@@ -36,33 +38,50 @@ import ch.rgw.tools.StringTool;
 
 /**
  * This view summarizes all services to the currently selected patient
+ * 
  * @author gerry
- *
+ * 
  */
-public class VerrechnungsStatistikView extends ViewPart implements ActivationListener,
-SelectionListener, Counter.IJobFinishedListener {
+public class VerrechnungsStatistikView extends ViewPart implements
+		IActivationListener, Counter.IJobFinishedListener {
 	private Action recalcAction, exportCSVAction;
 	Form form;
 	Table table;
-	
-	String[] tableHeaders = {
-		Messages.VerrechnungsStatistikView_CODESYSTEM, Messages.VerrechnungsStatistikView_CODE, Messages.VerrechnungsStatistikView_TEXT, Messages.VerrechnungsStatistikView_NUMBER, Messages.VerrechnungsStatistikView_AMOUNT
+
+	String[] tableHeaders = { Messages.VerrechnungsStatistikView_CODESYSTEM,
+			Messages.VerrechnungsStatistikView_CODE,
+			Messages.VerrechnungsStatistikView_TEXT,
+			Messages.VerrechnungsStatistikView_NUMBER,
+			Messages.VerrechnungsStatistikView_AMOUNT };
+	int[] columnWidths = new int[] { 130, 60, 160, 40, 50 };
+
+	private ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(
+			Patient.class) {
+
+		@Override
+		public void runInUi(ElexisEvent ev) {
+			if (ev.getType() == ElexisEvent.EVENT_SELECTED) {
+				Patient pat = (Patient) ev.getObject();
+				form.setText(pat.getLabel());
+				recalc();
+			} else if (ev.getType() == ElexisEvent.EVENT_DESELECTED) {
+				form
+						.setText(Messages.VerrechnungsStatistikView_NoPatientSelected);
+
+			}
+
+		}
+
 	};
-	int[] columnWidths = new int[] {
-		130, 60, 160, 40, 50
-	};
-	
-	public VerrechnungsStatistikView(){
-		
-	}
-	
+
 	/**
-	 * The Eclipse View is created: We use a Form with an SWT Table to display the data. Then we create a local menu and toolbar
-	 * and finally, we attach ourselves as ActivationListener at Elexis' Event scheduler to be informed when we become visible to
-	 * the user.
+	 * The Eclipse View is created: We use a Form with an SWT Table to display
+	 * the data. Then we create a local menu and toolbar and finally, we attach
+	 * ourselves as ActivationListener at Elexis' Event scheduler to be informed
+	 * when we become visible to the user.
 	 */
 	@Override
-	public void createPartControl(Composite parent){
+	public void createPartControl(Composite parent) {
 		form = Desk.getToolkit().createForm(parent);
 		form.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		form.getBody().setLayout(new GridLayout());
@@ -79,88 +98,78 @@ SelectionListener, Counter.IJobFinishedListener {
 		ViewMenus menu = new ViewMenus(getViewSite());
 		menu.createToolbar(exportCSVAction, recalcAction);
 		menu.createMenu(exportCSVAction);
-		GlobalEvents.getInstance().addActivationListener(this, this);
+		GlobalEventDispatcher.addActivationListener(this, this);
 	}
-	
+
 	/**
-	 * Important: On disposal of the View, the ActivationListener MUST be removed.
+	 * Important: On disposal of the View, the ActivationListener MUST be
+	 * removed.
 	 */
 	@Override
-	public void dispose(){
-		GlobalEvents.getInstance().removeActivationListener(this, this);
+	public void dispose() {
+		GlobalEventDispatcher.removeActivationListener(this, this);
 		super.dispose();
 	}
-	
+
 	@Override
-	public void setFocus(){
+	public void setFocus() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/**
 	 * Method from ActivationListener - We are not interested
 	 */
-	public void activation(boolean mode){
+	public void activation(boolean mode) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/**
-	 * Method from ActivationListener. If we get visible, we attach ourselves as SelectionListener to Elexis' Event scheduler to
-	 * be informed as the user selects a patient. When we become invisible, we detach the listener again.
+	 * Method from ActivationListener. If we get visible, we attach ourselves as
+	 * SelectionListener to Elexis' Event scheduler to be informed as the user
+	 * selects a patient. When we become invisible, we detach the listener
+	 * again.
 	 */
-	public void visible(boolean mode){
+	public void visible(boolean mode) {
 		if (mode) {
-			GlobalEvents.getInstance().addSelectionListener(this);
-			selectionEvent(GlobalEvents.getSelectedPatient());
+			ElexisEventDispatcher.getInstance().addListeners(eeli_pat);
+			eeli_pat.catchElexisEvent(ElexisEvent.createPatientEvent());
 		} else {
-			GlobalEvents.getInstance().removeSelectionListener(this);
+			ElexisEventDispatcher.getInstance().removeListeners(eeli_pat);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Method from SelectionListener
 	 */
-	public void clearEvent(Class<? extends PersistentObject> template){
+	public void clearEvent(Class<? extends PersistentObject> template) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	/**
-	 * Method from SelectionListener. The user selected a new Patient
-	 */
-	public void selectionEvent(PersistentObject obj){
-		Patient pat = GlobalEvents.getSelectedPatient();
-		if (pat == null) {
-			form.setText(Messages.VerrechnungsStatistikView_NoPatientSelected);
-		} else {
-			form.setText(pat.getLabel());
-			recalc();
-		}
-	}
-	
-	private void recalc(){
-		
-		Patient pat = GlobalEvents.getSelectedPatient();
+
+	private void recalc() {
+
+		Patient pat = ElexisEventDispatcher.getSelectedPatient();
 		if (pat != null) {
 			final Counter counter = new Counter(pat, null, null, this);
 			table.removeAll();
 			counter.schedule();
 		}
 	}
-	
-	public void jobFinished(final Counter counter){
+
+	public void jobFinished(final Counter counter) {
 		HashMap<IVerrechenbar, List<Verrechnet>> cnt = counter.getValues();
 		HashMap<String, Money> totals = new HashMap<String, Money>();
-		
-		
+
 		// TreeSet<IVerrechenbar> set=new
 		// TreeSet<IVerrechenbar>(cnt.keySet());
-		ArrayList<IVerrechenbar> set = new ArrayList<IVerrechenbar>(cnt.keySet());
+		ArrayList<IVerrechenbar> set = new ArrayList<IVerrechenbar>(cnt
+				.keySet());
 		Collections.sort(set, new Comparator<IVerrechenbar>() {
-			
-			public int compare(IVerrechenbar o1, IVerrechenbar o2){
+
+			public int compare(IVerrechenbar o1, IVerrechenbar o2) {
 				if (o1 != null && o2 != null) {
 					String csname1 = o1.getCodeSystemName();
 					String csname2 = o2.getCodeSystemName();
@@ -173,7 +182,7 @@ SelectionListener, Counter.IJobFinishedListener {
 					return res;
 				}
 				return 0;
-				
+
 			}
 		});
 		for (IVerrechenbar iv : set) {
@@ -191,16 +200,16 @@ SelectionListener, Counter.IJobFinishedListener {
 				Money total = new Money();
 				int count = 0;
 				for (Verrechnet vv : cnt.get(iv)) {
-					Money singlePrice=vv.getNettoPreis();
-					int num=vv.getZahl();
+					Money singlePrice = vv.getNettoPreis();
+					int num = vv.getZahl();
 					singlePrice.multiply(num);
 					total.addMoney(singlePrice);
-					count+=num;
+					count += num;
 				}
 				tCode.addMoney(total);
 				ti.setText(3, Integer.toString(count));
 				ti.setText(4, total.getAmountAsString());
-				
+
 			}
 		}
 		Money sumAll = new Money();
@@ -215,47 +224,57 @@ SelectionListener, Counter.IJobFinishedListener {
 		ti.setText(0, Messages.VerrechnungsStatistikView_SUMTOTAL);
 		ti.setText(4, sumAll.getAmountAsString());
 	}
-	
-	private void makeActions(){
-		recalcAction = new Action(Messages.VerrechnungsStatistikView_REFRESH, Desk.getImageDescriptor(Desk.IMG_REFRESH)) {
+
+	private void makeActions() {
+		recalcAction = new Action(Messages.VerrechnungsStatistikView_REFRESH,
+				Desk.getImageDescriptor(Desk.IMG_REFRESH)) {
 			@Override
-			public void run(){
+			public void run() {
 				recalc();
 			}
-			
+
 		};
-		exportCSVAction =
-			new Action(Messages.VerrechnungsStatistikView_ExportToCSV, Desk.getImageDescriptor(Desk.IMG_EXPORT)) {
+		exportCSVAction = new Action(
+				Messages.VerrechnungsStatistikView_ExportToCSV, Desk
+						.getImageDescriptor(Desk.IMG_EXPORT)) {
 			@Override
-			public void run(){
-				FileDialog fd = new FileDialog(getViewSite().getShell(), SWT.SAVE);
-				fd.setFilterExtensions(new String[] {
-					"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			public void run() {
+				FileDialog fd = new FileDialog(getViewSite().getShell(),
+						SWT.SAVE);
+				fd.setFilterExtensions(new String[] { "*.csv", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
 				fd.setFilterNames(new String[] {
-					"CSV", Messages.VerrechnungsStatistikView_AllFiles}); //$NON-NLS-1$ 
+						"CSV", Messages.VerrechnungsStatistikView_AllFiles }); //$NON-NLS-1$ 
 				fd.setFileName("elexis-verr.csv"); //$NON-NLS-1$
 				String fname = fd.open();
 				if (fd != null) {
 					try {
 						FileWriter fw = new FileWriter(fname);
-						fw.write(StringTool.join(tableHeaders, StringConstants.SEMICOLON)+StringConstants.CRLF);
+						fw.write(StringTool.join(tableHeaders,
+								StringConstants.SEMICOLON)
+								+ StringConstants.CRLF);
 						for (TableItem it : table.getItems()) {
 							StringBuilder sb = new StringBuilder();
-							sb.append(it.getText(0)).append(StringConstants.SEMICOLON).append(it.getText(1)).append(
-							StringConstants.SEMICOLON).append(it.getText(2)).append(StringConstants.SEMICOLON).append(it.getText(3))
-							.append(StringConstants.SEMICOLON).append(it.getText(4)).append(StringConstants.CRLF);
+							sb.append(it.getText(0)).append(
+									StringConstants.SEMICOLON).append(
+									it.getText(1)).append(
+									StringConstants.SEMICOLON).append(
+									it.getText(2)).append(
+									StringConstants.SEMICOLON).append(
+									it.getText(3)).append(
+									StringConstants.SEMICOLON).append(
+									it.getText(4)).append(StringConstants.CRLF);
 							fw.write(sb.toString());
 						}
 						fw.close();
 					} catch (IOException e) {
 						ExHandler.handle(e);
-						
+
 					}
-					
+
 				}
-				
+
 			}
-			
+
 		};
 	}
 }
