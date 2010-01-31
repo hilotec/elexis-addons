@@ -32,40 +32,41 @@ import ch.elexis.actions.GlobalEventDispatcher.IActivationListener;
 import ch.elexis.actions.Heartbeat.HeartListener;
 import ch.elexis.data.Anwender;
 import ch.elexis.data.Patient;
-import ch.elexis.data.PersistentObject;
 import ch.elexis.preferences.SettingsPreferenceStore;
 import ch.elexis.stickynotes.data.StickyNote;
 import ch.elexis.text.EnhancedTextField;
 import ch.elexis.util.SWTHelper;
 
-public class StickyNotesView extends ViewPart implements IActivationListener,
-HeartListener {
+public class StickyNotesView extends ViewPart implements IActivationListener, HeartListener {
 	private ScrolledForm form;
 	EnhancedTextField etf;
 	Patient actPatient;
 	StickyNote actNote;
 	SettingsPreferenceStore prefs;
 	
-	private final ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(
-		Patient.class) {
+	private final ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(Patient.class) {
 		@Override
-		public void runInUi(ElexisEvent ev) {
-			doSelect((Patient) ev.getObject());
+		public void runInUi(ElexisEvent ev){
+			if (ev.getType() == ElexisEvent.EVENT_SELECTED) {
+				doSelect((Patient) ev.getObject());
+			} else if (ev.getType() == ElexisEvent.EVENT_DESELECTED) {
+				deselect();
+			}
 		}
 	};
 	
-	private final ElexisEventListenerImpl eeli_user = new ElexisEventListenerImpl(
-		Anwender.class, ElexisEvent.EVENT_USER_CHANGED) {
+	private final ElexisEventListenerImpl eeli_user =
+		new ElexisEventListenerImpl(Anwender.class, ElexisEvent.EVENT_USER_CHANGED) {
 		
 		@Override
-		public void catchElexisEvent(ElexisEvent ev) {
+		public void catchElexisEvent(ElexisEvent ev){
 			prefs = new SettingsPreferenceStore(Hub.userCfg);
 		}
 		
 	};
 	
 	@Override
-	public void createPartControl(Composite parent) {
+	public void createPartControl(Composite parent){
 		prefs = new SettingsPreferenceStore(Hub.userCfg);
 		form = Desk.getToolkit().createScrolledForm(parent);
 		form.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
@@ -78,17 +79,17 @@ HeartListener {
 	}
 	
 	@Override
-	public void dispose() {
+	public void dispose(){
 		GlobalEventDispatcher.removeActivationListener(this, this);
 		super.dispose();
 	}
 	
 	@Override
-	public void setFocus() {
+	public void setFocus(){
 		etf.setFocus();
 	}
 	
-	public void activation(boolean mode) {
+	public void activation(boolean mode){
 		if ((mode == false) && etf.isDirty()) {
 			if (actPatient != null) {
 				if (actNote == null) {
@@ -100,51 +101,50 @@ HeartListener {
 		
 	}
 	
-	public void visible(boolean mode) {
+	public void visible(boolean mode){
 		if (mode) {
 			eeli_pat.catchElexisEvent(ElexisEvent.createPatientEvent());
 			eeli_user.catchElexisEvent(ElexisEvent.createUserEvent());
-			ElexisEventDispatcher.getInstance().addListeners(eeli_pat,
-				eeli_user);
+			ElexisEventDispatcher.getInstance().addListeners(eeli_pat, eeli_user);
 			Hub.heart.addListener(this);
 		} else {
-			ElexisEventDispatcher.getInstance().removeListeners(eeli_pat,
-				eeli_user);
+			ElexisEventDispatcher.getInstance().removeListeners(eeli_pat, eeli_user);
 			Hub.heart.removeListener(this);
 		}
 		
 	}
 	
-	public void clearEvent(Class<? extends PersistentObject> template) {
-		if (template.equals(Patient.class)) {
-			actNote = null;
-			actPatient = null;
-			etf.setText(""); //$NON-NLS-1$
-			// form.setText(Messages.StickyNotesView_NoPatientSelected);
-			setPartName("Haftnotizen");
+	private void deselect(){
+		actNote = null;
+		actPatient = null;
+		etf.setText(""); //$NON-NLS-1$
+		// form.setText(Messages.StickyNotesView_NoPatientSelected);
+		setPartName("Haftnotizen");
+	}
+	
+	private void doSelect(Patient pat){
+		if (pat == null) {
+			deselect();
+			
+		} else {
+			
+			actPatient = pat;
+			actNote = StickyNote.load(actPatient);
+			etf.setText(actNote.getText());
+			// form.setText(actPatient.getLabel());
+			setPartName("Haftnotizen - " + actPatient.getLabel());
+			RGB rgb = PreferenceConverter.getColor(prefs, Preferences.COLBACKGROUND);
+			Desk.getColorRegistry().put(Preferences.COLBACKGROUND, rgb);
+			Color back = Desk.getColorRegistry().get(Preferences.COLBACKGROUND);
+			rgb = PreferenceConverter.getColor(prefs, Preferences.COLFOREGROUND);
+			Desk.getColorRegistry().put(Preferences.COLFOREGROUND, rgb);
+			Color fore = Desk.getColorRegistry().get(Preferences.COLFOREGROUND);
+			etf.getControl().setBackground(back);
+			etf.getControl().setForeground(fore);
 		}
-		
 	}
 	
-	public void doSelect(Patient pat) {
-		actPatient = pat;
-		actNote = StickyNote.load(actPatient);
-		etf.setText(actNote.getText());
-		// form.setText(actPatient.getLabel());
-		setPartName("Haftnotizen - " + actPatient.getLabel());
-		RGB rgb = PreferenceConverter
-		.getColor(prefs, Preferences.COLBACKGROUND);
-		Desk.getColorRegistry().put(Preferences.COLBACKGROUND, rgb);
-		Color back = Desk.getColorRegistry().get(Preferences.COLBACKGROUND);
-		rgb = PreferenceConverter.getColor(prefs, Preferences.COLFOREGROUND);
-		Desk.getColorRegistry().put(Preferences.COLFOREGROUND, rgb);
-		Color fore = Desk.getColorRegistry().get(Preferences.COLFOREGROUND);
-		etf.getControl().setBackground(back);
-		etf.getControl().setForeground(fore);
-		
-	}
-	
-	public void heartbeat() {
+	public void heartbeat(){
 		if (actPatient == null) {
 			actPatient = ElexisEventDispatcher.getSelectedPatient();
 		}
