@@ -119,7 +119,7 @@ public class StickyNotesView extends ViewPart implements IActivationListener, He
 		actPatient = null;
 		etf.setText(""); //$NON-NLS-1$
 		// form.setText(Messages.StickyNotesView_NoPatientSelected);
-		setPartName("Haftnotizen");
+		setPartName(Messages.StickyNotesView_StickyNotesName);
 	}
 	
 	private void doSelect(Patient pat){
@@ -132,7 +132,7 @@ public class StickyNotesView extends ViewPart implements IActivationListener, He
 			actNote = StickyNote.load(actPatient);
 			etf.setText(actNote.getText());
 			// form.setText(actPatient.getLabel());
-			setPartName("Haftnotizen - " + actPatient.getLabel());
+			setPartName(Messages.StickyNotesView_StickyNotesNameDash + actPatient.getLabel());
 			RGB rgb = PreferenceConverter.getColor(prefs, Preferences.COLBACKGROUND);
 			Desk.getColorRegistry().put(Preferences.COLBACKGROUND, rgb);
 			Color back = Desk.getColorRegistry().get(Preferences.COLBACKGROUND);

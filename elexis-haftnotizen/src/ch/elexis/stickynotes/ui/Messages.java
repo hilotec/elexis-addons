@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String Preferences_BackgroundColor;
 	public static String Preferences_ForegroundColor;
 	public static String StickyNotesView_NoPatientSelected;
+	public static String StickyNotesView_StickyNotesName;
+	public static String StickyNotesView_StickyNotesNameDash;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -28,8 +28,8 @@ public class StickyNote extends PersistentObject {
 		"deleted	CHAR(1) default '0',"+ //$NON-NLS-1$
 		"PatientID	VARCHAR(25),"+ //$NON-NLS-1$
 		"contents	BLOB);"+ //$NON-NLS-1$
-		"INSERT INTO "+TABLENAME+" (ID,PatientID) VALUES('VERSION','"+VERSION+"');"+
-		"CREATE INDEX "+TABLENAME+"1 ON "+TABLENAME+" (PatientID);";
+		"INSERT INTO "+TABLENAME+" (ID,PatientID) VALUES('VERSION','"+VERSION+"');"+ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		"CREATE INDEX "+TABLENAME+"1 ON "+TABLENAME+" (PatientID);"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 	
 	static{
