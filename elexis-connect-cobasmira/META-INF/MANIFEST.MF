@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Roche Cobas Mira Geräteanbindung
+Bundle-SymbolicName: at.herzpraxis.elexis.connect.cobasmira;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Vendor: herzpraxis.at
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ ch.elexis,
+ ch.elexis.importer.div,
+ ch.rgw.utility
