@@ -1,0 +1,9 @@
+Com-Port konnte nicht geoeffnet werden (MAC OS X):
+	Check RXTX-Library fixperm, maybe no user rights on COM Port http://jlog.org/rxtx-mac.html 
+	
+Laboratory XID is required for proper identification:
+Can be get using the Contact-View, selecting ones own Lab and copying the value into Preferences/Cobas Mira
+
+Measurements entered twice (same labItem, same Patient) on the same day result in a silent overwrite
+
+Cobas Mira different newline signs?? Currently set to \n

@@ -1,0 +1,54 @@
+!herzpraxisLogo.png! 
+
+h1. Elexis  Datenaustausch Geräteplugin: Roche Cobas Mira - V0.1 - März 2010
+
+__Entwickelt von:__ Descher Marco / "Herzpraxis Dr. Thomas Wolber":www.herzpraxis.at, Götzis, Österreich
+__Getestet mit:__ Roche Cobas Mira Classic / Firmware Version 8847.AB
+
+Dieses Plug-In bindet das Roche Cobas Mira Classic Gerät als externes Laborgerät in Elexis ein. Labordaten die über die serielle Schnittstelle des Gerätes abgesetzt werden,
+werden automatisch dem in der Elexis Datenbank vorhandenen Patienten zugeordnet und gespeichert.
+
+
+
+h1. Konfiguration
+
+Die folgende Sektion beschreibt die notwendigen Schritte zur Anbindung des Roche Cobas Mira Gerätes. 
+
+h2. Gerätekonfiguration
+
+!RocheCobasMiraClassic.jpg!
+Das Gerät muss für die Ausgabe der Daten über die serielle Schnittstelle konfiguriert werden. Details zu dieser Konfiguration finden Sie im Handbuch bzw.
+der Cobas Mira Host Interface Description. Um den Einstieg zu erleichtern, werden hier die "Quick Steps" zur Konfiguration angeführt:
+
+# @<PROG> <1>@   Melden sie sich hier mit den höchsten Benutzerrechten an.
+# @<PROG> <6> <3>@ Sie befinden sich jetzt im OUTPUT MODE Fenster
+# Setzen Sie hier folgende Parameter:
+#* @INTERFACE STATUS: ON@
+#* @INTERFACE REMOTE CTRL. OUTP: ON@
+#* @INTERFACE RESULT AUTO.MODE: SPL/CAL/CS@
+#* @INTERFACE <PRINT> -> SEND: ON@
+#* @INTERFACE <CLOSE> -> SEND: OFF@
+
+Dies konfiguriert den __Automatic Random Transmit Mode__ der von diesem Plug-In verwendet wird. Sollten Sie eine höhere Firmware als die von uns
+getestete verwenden, können noch die Parameter für die serielle Schnittstelle gesetzt werden. Ist dies nicht der Fall, dürften die folgenden Parameter Standard
+sein (sie sind auch bereits im Plug-In als Standard voreingestellt): @1200, 7, E, 2@
+
+Konfiguration der seriellen Schnittstelle am PC: RXTX Program!
+
+h2. Konfiguration in Elexis
+
+Sollte das Plug-In korrekt installiert sein, sehen Sie unter Elexis/Einstellungen/Datenaustausch/Roche Cobas Mira folgende Seite:
+
+
+
+
+Folgende Parameter müssen konfiguriert werden:
+* *Eigenlabor Identifikation (XID)*: Hier muss die XID Ihres hauseigenen Labors eingegeben werden. Sie müssen dafür einen Kontakt erstellt haben (mit Prädikat "IstLabor"), und kopieren die zugehörige XID in dieses Feld.
+* *Kontroll Identität*: Diese Identität wird beim Einlesen von Werten aus dem Cobas Mira Gerät ignoriert. Für Kontrolldurchgänge am Gerät verwenden Sie also dieselbe Identität wie in diesem Feld angegeben.
+* *COM-Port, Geschwindigkeit, Daten-Bits, Parität, Stop-Bits, Timeout*: Die seriellen Parameter zur Anbindung des Cobas Mira Gerätes.
+* *Im Hintergrund*: Die Datenaufnahme wird ohne sichtbare Meldungen geführt. Sollten Fehler auftreten werden diese im Cobas Mira Logfile gespeichert.
+* *Logging*: Diese Option aktiviert zusätzliches Logging. Standardoperationen werden ohnedies geloggt, sollten Sie weiterführende Informationen wünschen, aktivieren Sie diese Option und erhöhen Sie das Loglevel unter Einstellungen/Allgemein auf Log-Stufe 5.
+
+h1. Anmerkungen
+
+Pro Tag kann eine Messung pro Patient und Test erstellt werden. Wird ein zweiter Wert geliefert überschreibt dieser den ersten ohne eine spezifische Meldung im System.
