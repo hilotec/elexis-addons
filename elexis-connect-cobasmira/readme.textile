@@ -1,0 +1,5 @@
+h1. Roche Cobas Mira Laborimport
+
+Dieses Plug-In erweitert den Elexis Datenaustausch um einen Cobas Mira Laborimporter.
+
+This Plug-In extends the Elexis data exchange with a Cobas Mira laboratory import module.

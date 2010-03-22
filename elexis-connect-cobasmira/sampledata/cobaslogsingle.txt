@@ -1,0 +1,35 @@
+# General Message structure
+#	SOHLF [01, 0d 0a]	Start of heading, line feed [0d 0a or 0a depding on platform!]
+#   mm iiii bb LF		Block Heading, line feed
+#	STXLF [02, 0d 0a]	Start of Text, line feed
+#	cc dddd LF
+#	cc dddd LF
+#	cc dddd LF			Variable numer of data line
+#	...
+#	ETXLF [03, 0d 0a]	End of Text, line feed
+#	EOTLF [04, 0d 0a]	End of Transmission, line feed
+
+# SAMPLE Single Measurement Output of Cobas Mira Classic (plain, and 2 hexdumps)
+
+02 26-4983          03
+
+20 R A1 GOT  01 0001 NAMENAME   +2.61143E+01 00 21 O N 00
+
+
+
+$ hexdump -c cobaslogsingle.txt 
+0000000 001  \r  \n   0   2       2   6   -   4   9   8   3            
+0000010                               0   3  \r  \n 002  \r  \n   2   0
+0000020       R       A   1       G   O   T           0   1       0   0
+0000030   0   1       N   A   M   E   N   A   M   E               +   2
+0000040   .   6   1   1   4   3   E   +   0   1       0   0       2   1
+0000050       O       N       0   0  \r  \n 003  \r  \n 004  \r  \n    
+000005f
+$ hexdump -C cobaslogsingle.txt 
+00000000  01 0d 0a 30 32 20 32 36  2d 34 39 38 33 20 20 20  |...02 26-4983   |
+00000010  20 20 20 20 20 20 20 30  33 0d 0a 02 0d 0a 32 30  |       03.....20|
+00000020  20 52 20 41 31 20 47 4f  54 20 20 30 31 20 30 30  | R A1 GOT  01 00|
+00000030  30 31 20 4e 41 4d 45 4e  41 4d 45 20 20 20 2b 32  |01 NAMENAME   +2|
+00000040  2e 36 31 31 34 33 45 2b  30 31 20 30 30 20 32 31  |.61143E+01 00 21|
+00000050  20 4f 20 4e 20 30 30 0d  0a 03 0d 0a 04 0d 0a     | O N 00........|
+0000005f

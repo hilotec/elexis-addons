@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="ch.elexis.LaborDatenImport">
+      <Importer
+            ToolbarAction="at.herzpraxis.elexis.connect.cobasmira.CobasMiraAction"
+            name="Roche Cobas Mira">
+      </Importer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="ch.elexis.preferences.transporters"
+            class="at.herzpraxis.elexis.connect.cobasmira.Preferences"
+            id="at.herzpraxis.elexis.connect.cobasmira.preferences"
+            name="Roche Cobas Mira">
+      </page>
+   </extension>
+</plugin>
