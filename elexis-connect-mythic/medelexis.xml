@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service:service category="feature" id="ch.elexis.connect.mythic" name="Elexis-Connect-Mythic" provider="support@medelexis.ch" type="Geräteanbindung" version="2.0.0" xmlns:service="http://www.medelexis.ch/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ">
+  <service:conditions>
+  	<service:roles>
+  		<service:role available="true" daysperpayment="365"
+  			name="default" priceClass="fixed-low">
+  			<service:pricePerDB amount="5.00" currency="CHF"></service:pricePerDB>
+  		</service:role>
+  	</service:roles>
+  </service:conditions>
+  <service:description>Verbindung von Elexis zum Hämatologiegerät Mythic 18</service:description>
+  <service:depends>ch.medelexis.nucleus ch.elexis.importer.div</service:depends>
+</service:service>
