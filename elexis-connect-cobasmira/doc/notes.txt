@@ -4,6 +4,12 @@ Com-Port konnte nicht geoeffnet werden (MAC OS X):
 Laboratory XID is required for proper identification:
 Can be get using the Contact-View, selecting ones own Lab and copying the value into Preferences/Cobas Mira
 
-Measurements entered twice (same labItem, same Patient) on the same day result in a silent overwrite
+- Measurements entered twice (same labItem, same Patient) on the same day result in a silent overwrite
+- Cobas Mira different newline signs?? Currently set to \n
 
-Cobas Mira different newline signs?? Currently set to \n
+
+TODO:
+- Test plugin on Windows.
+- Anzahl Kommastellen 0 -> Integer Convert
+- Notification wenn "Pippetten voll"
+- Cobas Mira Background Timeout Unlimited? Auto new Connection?

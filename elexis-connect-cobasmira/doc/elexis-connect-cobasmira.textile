@@ -1,9 +1,10 @@
 !herzpraxisLogo.png! 
 
-h1. Elexis  Datenaustausch Geräteplugin: Roche Cobas Mira - V0.1 - März 2010
+h1. Elexis  Datenaustausch Geräteplugin: Roche Cobas Mira - V0.1 - März 2010 - WORK IN PROGRESS!
 
-__Entwickelt von:__ Descher Marco / "Herzpraxis Dr. Thomas Wolber":www.herzpraxis.at, Götzis, Ö–sterreich
+__Entwickelt von:__ Descher Marco / "Herzpraxis Dr. Thomas Wolber":htp://www.herzpraxis.at, Götzis, Österreich
 __Getestet mit:__ Roche Cobas Mira Classic / Firmware Version 8847.AB
+__Letztes Update:__ 28.3.2010
 
 Dieses Plug-In bindet das Roche Cobas Mira Classic Gerät als externes Laborgerät in Elexis ein. Labordaten die über die serielle Schnittstelle des Gerätes abgesetzt werden, werden automatisch dem in der Elexis Datenbank vorhandenen Patienten zugeordnet und gespeichert.
 
@@ -29,7 +30,7 @@ Das Gerät muss für die Ausgabe der Daten über die serielle Schnittstelle konfigu
 
 Dies konfiguriert den __Automatic Random Transmit Mode__ der von diesem Plug-In verwendet wird. Sollten Sie eine höhere Firmware als die von uns getestete verwenden, können noch die Parameter für die serielle Schnittstelle gesetzt werden. Ist dies nicht der Fall, dürften die folgenden Parameter Standard sein (sie sind auch bereits im Plug-In als Standard voreingestellt): @1200, 7, E, 2@
 
-Konfiguration der seriellen Schnittstelle am PC: RXTX Program!
+>> Konfiguration der seriellen Schnittstelle am PC: RXTX Program!
 
 h2. Konfiguration in Elexis
 
@@ -42,6 +43,9 @@ Folgende Parameter müssen konfiguriert werden:
 * *COM-Port, Geschwindigkeit, Daten-Bits, Parität, Stop-Bits, Timeout*: Die seriellen Parameter zur Anbindung des Cobas Mira Gerätes.
 * *Im Hintergrund*: Die Datenaufnahme wird ohne sichtbare Meldungen geführt. Sollten Fehler auftreten werden diese im Cobas Mira Logfile gespeichert.
 * *Logging*: Diese Option aktiviert zusätzliches Logging. Standardoperationen werden ohnedies geloggt, sollten Sie weiterführende Informationen wünschen, aktivieren Sie diese Option und erhöhen Sie das Loglevel unter Einstellungen/Allgemein auf Log-Stufe 5.
+
+>>insert screenshot here, etc.
+
 
 h1. Anmerkungen
 

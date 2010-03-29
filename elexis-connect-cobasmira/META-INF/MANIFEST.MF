@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Roche Cobas Mira Geräteanbindung
 Bundle-SymbolicName: at.herzpraxis.elexis.connect.cobasmira;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.1.0
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: herzpraxis.at
 Require-Bundle: org.eclipse.ui,
