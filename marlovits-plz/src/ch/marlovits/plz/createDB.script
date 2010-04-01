@@ -1,0 +1,50 @@
+CREATE TABLE ch_marlovits_country
+	(
+	id					character varying(25) NOT NULL,
+	iso2				character(2),				/* innerhalb Elexis gebraucht                  */
+	iso3				character(3),				/*                                             */
+	isonum				integer,					/*                                             */
+	fips				character varying(2),		/* US-Variante                                 */
+	name				character varying,			/*                                             */
+	tld					character(3),				/* top level domain                            */
+	currencycode		character(3),				/* evtl. für Umrechnung von Rechnungsbeträgen  */
+	currencyname		character varying(25),		/*                                             */
+	phone				character varying(20),		/* Vorwahl Land, evtl. für Kontrolle Tel Nr    */
+	postalcodeformat	character varying(200),		/* PLZ-Repräsentation: #=Ziffer, @=Buchstabe   */
+	postalcoderegex		character varying(200),		/* PLZ-Kontrolle                               */
+	languages			character varying(70),		/* Sprachen des Landes                         */
+	geonameid			bigint,						/* für Zugriff auf weitere Daten von GeoNames  */
+	neigbours			character varying(60),		/* Nachbarländer                               */
+	entrylanguage		character(2),				/* Sprache dieses Eintrages	                   */
+	postalcodemessage	character varying(100),		/* Nachricht, die angezeigt wird, wenn die     */
+													/* Bedingung postalcoderegex nicht erfüllt ist */
+	landsorting			integer DEFAULT 9999,		/*                                             */ 
+	strasseerlaubt		integer,
+	kantonauswaehlen	integer,
+	deleted				character(1) DEFAULT '0',
+	lastupdate			bigint,
+	CONSTRAINT ch_marlovits_land_pkey PRIMARY KEY (id)
+	)
+WITH (OIDS=FALSE);
+ALTER TABLE ch_marlovits_land OWNER TO elexisuser;
+
+CREATE INDEX ch_marlovits_land0
+	ON ch_marlovits_land
+	USING btree
+	(landname);
+
+CREATE INDEX ch_marlovits_land1
+	ON ch_marlovits_land
+	USING btree
+	(landiso2);
+
+CREATE INDEX ch_marlovits_land2
+	ON ch_marlovits_land
+	USING btree
+	(landiso3);
+
+CREATE INDEX ch_marlovits_land3
+	ON ch_marlovits_land
+	USING btree
+	(landisonum);
+
