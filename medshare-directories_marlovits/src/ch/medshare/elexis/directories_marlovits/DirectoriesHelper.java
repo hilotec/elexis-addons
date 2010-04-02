@@ -25,6 +25,8 @@ import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 public class DirectoriesHelper {
 	
 	private static String cleanupText(String text){
@@ -68,51 +70,14 @@ public class DirectoriesHelper {
 			
 			text = text.replace("&nbsp;", " ");//$NON-NLS-1$ //$NON-NLS-2$
 			
+			text = StringEscapeUtils.unescapeHtml(text);
+			
 			return text;
 		}
     }
-	/**
-	 * create and return the url for an online address query
-	 * @param  name    search for this name
-	 * @param  geo     search in this city/location
-	 * @param  country search in this country - must be iso2 name of the country
-	 * @return the url which returns the results, null if any error occurs
-	 */
-	private static URL getURL_(String name, String geo, String country)	{
-		name = name.replace(' ', '+');
-		geo = geo.replace(' ', '+');
-		country = country.toLowerCase();
-		
-		int recCount = 10;
-		String urlPattern = "";
-		// *** create the url string for different countries
-		if (country.equalsIgnoreCase("ch"))	{
-			// *** switzerland
-			urlPattern = "http://tel.local.ch/{0}/q/?what={1}&where={2}"; //$NON-NLS-1$
-		} else if (country.equalsIgnoreCase("de"))	{
-			// *** germany
-			try {
-				name = URLEncoder.encode(name, "ISO-8859-1");
-				geo  = URLEncoder.encode(geo,  "ISO-8859-1");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-			recCount = 20;
-			urlPattern = "http://www.dastelefonbuch.de/?la={0}&kw={1}&ci={2}&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom=1&reccount=10"; //$NON-NLS-1$
-		}
-		
-		// *** actually create the URL
-		try {
-			return new URL(MessageFormat.format(urlPattern, new Object[] {
-				Locale.getDefault().getLanguage(), name, geo, recCount
-			}));
-		} catch (MalformedURLException e) {
-			return null;
-		}
-	}
 	
 	/**
-	 * 
+	 * creates and returns a url for reading data from an online-address-query page
 	 * @param  name    search for this name
 	 * @param  geo     search in this city/location
 	 * @param  country search in this country - must be iso2 name of the country
@@ -124,6 +89,7 @@ public class DirectoriesHelper {
 		geo = geo.replace(' ', '+');
 		country = country.toLowerCase();
 		
+		int lPageNum = pageNum;
 		int recCount = 10;
 		String urlPattern = "";
 		// *** create the url string for different countries
@@ -139,13 +105,15 @@ public class DirectoriesHelper {
 				e.printStackTrace();
 			}
 			recCount = 20;
+			lPageNum = lPageNum * 20 + 1;
+			System.out.println("lPageNum: " + lPageNum);
 			urlPattern = "http://www.dastelefonbuch.de/?la={0}&kw={1}&ci={2}&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom={3}&reccount={4}"; //$NON-NLS-1$
 		}
 		
 		// *** actually create the URL
 		try {
 			return new URL(MessageFormat.format(urlPattern, new Object[] {
-				Locale.getDefault().getLanguage(), name, geo, pageNum, recCount
+				Locale.getDefault().getLanguage(), name, geo, lPageNum, recCount
 			}));
 		} catch (MalformedURLException e) {
 			return null;
@@ -153,7 +121,45 @@ public class DirectoriesHelper {
 	}
 	
 	/**
-	 * Schreibt binäre Datei
+	 * reads and returns page contents from an online-address-query page
+	 * @param  name    search for this name
+	 * @param  geo     search in this city/location
+	 * @param  country search in this country - must be iso2 name of the country
+	 * @param  pageNum
+	 * @return the contents of the requested page or "" if any error occurs
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 */
+	public static String readContent(final String name, final String geo, final String country, int pageNum)	{
+		URL content = getURL(name, geo, country, pageNum);
+		InputStream input;
+		StringBuffer sb = new StringBuffer();
+		try {
+			input = content.openStream();
+			
+			int count = 0;
+			char[] c = new char[10000];
+			InputStreamReader isr = new InputStreamReader(input, "ISO-8859-1");
+			try {
+				while ((count = isr.read(c)) > 0) {
+					sb.append(c, 0, count);
+				}
+			} finally {
+				if (input != null) {
+					input.close();
+				}
+			}
+		} catch (IOException e) {
+		}
+		
+		return cleanupUmlaute(cleanupText(sb.toString()));
+	}
+	
+	/**
+	 * write binary file
+	 * @param filenamePath the path of the file
+	 * @param text the text to be written
+	 * @throws IOException
 	 */
 	public static void writeFile(String filenamePath, final String text)
 		throws IOException{
@@ -166,56 +172,5 @@ public class DirectoriesHelper {
 				output.close();
 			}
 		}
-	}
-	
-	/**
-	 * Liest Inhalt einer Web-Abfrage auf www.directories.ch/weisseseiten
-	 */
-	public static String readContent_(final String name, final String geo, final String country)
-		throws IOException, MalformedURLException{
-		URL content = getURL_(name, geo, country);
-		InputStream input = content.openStream();
-		
-		StringBuffer sb = new StringBuffer();
-		int count = 0;
-		char[] c = new char[10000];
-		InputStreamReader isr = new InputStreamReader(input);
-		try {
-			while ((count = isr.read(c)) > 0) {
-				sb.append(c, 0, count);
-			}
-		} finally {
-			if (input != null) {
-				input.close();
-			}
-		}
-		return cleanupUmlaute(cleanupText(sb.toString()));
-	}
-	
-	/**
-	 * Liest Inhalt einer Web-Abfrage auf www.directories.ch/weisseseiten
-	 * mit Angabe der Seite
-	 */
-	public static String readContent(final String name, final String geo, final String country, int pageNum)
-		throws IOException, MalformedURLException{
-		
-		URL content = getURL(name, geo, country, pageNum);
-		InputStream input = content.openStream();
-		
-		StringBuffer sb = new StringBuffer();
-		
-		int count = 0;
-		char[] c = new char[10000];
-		InputStreamReader isr = new InputStreamReader(input, "ISO-8859-1");
-		try {
-			while ((count = isr.read(c)) > 0) {
-				sb.append(c, 0, count);
-			}
-		} finally {
-			if (input != null) {
-				input.close();
-			}
-		}
-		return cleanupUmlaute(cleanupText(sb.toString()));
 	}
 }

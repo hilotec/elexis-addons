@@ -13,6 +13,7 @@
 
 package ch.medshare.elexis.directories_marlovits;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,7 +37,7 @@ http://www2.dastelefonbuch.de/Erweiterte-Suche.html?la=de&cmd=&s=a30000&sp=1&akt
 ist mit method post - get geht auch
  */
 
-public class DirectoriesContentParser extends HtmlParser {
+public abstract class PhoneBookContentParser extends HtmlParser {
 	
 	// some constants
 	private static String MARKER_VCARD_BEGIN_   = "BEGIN:VCARD";
@@ -88,7 +89,7 @@ public class DirectoriesContentParser extends HtmlParser {
 		super(htmlText);
 	}
 */	
-	public DirectoriesContentParser(String htmlText, String name, String geo, String country){
+	public PhoneBookContentParser(String htmlText, String name, String geo, String country){
 		super(htmlText);
 		this.name = name;
 		this.geo  = geo;

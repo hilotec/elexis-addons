@@ -55,7 +55,7 @@ public class WeisseSeitenSearchForm extends Composite {
 	private Text nameText;
 	private Combo geoText;
 	
-	private int maxEntriesToRead = 10;
+	private int entriesToRead = 10;
 	private int startEntryIndex = 0;
 	private int numOfPages = 0;
 	private int numOfEntries = 1;
@@ -206,7 +206,7 @@ public class WeisseSeitenSearchForm extends Composite {
 			searchInfoTextField.setText(searchInfoText);
 			infoComposite.pack(true);
 			visible = true;
-			numOfPages = (numOfEntries - 1) / 10;
+			numOfPages = (numOfEntries - 1) / entriesToRead;
 			previousBtn.setEnabled(false);
 			if (numOfPages > 0)	{
 				nextBtn.setEnabled(true);
