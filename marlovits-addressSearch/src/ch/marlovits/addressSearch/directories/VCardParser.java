@@ -66,12 +66,20 @@ public class VCardParser {
 	
 	/**
 	 * find the value for a key in the vCard HashMap
-	 * @param key : the key for which to find the matching value
+	 * @param key   the key for which to find the matching value
+	 * @param index the index of the actual info in the data, zero-based, semicolon-delimited
 	 * @return
 	 */
-	public String getVCardValue(final String key)	{
+	public String getVCardValue(final String key, int index)	{
 		if (vCardValues == null) return "";
-		return vCardValues.get(key.toUpperCase());
+		String data = vCardValues.get(key.toUpperCase());
+		if (data == null) return "";
+		String[] dataParts = data.split(";");
+		data = "";
+		if (dataParts.length > index)	{
+			data = dataParts[index];
+		}
+		return data;
 	}
 	
 	/**

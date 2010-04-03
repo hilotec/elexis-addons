@@ -27,6 +27,7 @@ public class KontaktEntryHash {
 	public static final String FLD_ISORG      = "IsOrg";
 	public static final String FLD_VCARDLINK  = "VCardLink";
 	public static final String FLD_POBOX      = "poBox";
+	public static final String FLD_NOTE       = "Note";
 
 
 

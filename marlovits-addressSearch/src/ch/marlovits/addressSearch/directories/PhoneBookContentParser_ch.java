@@ -417,92 +417,67 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		VCardParser vCardParser = new VCardParser(vCardContents);
 		
 		// test if this is a company entry
-		boolean isCompany = (vCardParser.getVCardValue("X-ABShowAs").equalsIgnoreCase("COMPANY"));
-		// switch "HOME" and "WORK" for company entries
-		if (isCompany){
-			if (extractionSpec.indexOf("HOME") >= 0){
-				extractionSpec = extractionSpec.replace("HOME", "WORK");
-			} else	{
-				extractionSpec = extractionSpec.replace("WORK", "HOME");
-			}
-		}
-		
+		boolean isCompany = (vCardParser.getVCardValue("X-ABShowAs", 0).equalsIgnoreCase("COMPANY"));
+		/*
+		public static final String FLD_FIRSTNAME  = "Firstname";
+		public static final String FLD_LASTNAME   = "Lastname";
+		public static final String FLD_ZUSATZ     = "Zusatz";
+		public static final String FLD_STREET     = "Street";
+		public static final String FLD_ZIP        = "Zip";
+		public final static String FLD_CITY       = "City";
+		public static final String FLD_PHONE      = "Phone";
+		public static final String FLD_PHONE2     = "Phone2";
+		public static final String FLD_FAX        = "Fax";
+		public static final String FLD_EMAIL      = "Email";
+		public static final String FLD_MOBILE     = "Mobile";
+		public static final String FLD_MAIDENNAME = "Maidenname";
+		public static final String FLD_TITLE      = "Title";
+		public static final String FLD_COUNTRY    = "Country";	// iso2
+		public static final String FLD_PROFESSION = "Profession";
+		public static final String FLD_WEBSITE    = "Website";
+		public static final String FLD_CATEGORY   = "Category";
+		public static final String FLD_ISORG      = "IsOrg";
+		public static final String FLD_VCARDLINK  = "VCardLink";
+		public static final String FLD_POBOX      = "poBox";
+		 */
 		String[] extractionSpecs = {
-				"NAME:N:0",
-				"VORNAME:N:1",
-				"STRASSE:Item1.ADR;TYPE=HOME:2",   //home/work
-				"PLZ:Item1.ADR;TYPE=HOME:5",       //home/work
-				"ORT:Item1.ADR;TYPE=HOME:3",       //home/work
-				"Telefon1:TEL;TYPE=VOICE,HOME:0",  //home/work
-				"Telefon2:TEL;TYPE=VOICE,WORK:0",  //home/work
-				"FAX:TEL;TYPE=FAX,HOME:0",         //home/work
-				"MOBIL:TEL;TYPE=CELL,HOME:0",      //home/work
-				"EMAIL:EMAIL;TYPE=INTERNET:0",
-				"WEBSITE:URL;TYPE=HOME:0",         //home/work
-				"BERUF:TITLE:0",
-				"NOTE:NOTE:0"
+				KontaktEntryHash.FLD_LASTNAME   + ":N:0",
+				KontaktEntryHash.FLD_FIRSTNAME  + ":N:1",
+				KontaktEntryHash.FLD_STREET     + ":Item1.ADR;TYPE=HOME:2",  //home/work
+				KontaktEntryHash.FLD_ZIP        + ":Item1.ADR;TYPE=HOME:5",  //home/work
+				KontaktEntryHash.FLD_CITY       + ":Item1.ADR;TYPE=HOME:3",  //home/work
+				KontaktEntryHash.FLD_PHONE      + ":TEL;TYPE=VOICE,HOME:0",  //home/work
+				KontaktEntryHash.FLD_PHONE2     + ":TEL;TYPE=VOICE,WORK:0",  //home/work
+				KontaktEntryHash.FLD_FAX        + ":TEL;TYPE=FAX,HOME:0",    //home/work
+				KontaktEntryHash.FLD_MOBILE     + ":TEL;TYPE=CELL,HOME:0",   //home/work
+				KontaktEntryHash.FLD_EMAIL      + ":EMAIL;TYPE=INTERNET:0",
+				KontaktEntryHash.FLD_WEBSITE    + ":URL;TYPE=HOME:0",        //home/work
+				KontaktEntryHash.FLD_PROFESSION + ":TITLE:0",
+				KontaktEntryHash.FLD_NOTE       + ":NOTE:0"
 			};
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		// read contents of vCard
-		String vCardContents = "";
-		try {
-			vCardContents = readContent(vCardURL);
-			//parseVCard(vCardContents);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-		// get the used newline/return for this vcard
-		String MARKER_VCARD_NEWLINE = getDocReturnCharacter(vCardContents);
-		
-		// 
-		String MARKER_VCARD_BEGIN = MARKER_VCARD_BEGIN_ + MARKER_VCARD_NEWLINE;
-		String MARKER_VCARD_END   = MARKER_VCARD_END_;
-		
-		// test if this really is a valid vCard: Start with BEGIN:VCARD, end with END:VCARD
-		if (!vCardContents.substring(0, MARKER_VCARD_BEGIN.length()).equalsIgnoreCase(MARKER_VCARD_BEGIN))	{
-			return null;
-		}
-		int endMarkerPos = vCardContents.indexOf(MARKER_VCARD_END);
-		if (endMarkerPos == -1)	{
-			return null;
-		}
-		
-		Boolean isCompany = false;
-		if (country.toLowerCase().equalsIgnoreCase("ch"))	{
-			// test if this is company: X-ABShowAs:COMPANY entry
-			isCompany = false;
-			if (vCardContents.indexOf("X-ABShowAs:COMPANY") >= 0)	{
-				isCompany = true;
-			}
-		}
-		if (country.toLowerCase().equalsIgnoreCase("de"))	{
-			// test if this is company: X-ABShowAs:COMPANY entry
-			isCompany = false;
-			if (vCardContents.indexOf("TEL;WORK") >= 0)	{
-				if (vCardContents.indexOf("TEL;HOME") >= 0)	{
-					isCompany = false;
+		// read from vCard into hashMap
+		for (int i = 0; i < extractionSpecs.length; i++)	{
+			String extractionSpec = extractionSpecs[i];
+			// switch "HOME" and "WORK" for company entries
+			if (isCompany){
+				if (extractionSpec.indexOf("HOME") >= 0){
+					extractionSpec = extractionSpec.replace("HOME", "WORK");
 				} else	{
-					isCompany = true;
+					extractionSpec = extractionSpec.replace("WORK", "HOME");
 				}
 			}
+			// split extraction spec on ":"
+			String[] specParts = extractionSpec.split(":");
+			String kontaktKey = specParts[0];	// write  to  this key in KontaktEntryHash
+			String vCardKey   = specParts[1];	// search for this key in vCard-Info
+			String infoIndex  = specParts[2];	// index in info of vCard (comma-separated)
+			String vCardValue = vCardParser.getVCardValue(vCardKey, Integer.parseInt(infoIndex));
+			result.put(kontaktKey, vCardValue);
 		}
+		
+		// postprocess values read from vCard
+		// TODO
 		
 		// now extract the values, one by one, in the order needed by Dialog
 		// for telefonbuch.de this is always empty
