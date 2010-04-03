@@ -54,7 +54,7 @@ import ch.marlovits.addressSearch.directories.KontaktEntry;
  * einer Liste der gefundenen Resultate.
  */
 
-public class WeisseSeitenSearchView extends ViewPart {
+public class PhoneBookSearchView extends ViewPart {
 	private TableViewer kontakteTableViewer;
 	private Text searchInfoText;
 	private Action newPatientAction;
@@ -65,21 +65,24 @@ public class WeisseSeitenSearchView extends ViewPart {
 	
 	private int currCountry = 0;
 	private static String[] countryIconList = {
-		"../medshare-directories_marlovits/rsc/switzerland.png",
-		"../medshare-directories_marlovits/rsc/germany.png",
-		"../medshare-directories_marlovits/rsc/austria.png"
-};
+		"rsc/switzerland.png",
+		"rsc/germany.png",
+		"rsc/austria.png"
+/*		"../marlovits-addressSearch/rsc/switzerland.png",
+		"../marlovits-addressSearch/rsc/germany.png",
+		"../marlovits-addressSearch/rsc/austria.png"*/
+	};
 	private static String[] countryNameList = {
 		"Schweiz",
 		"Deutschland",
 		"österreich"
-};
+	};
 	
 	private static String[] countryIso2List = {
 		"ch",
 		"de",
 		"at"
-};
+	};
 	
 	class WhitePageLabelProvider extends LabelProvider implements
 			ITableLabelProvider {
@@ -137,7 +140,7 @@ public class WeisseSeitenSearchView extends ViewPart {
 	/**
 	 * The constructor.
 	 */
-	public WeisseSeitenSearchView() {
+	public PhoneBookSearchView() {
 	}
 
 	/**

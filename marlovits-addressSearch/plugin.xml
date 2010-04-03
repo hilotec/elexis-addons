@@ -14,5 +14,17 @@
             name="Adress Suche (Neu)">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="true"
+            category="ch.elexis.datenKategorie"
+            class="ch.marlovits.addressSearch.views.PhoneBookSearchView"
+            icon="icons/directories_white_logo16.png"
+            id="ch.marlovits.addressSearch.views.PhoneBookSearchView"
+            nameSaved="%WeisseSeitenView"
+            name="Adress Suche (Neu 2)">
+      </view>
+   </extension>
 
 </plugin>
