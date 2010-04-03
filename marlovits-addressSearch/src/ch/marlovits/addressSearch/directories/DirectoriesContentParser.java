@@ -1139,9 +1139,6 @@ public class DirectoriesContentParser extends HtmlParser {
 	 * </div> </div> </div>
 	 */
 	private KontaktEntry extractKontakt(){
-		//++++ modification: read info from vCard - this is much safer...
-		// TODO vCard
-		
 		if (!moveTo(ADR_DETAIL_TAG)) { // Kein neuer Eintrag
 			return null;
 		}

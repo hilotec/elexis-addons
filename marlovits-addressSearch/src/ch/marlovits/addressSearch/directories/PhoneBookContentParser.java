@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Vector;
@@ -27,38 +28,21 @@ import org.apache.commons.lang.StringEscapeUtils;
 import java.util.HashMap;
 
 public abstract class PhoneBookContentParser extends HtmlParser {	
-	private static final String[] ADR_VORNAMENSTRENNER = {" und ",  " u\\. ",  " e ",  " et "};
+	private static final String[] ADR_FIRSTNAMESEPARATORS = {" und ",  " u\\. ",  " e ",  " et "};
 	
-	//
+	// members
 	private int entriesPerPage = 20;
 	private String name        = "";
 	private String geo         = "";
 	private String country     = "ch";
 	
-	// all titles without period
-	private static String[] ADR_TITLES = {	"", // 
-											"Prof. Dr. med. dent. ",
-											"Prof. Dr. méd. dent. ",
-											"Prof. Dr. med. vet. ",
-											"Prof. Dr. méd. vét. ",
-											"Prof. Dr. med. ",
-											"Prof. Dr. méd. ",
-											"Prof. Dr. ",
-											"Prof. Dr. med. ",
-											"Prof. Dr. méd. ",
-											"Prof. ",
-											"Dr. med. dent. ",
-											"Dr. méd. dent. ",
-											"Dr. med. vet. ",
-											"Dr. méd. vét. ",
-											"Dr. med. ",
-											"Dr. méd. ",
-											"PD. Dr. med. dent. ",
-											"PD. Dr. méd. dent. ",
-											"PD. Dr. med. ",
-											"PD. Dr. méd. "
-											};
-	
+	/**
+	 * this is the constructor: save html, name, geo and country in members
+	 * @param htmlText
+	 * @param name
+	 * @param geo
+	 * @param country
+	 */
 	public PhoneBookContentParser(String htmlText, String name, String geo, String country){
 		super(htmlText);
 		this.name = name;
@@ -105,7 +89,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * Abstract function, must override
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	private HashMap<String, String> extractListKontakt()	{
+	private HashMap<String, String> extractKontaktFromList()	{
 		return null;
 	}
 	
@@ -114,13 +98,13 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * this just extracts the parts needed for the display in the results list           <br>
 	 * if the actual detail info is needed, then the vCards are extracted                <br>
 	 * this procedure can be the same as extracting from a list                          <br>
-	 * - for ch this is different                                                        <br>
+	 * - for ch this is different from extractListKontakt                                <br>
 	 * - for de this is the same as extractListKontakt                                   <br>
 	 * - for at this is the same as extractListKontakt
 	 * Abstract function, must override
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	private HashMap<String, String> extractKontakt(){
+	private HashMap<String, String> extractKontaktFromDetail(){
 		return null;
 	}
 	
@@ -146,8 +130,8 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	public static String extractFirstnames(final String firstnames, final String delimiter)	{
 		String result = "";
 		String lFirstnames = firstnames;
-		for (int fn_sepIx = 0; fn_sepIx < ADR_VORNAMENSTRENNER.length; fn_sepIx++)	{
-			String fn_sep = ADR_VORNAMENSTRENNER[fn_sepIx];
+		for (int fn_sepIx = 0; fn_sepIx < ADR_FIRSTNAMESEPARATORS.length; fn_sepIx++)	{
+			String fn_sep = ADR_FIRSTNAMESEPARATORS[fn_sepIx];
 			String[] parts = lFirstnames.split(fn_sep);
 			String lDelimiter = "";
 			result = "";
@@ -164,10 +148,10 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * extract last name and first name from input string.  <br>
 	 * format: &lt;LastName&gt; &lt;FirstName&gt;
 	 * @param text input string 
-	 * @return String[]: StringArray, index O: LastName, index 1: FirstName
+	 * @return String[]: StringArray, index O: firstname, index 1: lastname
 	 */
-	@SuppressWarnings("unused")
-	private static String[] getVornameNachname(String text){
+	protected
+	static String[] getFirstnameLastname(String text){
 		String vorname = ""; //$NON-NLS-1$
 		String nachname = text;
 		int nameEndIndex = text.trim().indexOf(" "); //$NON-NLS-1$
@@ -270,53 +254,86 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	    return result.toString();
 	}
 	
-	private static String readContent(final String fullUrl)
-		throws IOException, MalformedURLException{
-		
-		URL content = new URL(fullUrl);
-		InputStream input = content.openStream();
-		
+	/**
+	 *  read and return the contents of a html page, uses default character encoding
+	 *  
+	 * @param urlText = the url from where the page should be read
+	 * @param timeOut = how long to wait for the page to be returned in milliseconds, 0 = no timeout
+	 * 
+	 * @return String, the contents of the page
+	 */
+	protected static String readContent(final String urlText, final int timeout)	{
 		StringBuffer sb = new StringBuffer();
-		int count = 0;
-		char[] c = new char[10000];
-		InputStreamReader isr = new InputStreamReader(input);
+		URL url;
+		InputStream input = null;
 		try {
+			url = new URL(urlText);
+			// set timeout
+			URLConnection urlConnection = url.openConnection();
+			urlConnection.setConnectTimeout(timeout);
+			urlConnection.setReadTimeout(timeout);
+			// now open the stream
+			input = urlConnection.getInputStream();
+			// read from stream
+			int count = 0;
+			char[] c = new char[10000];
+			InputStreamReader isr = new InputStreamReader(input);
 			while ((count = isr.read(c)) > 0) {
 				sb.append(c, 0, count);
 			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			if (input != null) {
-				input.close();
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 		return sb.toString();
 	}
-
+	
 	/**
 	 *  read and return the contents of a html page
 	 *  
 	 * @param urlText = the url from where the page should be read
 	 * @param charSet = the character set to be used for page-encoding
+	 * @param timeOut = how long to wait for the page to be returned in milliseconds, 0 = no timeout
 	 * 
 	 * @return String, the contents of the page
 	 */
-	
-	public static String readContent(final String urlText, final String charSet) throws IOException, MalformedURLException{
-		URL url = new URL(urlText);
-		InputStream input = url.openStream();
-		
+	public static String readContent(final String urlText, final String charSet, final int timeout) throws IOException, MalformedURLException{
 		StringBuffer sb = new StringBuffer();
-		int count = 0;
-		char[] c = new char[10000];
-		InputStreamReader isr = new InputStreamReader(input, charSet);
+		URL url;
+		InputStream input = null;
 		try {
-			int lcount = isr.read(c);
+			url = new URL(urlText);
+			// set timeout
+			URLConnection urlConnection = url.openConnection();
+			urlConnection.setConnectTimeout(timeout);
+			urlConnection.setReadTimeout(timeout);
+			// now open the stream
+			input = urlConnection.getInputStream();
+			// read from stream
+			int count = 0;
+			char[] c = new char[10000];
+			InputStreamReader isr = new InputStreamReader(input, charSet);
 			while ((count = isr.read(c)) > 0) {
 				sb.append(c, 0, count);
 			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			if (input != null) {
-				input.close();
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 		return sb.toString();
@@ -325,7 +342,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	/**
 	 * Retourniert String in umgekehrter Reihenfolge
 	 */
-	private String reverseString(String text){
+	protected String reverseString(String text){
 		if (text == null) {
 			return "";
 		}
@@ -336,7 +353,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 		return reversed;
 	}
 	
-	private static String removeDirt(String text){
+	protected static String removeDirt(String text){
 		return text.replace("<span class=\"highlight\">", "").replace("</span>", "");
 	}
 }
