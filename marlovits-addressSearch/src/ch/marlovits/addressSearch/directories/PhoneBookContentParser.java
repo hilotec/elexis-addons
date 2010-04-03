@@ -170,7 +170,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * @param text
 	 * @return
 	 */
-	private static String cleanupUmlaute(String text) {
+	protected static String cleanupUmlaute(String text) {
 		// this version is prepared for any characters
 		String tmp = text;
 		tmp = tmp.replaceAll("&#x([0-9A-Fa-f]{2,2});", "%$1");
@@ -188,7 +188,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 */
 	public static String formatString(final String sourceString)	{
 		// unescape, first replace "=" by "%"...
-		String data = sourceString.replaceAll("=", "%");
+		String data = sourceString.replaceAll("=([0-9A-Fa-f]{2,2})", "%$1");
 		try {
 			data = URLDecoder.decode(data, "ISO-8859-1");
 			return data;
@@ -199,40 +199,25 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	
 	//****************************************************
 	/**
-	 * Format a phone number as swiss phone number, 0xx xxx xx xx
-	 * @param phoneNumber the phoneNumber as returned from vCard from tel.local.ch, 
-	 *                    eg. +41523439772
+	 * Format a phone number according to the country of the subclass
+	 * @param phoneNumber the phoneNumber as returned from html
 	 * @return the reformatted phone number. if the input is not formatted correctly, then the
 	 * function returns an empty string
+	 * this implementation just returns the unchanged phone number
 	 */
-	public static String formatPhoneNumber(final String phoneNumber, final String country)	{
-		String result = phoneNumber;
-		// do some testing
-		if (country.toLowerCase().equalsIgnoreCase("ch"))	{
-			if (phoneNumber.length() == 0) return "";
-			String tmp = phoneNumber.replaceAll("\\+[0-9]{11}", "");
-			if (tmp.length() != 0) return "";
-			
-			// now format the number
-			result = "0" + 
-							phoneNumber.substring( 3,  5) + " " +
-							phoneNumber.substring( 5,  8) + " " +
-							phoneNumber.substring( 8, 10) + " " +
-							phoneNumber.substring(10, 12);
-		}
-		return result;
+	public static String formatPhoneNumber(final String phoneNumber)	{
+		return phoneNumber;
 	}
 	
 	/**
 	 * Format a phone number according to your needs. NOT YET IMPLEMENTED
-	 * @param phoneNumber the phoneNumber as returned from vCard from tel.local.ch, 
-	 *                    eg. +41523439772
+	 * @param phoneNumber the phoneNumber as returned from html
 	 * @param inFormat the format of the input
 	 * @param outFormat how to format the output
 	 * @return the reformatted phone number. if the input is not formatted correctly, then the
 	 * function returns an empty string
 	 */
-	public static String formatPhoneNumber(final String phoneNumber, final String country, final String inFormat, final String outFormat)	{
+	public static String formatPhoneNumber(final String phoneNumber, final String inFormat, final String outFormat)	{
 		return phoneNumber;
 	}
 	
@@ -256,6 +241,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	
 	/**
 	 *  read and return the contents of a html page, uses default character encoding
+	 *  timeout needed because on telefonbuch.de vCards sometimes do not work correctly...
 	 *  
 	 * @param urlText = the url from where the page should be read
 	 * @param timeOut = how long to wait for the page to be returned in milliseconds, 0 = no timeout

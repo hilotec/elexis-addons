@@ -38,7 +38,32 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	private static final String   ADR_MAIDENNAMESEPARATOR = "\\(-";
 	private static final String   ADR_MAIDENNAMEEND       = "\\)";
 	
+	private static String LOCAL_COPYRIGHT      = "\\[Copyright \\(c\\) local\\.ch ag\\]";
+	
 	private static final int htmlReadTimeout = 7000;
+	
+	private static String[] ADR_TITLES = {	"", // 
+		"Prof. Dr. med. dent. ",
+		"Prof. Dr. méd. dent. ",
+		"Prof. Dr. med. vet. ",
+		"Prof. Dr. méd. vét. ",
+		"Prof. Dr. med. ",
+		"Prof. Dr. méd. ",
+		"Prof. Dr. ",
+		"Prof. Dr. med. ",
+		"Prof. Dr. méd. ",
+		"Prof. ",
+		"Dr. med. dent. ",
+		"Dr. méd. dent. ",
+		"Dr. med. vet. ",
+		"Dr. méd. vét. ",
+		"Dr. med. ",
+		"Dr. méd. ",
+		"PD. Dr. med. dent. ",
+		"PD. Dr. méd. dent. ",
+		"PD. Dr. med. ",
+		"PD. Dr. méd. "
+		};
 
 	/**
 	 * this is the constructor: save html, name, geo and country in members
@@ -396,7 +421,6 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
 	public HashMap<String, String> parseVCard(HashMap<String, String> kontaktHashMap)	{
-		// TODO
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
 		
@@ -406,7 +430,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 			return result;
 		}
 		
-		// read contents of vCard
+		// ****** read contents of vCard
 		String vCardContents = readContent(vCardLink, htmlReadTimeout);
 		// strip ENCODING, CHARSET and PREF from vCard
 		vCardContents = vCardContents.replaceAll(";CHARSET=[a-zA-Z1-9-_]+", "");
@@ -418,28 +442,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		
 		// test if this is a company entry
 		boolean isCompany = (vCardParser.getVCardValue("X-ABShowAs", 0).equalsIgnoreCase("COMPANY"));
-		/*
-		public static final String FLD_FIRSTNAME  = "Firstname";
-		public static final String FLD_LASTNAME   = "Lastname";
-		public static final String FLD_ZUSATZ     = "Zusatz";
-		public static final String FLD_STREET     = "Street";
-		public static final String FLD_ZIP        = "Zip";
-		public final static String FLD_CITY       = "City";
-		public static final String FLD_PHONE      = "Phone";
-		public static final String FLD_PHONE2     = "Phone2";
-		public static final String FLD_FAX        = "Fax";
-		public static final String FLD_EMAIL      = "Email";
-		public static final String FLD_MOBILE     = "Mobile";
-		public static final String FLD_MAIDENNAME = "Maidenname";
-		public static final String FLD_TITLE      = "Title";
-		public static final String FLD_COUNTRY    = "Country";	// iso2
-		public static final String FLD_PROFESSION = "Profession";
-		public static final String FLD_WEBSITE    = "Website";
-		public static final String FLD_CATEGORY   = "Category";
-		public static final String FLD_ISORG      = "IsOrg";
-		public static final String FLD_VCARDLINK  = "VCardLink";
-		public static final String FLD_POBOX      = "poBox";
-		 */
+		
 		String[] extractionSpecs = {
 				KontaktEntryHash.FLD_LASTNAME   + ":N:0",
 				KontaktEntryHash.FLD_FIRSTNAME  + ":N:1",
@@ -456,9 +459,9 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 				KontaktEntryHash.FLD_NOTE       + ":NOTE:0"
 			};
 		
-		// read from vCard into hashMap
+		// ****** read from vCard into hashMap
 		for (int i = 0; i < extractionSpecs.length; i++)	{
-			String extractionSpec = extractionSpecs[i];
+			String extractionSpec = formatString(extractionSpecs[i]);
 			// switch "HOME" and "WORK" for company entries
 			if (isCompany){
 				if (extractionSpec.indexOf("HOME") >= 0){
@@ -472,84 +475,80 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 			String kontaktKey = specParts[0];	// write  to  this key in KontaktEntryHash
 			String vCardKey   = specParts[1];	// search for this key in vCard-Info
 			String infoIndex  = specParts[2];	// index in info of vCard (comma-separated)
-			String vCardValue = vCardParser.getVCardValue(vCardKey, Integer.parseInt(infoIndex));
+			String vCardValue = formatString(vCardParser.getVCardValue(vCardKey, Integer.parseInt(infoIndex)));
 			result.put(kontaktKey, vCardValue);
 		}
 		
-		// postprocess values read from vCard
-		// TODO
+		// ****** postprocess values read from vCard
+		// extract distinct firstnames from field firstname
+		String firstName = result.get(KontaktEntryHash.FLD_FIRSTNAME);
+		firstName = extractFirstnames(formatString(firstName), ";");
+		result.put(KontaktEntryHash.FLD_FIRSTNAME, firstName);
 		
-		// now extract the values, one by one, in the order needed by Dialog
-		// for telefonbuch.de this is always empty
-		String vCardVorname = getVCardValue(vCardContents, "Vorname", isCompany, country);
-		vCardVorname = extractVornamen(formatString(vCardVorname), ";");
-		// for telefonbuch.de this contains firstname
-		String vCardName = formatString(getVCardValue(vCardContents, "Name", isCompany, country));
-		if (country.toLowerCase().equalsIgnoreCase("de"))	{
-			if (!isCompany)	{
-				String[] firstNameLastName = getVornameNachname(vCardName);
-				vCardVorname = extractVornamen(firstNameLastName[0], ";");
-				vCardName    = firstNameLastName[1];
-			}
-		}
-		String vCardZusatz = getVCardValue(vCardContents, "Note", isCompany, country);
-		vCardZusatz = formatString(vCardZusatz);
-		// strip copyright notice [Copyright (c) local.ch ag]
-		vCardZusatz = vCardZusatz.replaceAll(MARKER_VCARD_NEWLINE + LOCAL_COPYRIGHT, "");
-		vCardZusatz = vCardZusatz.replaceAll(LOCAL_COPYRIGHT, "");
-		String vCardStrasse = formatString(getVCardValue(vCardContents, "Strasse", isCompany, country));
-		String vCardPlz = formatString(getVCardValue(vCardContents, "PLZ", isCompany, country));
-		String vCardOrt = formatString(getVCardValue(vCardContents, "Ort", isCompany, country));
-		String vCardTelefon1 = formatPhoneNumber(getVCardValue(vCardContents, "Telefon1", isCompany, country), country);
-		String vCardFax = formatPhoneNumber(getVCardValue(vCardContents, "Fax", isCompany, country), country);
-		String vCardEmail = formatString(getVCardValue(vCardContents, "Email", isCompany, country));
-		String vCardIsDetail = "1";
-		String vCardWebSite = formatString(getVCardValue(vCardContents, "Website", isCompany, country));
-		String vCardTelefon2 = formatPhoneNumber(getVCardValue(vCardContents, "Telefon2", isCompany, country), country);
-		String vCardMobile = formatPhoneNumber(getVCardValue(vCardContents, "Mobil", isCompany, country), country);
-		String vCardBeruf = formatString(getVCardValue(vCardContents, "Beruf", isCompany, country));
-		String vCardCategory = formatString(getVCardValue(vCardContents, "BEMERKUNG", isCompany, country));
-		// part between () belongs to "role"/Beruf
-		String DIEKATEGORIE = vCardZusatz;
-		String ADDITIONALROLE = "";
-		int parPos = vCardZusatz.indexOf("(");
-		if (parPos >= 0)	{
-			DIEKATEGORIE   = vCardZusatz.substring(0, parPos).trim();
-			ADDITIONALROLE = vCardZusatz.substring(parPos + 1).trim();
-			ADDITIONALROLE = ADDITIONALROLE.substring(0, ADDITIONALROLE.length() - 1);
-		}
-		// title may be contained in vCardBeruf or in vCardName -> extract to vCardTitle
-		// search in vCardberuf
+		// format phone numbers
+		result.put(KontaktEntryHash.FLD_PHONE,  formatPhoneNumber(result.get(KontaktEntryHash.FLD_PHONE)));
+		result.put(KontaktEntryHash.FLD_FAX,    formatPhoneNumber(result.get(KontaktEntryHash.FLD_FAX)));
+		result.put(KontaktEntryHash.FLD_PHONE2, formatPhoneNumber(result.get(KontaktEntryHash.FLD_PHONE2)));
+		result.put(KontaktEntryHash.FLD_MOBILE, formatPhoneNumber(result.get(KontaktEntryHash.FLD_MOBILE)));
+		
+		// title may be contained in vCardProfession -> extract to vCardTitle
+		String vCardProfession = result.get(KontaktEntryHash.FLD_PROFESSION);
 		String vCardTitle = "";
 		for (int i = 1; i < ADR_TITLES.length; i++)	{
 			String currTitle = ADR_TITLES[i];
-			if (vCardBeruf.indexOf(currTitle) >= 0)	{
+			if (vCardProfession.indexOf(currTitle) >= 0)	{
 				vCardTitle = currTitle;
-				// strip title off vCardBeruf
-				vCardBeruf = vCardBeruf.replace(currTitle, "");
+				// strip title off vCardProfession
+				vCardProfession = vCardProfession.replace(currTitle, "");
 				break;
 			}
 		}
+		result.put(KontaktEntryHash.FLD_TITLE, vCardTitle);
 		
-		// extract parts from html
-		String group     = "";
-		String ledigname = "";
-		String poBox     = "";
+		// strip copyright notice [Copyright (c) local.ch ag] from vCard-field NOTE
+		String vCardZusatz = result.get(KontaktEntryHash.FLD_NOTE);
+		String MARKER_VCARD_NEWLINE = VCardParser.getDocReturnCharacter(vCardContents);
+		vCardZusatz = vCardZusatz.replaceAll(MARKER_VCARD_NEWLINE + LOCAL_COPYRIGHT, "");
+		vCardZusatz = vCardZusatz.replaceAll(LOCAL_COPYRIGHT, "");
+		// part between () belongs to "role"/profession
+		String category = vCardZusatz;
+		String additionalRole = "";
+		int parPos = vCardZusatz.indexOf("(");
+		if (parPos >= 0)	{
+			category   = vCardZusatz.substring(0, parPos).trim();
+			additionalRole = vCardZusatz.substring(parPos + 1).trim();
+			additionalRole = additionalRole.substring(0, additionalRole.length() - 1);
+		}
+		result.put(KontaktEntryHash.FLD_ZUSATZ, vCardZusatz);
+		result.put(KontaktEntryHash.FLD_CATEGORY, category);
+		
+		// profession calculated: add part from vCardZusatz if found
+		if (!vCardProfession.isEmpty())	{
+			if (!additionalRole.isEmpty()) additionalRole = " " + additionalRole;
+			vCardProfession = vCardProfession + additionalRole;
+		} else	{
+			vCardProfession = additionalRole;
+		}
+		result.put(KontaktEntryHash.FLD_PROFESSION, vCardProfession);
+		
+		// ****** extract missing parts from html
+		String maidenname = "";
+		String poBox      = "";
 		try {
 			// calc the url of the detail entry
-			String htmlUrl = vCardURL.replace("/vcard/", "/de/d/");
-			String htmlContents = readContent(htmlUrl, "UTF-8");
+			String htmlUrl = vCardLink.replace("/vcard/", "/de/d/");
+			String htmlContents = readContent(htmlUrl, "UTF-8", htmlReadTimeout);
 			HtmlParser subParser = new HtmlParser(htmlContents);
-			if (subParser.moveTo(ADR_DETAIL_TAG)) { // kein Eintrag
-				// move to name/firstname
-				String nameVornameText = subParser.extract("<h2 class=\"fn\">", "</h2>");
+			if (subParser.moveTo(ADR_DETAIL_TAG)) {
+				// move to lsatname/firstname
+				String lastnameFirstnameText = subParser.extract("<h2 class=\"fn\">", "</h2>");
 				// no empty contents
-				if (nameVornameText != null && nameVornameText.length() > 0) {
-					// extract ledigname from nameVornameText
-					String[] vornameLedigname = nameVornameText.split(ADR_LEDIGNAMENSTRENNER);
-					ledigname = "";
-					if (vornameLedigname.length > 1)	{
-						ledigname = cleanupUmlaute(vornameLedigname[1].split(ADR_LEDIGNAMENSSCHLUSS)[0].trim());
+				if (lastnameFirstnameText != null && lastnameFirstnameText.length() > 0) {
+					// extract maidenname from lastnameFirstnameText
+					String[] firstnameMaidenname = lastnameFirstnameText.split(ADR_MAIDENNAMESEPARATOR);
+					maidenname = "";
+					if (firstnameMaidenname.length > 1)	{
+						maidenname = cleanupUmlaute(firstnameMaidenname[1].split(ADR_MAIDENNAMEEND)[0].trim());
 					}
 					// address -> pobox if present
 					String adressTxt = subParser.extract("<div class=\"streetAddress\">", "</div>");
@@ -562,46 +561,38 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 				}
 			}		
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		
-		// beruf calculated
-		if (!vCardBeruf.isEmpty())	{
-			if (!ADDITIONALROLE.isEmpty()) ADDITIONALROLE = " " + ADDITIONALROLE;
-			vCardBeruf = formatString(vCardBeruf) + ADDITIONALROLE;
-		} else	{
-			vCardBeruf = ADDITIONALROLE;
-		}
+		result.put(KontaktEntryHash.FLD_MAIDENNAME, maidenname);
+		result.put(KontaktEntryHash.FLD_POBOX,      poBox);
+		result.put(KontaktEntryHash.FLD_LAND,       "CH");
 		
 		// return result
-		boolean isDetail = true;
-		boolean isVCardDetail = true;
-		String detailLink = "";
-		return new KontaktEntry (
-				vCardVorname,
-				vCardName,
-				poBox,
-				vCardStrasse,
-				vCardPlz,
-				vCardOrt,
-				vCardTelefon1,
-				vCardFax,
-				vCardEmail,
-				isDetail,
-				isVCardDetail,
-				detailLink,
-				vCardWebSite,
-				vCardTelefon2,
-				vCardMobile,
-				ledigname,
-				vCardBeruf,
-				DIEKATEGORIE,
-				isCompany,
-				vCardTitle,
-				"CHE"
-				);
+		return result;
 	}
+
 	
+	/**
+	 * Format a phone number as swiss phone number, 0xx xxx xx xx
+	 * @param phoneNumber the phoneNumber as returned from vCard from tel.local.ch, 
+	 *                    eg. "+41523439772", the "+" is already replaced by " " -> " 41523439772"
+	 * @return the reformatted phone number. if the input is not formatted correctly, then the
+	 * function returns an empty string
+	 */
+	public static String formatPhoneNumber(final String phoneNumber)	{
+		String result = phoneNumber;
+		
+		// do some testing
+		if (phoneNumber.length() == 0) return "";
+		String tmp = phoneNumber.replaceAll(" [0-9]{11}", "");
+		if (tmp.length() != 0) return "";
+		
+		// now format the number
+		result = "0" + 
+						phoneNumber.substring( 3,  5) + " " +
+						phoneNumber.substring( 5,  8) + " " +
+						phoneNumber.substring( 8, 10) + " " +
+						phoneNumber.substring(10, 12);
+		return result;
+	}
 }
