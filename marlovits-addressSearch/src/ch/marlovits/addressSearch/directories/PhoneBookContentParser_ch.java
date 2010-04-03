@@ -14,20 +14,15 @@
 package ch.marlovits.addressSearch.directories;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.Vector;
-
-import org.apache.commons.lang.StringEscapeUtils;
-
-import ch.elexis.data.Patient;
-
+import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Vector;
 
 public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	// markers for identifying html parts
@@ -72,8 +67,8 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	 * @param geo
 	 * @param country
 	 */
-	public PhoneBookContentParser_ch(String htmlText, String name, String geo, String country){
-		super(htmlText, name, geo, country);
+	public PhoneBookContentParser_ch(String htmlText, String name, String geo){
+		super(htmlText, name, geo);
 	}
 	
 	/**
@@ -183,7 +178,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	 * class="postal-code">5742</span> <span class="locality">Kölliken</span> </p> </div> <div
 	 * style="clear: both;"></div> </div>
 	 */
-	private HashMap<String, String> extractKontaktFromList()	{
+	public HashMap<String, String> extractKontaktFromList()	{
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
 		
@@ -317,7 +312,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	 * </table>
 	 * </div> </div> </div>
 	 */
-	private HashMap<String, String> extractKontaktFromDetail(){
+	public HashMap<String, String> extractKontaktFromDetail(){
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
 		
@@ -571,6 +566,50 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		return result;
 	}
 
+	
+	/**
+	 * creates and returns a url for reading data from an online-address-query page
+	 * @param  name    search for this name
+	 * @param  geo     search in this city/location
+	 * @param  country search in this country - must be iso2 name of the country
+	 * @param  pageNum
+	 * @return the url which returns the results, null if any error occurs
+	 */
+	public URL getURL(String name, String geo, int pageNum)	{
+		name = name.replace(' ', '+');
+		geo = geo.replace(' ', '+');
+		country = country.toLowerCase();
+		
+		int lPageNum = pageNum;
+		int recCount = 10;
+		String urlPattern = "";
+		// *** create the url string for different countries
+		if (country.equalsIgnoreCase("ch"))	{
+			// *** switzerland
+			urlPattern = "http://tel.local.ch/{0}/q/?what={1}&where={2}&cid=directories&start={3}"; //$NON-NLS-1$
+		} else if (country.equalsIgnoreCase("de"))	{
+			// *** germany
+			try {
+				name = URLEncoder.encode(name, "ISO-8859-1");
+				geo  = URLEncoder.encode(geo,  "ISO-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			recCount = 20;
+			lPageNum = lPageNum * 20 + 1;
+			System.out.println("lPageNum: " + lPageNum);
+			urlPattern = "http://www.dastelefonbuch.de/?la={0}&kw={1}&ci={2}&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom={3}&reccount={4}"; //$NON-NLS-1$
+		}
+		
+		// *** actually create the URL
+		try {
+			return new URL(MessageFormat.format(urlPattern, new Object[] {
+				Locale.getDefault().getLanguage(), name, geo, lPageNum, recCount
+			}));
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
 	
 	/**
 	 * Format a phone number as swiss phone number, 0xx xxx xx xx

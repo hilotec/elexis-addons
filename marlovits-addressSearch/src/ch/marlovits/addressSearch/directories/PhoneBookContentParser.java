@@ -21,7 +21,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -31,23 +34,21 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	private static final String[] ADR_FIRSTNAMESEPARATORS = {" und ",  " u\\. ",  " e ",  " et "};
 	
 	// members
-	private int entriesPerPage = 20;
-	private String name        = "";
-	private String geo         = "";
-	private String country     = "ch";
+	protected int entriesPerPage    = 20;
+	protected String name           = "";
+	protected String geo            = "";
+	protected static String country = "ch";
 	
 	/**
-	 * this is the constructor: save html, name, geo and country in members
+	 * this is the constructor: save html, name and geo in members
 	 * @param htmlText
 	 * @param name
 	 * @param geo
-	 * @param country
 	 */
-	public PhoneBookContentParser(String htmlText, String name, String geo, String country){
+	public PhoneBookContentParser(String htmlText, String name, String geo){
 		super(htmlText);
 		this.name = name;
 		this.geo  = geo;
-		this.country = country;
 	}
 	
 	/**
@@ -58,18 +59,14 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * Abstract function, must override
 	 * @return the search string to be displayed as info
 	 */
-	public String getSearchInfo(){
-		return "";
-	}
+	public abstract String getSearchInfo();
 	
 	/**
 	 * extracts the total number of found entries  <br>
 	 * Abstract function, must override
 	 * @return number of found entries
 	 */
-	public int getNumOfEntries()	{
-		return 0;
-	}
+	public abstract int getNumOfEntries();
 	
 	/**
 	 * extracts Kontakte from HTML                 <br>
@@ -78,9 +75,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * @return the List of KontaktEntry's
 	 */
 	//public List<KontaktEntry> extractKontakte()	{
-	public List<HashMap<String, String>> extractKontakte()	{
-		return null;
-	}
+	public abstract List<HashMap<String, String>> extractKontakte();
 	
 	/**
 	 * extracts a Kontakt from a listEntry (<b>multiple</b> results displayed on a page)  <br>
@@ -89,9 +84,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * Abstract function, must override
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	private HashMap<String, String> extractKontaktFromList()	{
-		return null;
-	}
+	public abstract HashMap<String, String> extractKontaktFromList();
 	
 	/**
 	 * extracts a Kontakt from a DetailEntry (<b>single</b> result displayed on a page)  <br>
@@ -104,18 +97,14 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * Abstract function, must override
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	private HashMap<String, String> extractKontaktFromDetail(){
-		return null;
-	}
+	public abstract HashMap<String, String> extractKontaktFromDetail();
 	
 	/**
 	 * extracts a Kontakt with ALL available info from a vCard and /or html combined
 	 * @param kontaktHashMap Kontakt for which to extract the info
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	public HashMap<String, String> parseVCard(HashMap<String, String> kontaktHashMap)	{
-		return null;
-	}
+	public abstract HashMap<String, String> parseVCard(HashMap<String, String> kontaktHashMap);
 	
 	/*********************************************************************/
 	/*** Some Helping Functions                                        ***/
@@ -238,6 +227,16 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	    }
 	    return result.toString();
 	}
+	
+	/**
+	 * creates and returns a URL for reading data from an online-address-query page   <br>
+	 * Abstract function, must override
+	 * @param  name    search for this name
+	 * @param  geo     search in this city/location
+	 * @param  pageNum which page to get
+	 * @return the url which returns the results, null if any error occurs
+	 */
+	public abstract URL getURL(String name, String geo, int pageNum);
 	
 	/**
 	 *  read and return the contents of a html page, uses default character encoding
