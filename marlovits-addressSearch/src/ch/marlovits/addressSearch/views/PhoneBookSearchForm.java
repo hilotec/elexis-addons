@@ -14,6 +14,11 @@
 package ch.marlovits.addressSearch.views;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -36,7 +41,8 @@ import org.eclipse.swt.widgets.Text;
 import ch.elexis.dialogs.KontaktErfassenDialog;
 import ch.elexis.dialogs.PatientErfassenDialog;
 import ch.elexis.util.SWTHelper;
-import ch.marlovits.addressSearch.directories.DirectoriesContentParser;
+import ch.marlovits.addressSearch.directories.PhoneBookContentParser;
+import ch.marlovits.addressSearch.directories.PhoneBookContentParser_ch;
 import ch.marlovits.addressSearch.directories.DirectoriesHelper;
 import ch.marlovits.addressSearch.directories.KontaktEntry;
 import ch.rgw.tools.ExHandler;
@@ -45,7 +51,8 @@ public class PhoneBookSearchForm extends Composite {
 
 	private final ListenerList listeners = new ListenerList();
 
-	private List<KontaktEntry> kontakte = new Vector<KontaktEntry>();
+	private List<HashMap<String, String>> kontakte;
+	//private List<HashMap<String, String>> kontakte = new Vector<KontaktEntry>();
 
 	private String searchInfoText = "";
 	private Composite infoComposite;
@@ -60,7 +67,12 @@ public class PhoneBookSearchForm extends Composite {
 	private int numOfPages = 0;
 	private int numOfEntries = 1;
 	private String country = "ch";
-
+	private PhoneBookContentParser parser = null;
+	
+	public PhoneBookContentParser getPhoneBookContentParser()	{
+		return parser;
+	}
+	
 	public PhoneBookSearchForm(Composite parent, int style) {
 		super(parent, style);
 		createPartControl(parent);
@@ -198,7 +210,8 @@ public class PhoneBookSearchForm extends Composite {
 		});
 	}
 	
-	private void setSearchText(DirectoriesContentParser parser)	{
+	private void setSearchText()	{
+	//private void setSearchText(PhoneBookContentParser parser)	{
 		boolean visible = true;
 		if (parser != null)	{
 			int numOfEntries = parser.getNumOfEntries();
@@ -224,6 +237,10 @@ public class PhoneBookSearchForm extends Composite {
 		country = countryIso2;
 	}
 	
+	public String getCountry()	{
+		return country;
+	}
+	
 	/**
 	 * Liest Kontaktinformationen anhand der Kriterien name & geo.
 	 * Bei der Suche wird die Kontakteliste und der InfoText abgefüllt.
@@ -236,14 +253,25 @@ public class PhoneBookSearchForm extends Composite {
 		getShell().setCursor(waitCursor);
 
 		try {
-			String content = DirectoriesHelper.readContent(name, geo, country, startPageNum);
-			if ((content == null) || (content.equalsIgnoreCase("")))	{
-				SWTHelper.alert("Shit!", "content null or empty");
-			}
-			DirectoriesContentParser parser = new DirectoriesContentParser(content, name, geo, country);
+			// *** call constructor for parser for currently selected country
+			Class cls;
+			cls = Class.forName("ch.marlovits.addressSearch.directories.PhoneBookContentParser_" + country);
+			Class partypes[] = new Class[3];
+			partypes[0] = String.class;
+			partypes[1] = String.class;
+			partypes[2] = int.class;
+			Constructor ct = cls.getConstructor(partypes);
+			Object arglist[] = new Object[3];
+			arglist[0] = new String(name);
+			arglist[1] = new String(geo);
+			arglist[2] = new Integer(startPageNum);
+			Object retobj = ct.newInstance(arglist);
+			parser = (PhoneBookContentParser) ct.newInstance(arglist);
+			
 			kontakte = parser.extractKontakte();
 			searchInfoText = parser.getSearchInfo();
-			setSearchText(parser);
+			setSearchText(/*parser*/);
+			/* ++++++++++++++++++++++
 			if (parser.hasCitiesList())	{
 				SWTHelper.showInfo("", parser.getCitiesHitListMessage());
 				String[][] citiesList = parser.getCitiesHitList();
@@ -271,8 +299,23 @@ public class PhoneBookSearchForm extends Composite {
 					geoText.setText(savedText);
 				}
 			}
-		} catch (IOException e) {
-			ExHandler.handle(e);
+			*/
+		} catch (ClassNotFoundException e) {
+			SWTHelper.alert("Implementierungsfehler", "Für das ausgewählte Land (" + country.toUpperCase() + ") ist die Suchroutine nicht implementiert.");
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
 		} finally {
 			getShell().setCursor(backupCursor);
 		}
@@ -287,10 +330,10 @@ public class PhoneBookSearchForm extends Composite {
 		geoText.setItems(new String[] {""});
 		geoText.setText(savedText);
 		geoText.setRedraw(true);
-		readKontakte(name, geo,  startEntryIndex);
+		readKontakte(name, geo, startEntryIndex);
 		resultChanged();
 	}
-
+	
 	private void resultChanged() {
 		for (Object listener : listeners.getListeners()) {
 			if (listener != null) {
@@ -298,48 +341,20 @@ public class PhoneBookSearchForm extends Composite {
 			}
 		}
 	}
-
+	
 	/**
 	 * Retourniert String array für Dialoge
 	 *  //+++++ versucht Detailinfos zu lesen
 	 */
-	private String[] getFields(KontaktEntry entry) {
+	/*
+	private String[] getFields(HashMap<String, String> kontaktHashMap) {
 		
 		//if (country.equalsIgnoreCase("ch"))	{
-			entry = DirectoriesContentParser.parseVCard(entry.getDetailLink(), country);
+			entry = parser.parseVCard(entry.getDetailLink(), country);
 		//}
 		///////////KontaktEntry k = getKontakte().get(1);
 		
-		if (1==1) {
-		if (!entry.isDetail()) { // Sind Detailinformationen vorhanden
-			//++++ wenn keine Detailinfo da -> nach vollem Namen suchen -> ergibt meist Detail-Info
-			final String name = entry.getName() + " " //$NON-NLS-1$
-				+ entry.getVorname();
-			final String geo = entry.getPlz() + " " //$NON-NLS-1$
-				+ entry.getOrt();
-			readKontakte(name, geo, startEntryIndex); // Detail infos lesen (meist...)
-			KontaktEntry detailEntry = null;
-			if (getKontakte().size() == 1) {
-				// nur ein Eintrag gefunden -> benutzen
-				detailEntry = getKontakte().get(0);
-			} else if (getKontakte().size() > 1) {
-				// falls mehr als ein Eintrag gefunden -> Match auf Strasse versuchen, der erste Eintrag gewinnt...
-				// kann falsch sein
-				String strasse = entry.getAdresse().trim();
-				for (KontaktEntry tempEntry: getKontakte()) {
-					if (strasse.contains(tempEntry.getAdresse())) {
-						detailEntry = tempEntry;
-					}
-				}
-			}
-			if (detailEntry != null) {
-				// Falls bei Detailsuche Fehler passiert, dann sind weniger Infos vorhanden
-				if (detailEntry.countNotEmptyFields() > entry.countNotEmptyFields()) {
-					entry = detailEntry;
-				}
-			}
-		}
-		}
+		if (1==1) {}
 		return new String[] { entry.getName(), entry.getVorname(),
 				"", entry.getAdresse(), entry.getPlz(), //$NON-NLS-1$
 				entry.getOrt(), entry.getTelefon(), entry.getZusatz(),
@@ -350,27 +365,25 @@ public class PhoneBookSearchForm extends Composite {
 				(entry.getIsOrganisation() ? "1" : "0"),
 				entry.getTitle(), entry.getCountry()
 		};
-	
 	}
+	*/
 
 	/**
 	 * Öffnet Dialog zum Erfassen eines Patienten
 	 */
-	public void openPatientenDialog(KontaktEntry entry) {
-		if (entry != null) {
-			final PatientErfassenDialog dialog = new PatientErfassenDialog(
-					getShell(), entry.toHashmap());
+	public void openPatientenDialog(HashMap<String, String> kontaktHash) {
+		if (kontaktHash != null) {
+			final PatientErfassenDialog dialog = new PatientErfassenDialog(getShell(), kontaktHash);
 			dialog.open();
 		}
 	}
-
+	
 	/**
 	 * Öffnet Dialog zum Erfassen eines Kontaktes
 	 */
-	public void openKontaktDialog(KontaktEntry entry) {
-		if (entry != null) {
-			final KontaktErfassenDialog dialog = new KontaktErfassenDialog(
-					getShell(), getFields(entry));
+	public void openKontaktDialog(HashMap<String, String> kontaktHash) {
+		if (kontaktHash != null) {
+			final KontaktErfassenDialog dialog = new KontaktErfassenDialog(getShell(), kontaktHash);
 			dialog.open();
 		}
 	}
@@ -378,7 +391,7 @@ public class PhoneBookSearchForm extends Composite {
 	/**
 	 * Kontakt Liste
 	 */
-	public List<KontaktEntry> getKontakte() {
+	public List<HashMap<String, String>> getKontakte() {
 		return this.kontakte;
 	}
 

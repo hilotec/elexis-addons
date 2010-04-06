@@ -14,6 +14,8 @@
 package ch.marlovits.addressSearch.views;
 //ch.marlovits.addressSearch
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Vector;
 
@@ -39,6 +41,7 @@ import ch.elexis.util.SWTHelper;
 import ch.marlovits.addressSearch.directories.DirectoriesContentParser;
 import ch.marlovits.addressSearch.directories.DirectoriesHelper;
 import ch.marlovits.addressSearch.directories.KontaktEntry;
+import ch.marlovits.addressSearch.directories.PhoneBookContentParser;
 import ch.rgw.tools.ExHandler;
 
 public class WeisseSeitenSearchForm extends Composite {
@@ -240,7 +243,53 @@ public class WeisseSeitenSearchForm extends Composite {
 			if ((content == null) || (content.equalsIgnoreCase("")))	{
 				SWTHelper.alert("Shit!", "content null or empty");
 			}
-			DirectoriesContentParser parser = new DirectoriesContentParser(content, name, geo, country);
+			
+			DirectoriesContentParser parser = null;
+			Class cls;
+			try {
+				cls = Class.forName("ch.marlovits.addressSearch.directories.DirectoriesContentParser");
+				Class partypes[] = new Class[4];
+				partypes[0] = String.class;
+				partypes[1] = String.class;
+				partypes[2] = String.class;
+				partypes[3] = String.class;
+				Constructor ct = cls.getConstructor(partypes);
+				Object arglist[] = new Object[4];
+				arglist[0] = new String(content);
+				arglist[1] = new String(name);
+				arglist[2] = new String(geo);
+				arglist[3] = new String(country);
+				Object retobj = ct.newInstance(arglist);
+				parser = (DirectoriesContentParser) ct.newInstance(arglist);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
+			
+			
+			
+			//////////////DirectoriesContentParser parser = new DirectoriesContentParser(content, name, geo, country);
 			kontakte = parser.extractKontakte();
 			searchInfoText = parser.getSearchInfo();
 			setSearchText(parser);

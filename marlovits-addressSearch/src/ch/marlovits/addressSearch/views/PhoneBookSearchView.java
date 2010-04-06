@@ -13,6 +13,7 @@
 
 package ch.marlovits.addressSearch.views;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,7 +48,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import ch.elexis.Hub;
 import ch.elexis.util.SWTHelper;
-import ch.marlovits.addressSearch.directories.KontaktEntry;
+import ch.marlovits.addressSearch.directories.PhoneBookEntry;
 
 /**
  * Weisse-Seiten View. Diese View besteht aus zwei Eingabefelder und
@@ -60,18 +61,12 @@ public class PhoneBookSearchView extends ViewPart {
 	private Action newPatientAction;
 	private Action newKontaktAction;
 	private Action countrySelectorAction;
-	WeisseSeitenSearchForm searchForm;
+	PhoneBookSearchForm searchForm;
 	private boolean showErfassenAsPatient = false;
 	
 	private int currCountry = 0;
-	private static String[] countryIconList = {
-		"rsc/switzerland.png",
-		"rsc/germany.png",
-		"rsc/austria.png"
-/*		"../marlovits-addressSearch/rsc/switzerland.png",
-		"../marlovits-addressSearch/rsc/germany.png",
-		"../marlovits-addressSearch/rsc/austria.png"*/
-	};
+	private static String countryIconBasePath = "../marlovits-addressSearch/rsc/icon_";
+	private static String countryIconSuffix   = ".png";
 	private static String[] countryNameList = {
 		"Schweiz",
 		"Deutschland",
@@ -84,21 +79,20 @@ public class PhoneBookSearchView extends ViewPart {
 		"at"
 	};
 	
-	class WhitePageLabelProvider extends LabelProvider implements
-			ITableLabelProvider {
+	class WhitePageLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
-			KontaktEntry entry = (KontaktEntry) element;
+			HashMap<String, String> entry = (HashMap<String, String>) element;
 			switch (columnIndex) {
 			case 0:
-				return entry.getName() + " " + entry.getVorname(); //$NON-NLS-1$
+				return entry.get(PhoneBookEntry.FLD_NAME) + " " + entry.get(PhoneBookEntry.FLD_FIRSTNAME);
 			case 1:
-				return entry.getAdresse();
+				return entry.get(PhoneBookEntry.FLD_STREET);
 			case 2:
-				return entry.getPlz();
+				return entry.get(PhoneBookEntry.FLD_ZIP);
 			case 3:
-				return entry.getOrt();
+				return entry.get(PhoneBookEntry.FLD_PLACE);
 			case 4:
-				return entry.getTelefon();
+				return entry.get(PhoneBookEntry.FLD_PHONE1);
 			default:
 				return "-"; //$NON-NLS-1$
 			}
@@ -151,7 +145,7 @@ public class PhoneBookSearchView extends ViewPart {
 		parent.setLayout(new GridLayout(1, false));
 
 		// SuchForm
-		searchForm = new WeisseSeitenSearchForm(parent, SWT.NONE);
+		searchForm = new PhoneBookSearchForm(parent, SWT.NONE);
 		searchForm.addResultChangeListener(new Listener() {
 			public void handleEvent(Event event) {
 				showResult();
@@ -168,37 +162,33 @@ public class PhoneBookSearchView extends ViewPart {
 		//searchInfoText.setEnabled(false);
 		//searchInfoText.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		
-		Table table = new Table(listArea, SWT.V_SCROLL | SWT.FULL_SELECTION
-				| SWT.MULTI | SWT.BORDER);
+		Table table = new Table(listArea, SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);
 		TableColumn nameTc = new TableColumn(table, SWT.CENTER);
-		nameTc
-				.setText(Messages
-						.getString("WeisseSeitenSearchView.header.Name")); //$NON-NLS-1$
+		nameTc.setText(Messages.getString("PhoneBookSearchView.header.Name")); //$NON-NLS-1$
 		nameTc.setWidth(250);
 		TableColumn adrTc = new TableColumn(table, SWT.LEFT);
-		adrTc.setText(Messages
-				.getString("WeisseSeitenSearchView.header.Adresse")); //$NON-NLS-1$
+		adrTc.setText(Messages.getString("PhoneBookSearchView.header.Adresse")); //$NON-NLS-1$
 		adrTc.setWidth(140);
 		TableColumn plzTc = new TableColumn(table, SWT.LEFT);
-		plzTc.setText(Messages.getString("WeisseSeitenSearchView.header.Plz")); //$NON-NLS-1$
+		plzTc.setText(Messages.getString("PhoneBookSearchView.header.Plz")); //$NON-NLS-1$
 		plzTc.setWidth(45);
 		TableColumn ortTc = new TableColumn(table, SWT.LEFT);
-		ortTc.setText(Messages.getString("WeisseSeitenSearchView.header.Ort")); //$NON-NLS-1$
+		ortTc.setText(Messages.getString("PhoneBookSearchView.header.Ort")); //$NON-NLS-1$
 		ortTc.setWidth(150);
 		TableColumn telTc = new TableColumn(table, SWT.LEFT);
-		telTc.setText(Messages.getString("WeisseSeitenSearchView.header.Tel")); //$NON-NLS-1$
+		telTc.setText(Messages.getString("PhoneBookSearchView.header.Tel")); //$NON-NLS-1$
 		telTc.setWidth(90);
-
+		
 		table.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-
+		
 		kontakteTableViewer = new TableViewer(table);
 		kontakteTableViewer.setContentProvider(new WhitePageContentProvider());
 		kontakteTableViewer.setLabelProvider(new WhitePageLabelProvider());
 		kontakteTableViewer.setSorter(new KontaktSorter());
 		getSite().setSelectionProvider(kontakteTableViewer);
-
+		
 		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();
@@ -297,30 +287,28 @@ public class PhoneBookSearchView extends ViewPart {
 
 	@SuppressWarnings("unchecked")
 	private void openPatientenDialog() {
-		final StructuredSelection selection = (StructuredSelection) kontakteTableViewer
-				.getSelection();
+		final StructuredSelection selection = (StructuredSelection) kontakteTableViewer.getSelection();
 		if (!selection.isEmpty()) {
-			Iterator<KontaktEntry> iterator = selection.iterator();
+			Iterator<HashMap<String, String>> iterator = selection.iterator();
 			while (iterator.hasNext()) {
-				final KontaktEntry selectedKontakt = iterator.next();
-				searchForm.openPatientenDialog(selectedKontakt);
+				final HashMap<String, String> selectedKontakt = iterator.next();
+				searchForm.openPatientenDialog(searchForm.getPhoneBookContentParser().extractMaxInfo(selectedKontakt));
 			}
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void openKontaktDialog() {
-		final StructuredSelection selection = (StructuredSelection) kontakteTableViewer
-				.getSelection();
+		final StructuredSelection selection = (StructuredSelection) kontakteTableViewer.getSelection();
 		if (!selection.isEmpty()) {
-			Iterator<KontaktEntry> iterator = selection.iterator();
+			Iterator<HashMap<String, String>> iterator = selection.iterator();
 			while (iterator.hasNext()) {
-				final KontaktEntry selectedKontakt = iterator.next();
-				searchForm.openKontaktDialog(selectedKontakt);
+				final HashMap<String, String> selectedKontakt = iterator.next();
+				searchForm.openKontaktDialog(searchForm.getPhoneBookContentParser().extractMaxInfo(selectedKontakt));
 			}
 		}
 	}
-
+	
 	private void makeActions() {
 		if (!showErfassenAsPatient)	{
 			newPatientAction = new Action() {
@@ -329,9 +317,9 @@ public class PhoneBookSearchView extends ViewPart {
 				}
 			};
 			newPatientAction.setText(Messages
-					.getString("WeisseSeitenSearchView.popup.newPatient")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.popup.newPatient")); //$NON-NLS-1$
 			newPatientAction.setToolTipText(Messages
-					.getString("WeisseSeitenSearchView.tooltip.newPatient")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.tooltip.newPatient")); //$NON-NLS-1$
 			newPatientAction.setImageDescriptor(Hub.getImageDescriptor("rsc/patneu.ico"));
 			
 			newKontaktAction = new Action() {
@@ -340,9 +328,9 @@ public class PhoneBookSearchView extends ViewPart {
 				}
 			};
 			newKontaktAction.setText(Messages
-					.getString("WeisseSeitenSearchView.popup.newKontakt")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.popup.newKontakt")); //$NON-NLS-1$
 			newKontaktAction.setToolTipText(Messages
-					.getString("WeisseSeitenSearchView.tooltip.newKontakt")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.tooltip.newKontakt")); //$NON-NLS-1$
 			newKontaktAction.setImageDescriptor(Hub.getImageDescriptor("rsc/patneu.ico"));
 			
 			countrySelectorAction = new Action() {
@@ -350,13 +338,13 @@ public class PhoneBookSearchView extends ViewPart {
 					System.out.println("countrySelectorAction() called");
 					currCountry = (currCountry + 1) % countryNameList.length;
 					countrySelectorAction.setToolTipText(countryNameList[currCountry]);
-					countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor(countryIconList[currCountry]));
+					countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor(countryIconBasePath + countryIso2List[currCountry] + countryIconSuffix));
 					searchForm.setCountry(countryIso2List[currCountry]);
 				}
 			};
 			countrySelectorAction.setText("Land");
 			countrySelectorAction.setToolTipText("Land für die Suche auswählen");
-			countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor("../medshare-directories_marlovits/rsc/switzerland.png"));
+			countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor(countryIconBasePath + countryIso2List[currCountry] + countryIconSuffix));
 		} else	{
 			newPatientAction = new Action() {
 				public void run() {
@@ -364,9 +352,9 @@ public class PhoneBookSearchView extends ViewPart {
 				}
 			};
 			newPatientAction.setText(Messages
-					.getString("WeisseSeitenSearchView.popup.newPatient")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.popup.newPatient")); //$NON-NLS-1$
 			newPatientAction.setToolTipText(Messages
-					.getString("WeisseSeitenSearchView.tooltip.newPatient")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.tooltip.newPatient")); //$NON-NLS-1$
 			newPatientAction.setImageDescriptor(Hub.getImageDescriptor("rsc/patneu.ico"));
 			
 			newKontaktAction = new Action() {
@@ -375,9 +363,9 @@ public class PhoneBookSearchView extends ViewPart {
 				}
 			};
 			newKontaktAction.setText(Messages
-					.getString("WeisseSeitenSearchView.popup.newKontakt")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.popup.newKontakt")); //$NON-NLS-1$
 			newKontaktAction.setToolTipText(Messages
-					.getString("WeisseSeitenSearchView.tooltip.newKontakt")); //$NON-NLS-1$
+					.getString("PhoneBookSearchView.tooltip.newKontakt")); //$NON-NLS-1$
 			newKontaktAction.setImageDescriptor(Hub.getImageDescriptor("rsc/new.ico"));
 			
 			countrySelectorAction = new Action() {
@@ -385,13 +373,13 @@ public class PhoneBookSearchView extends ViewPart {
 					System.out.println("countrySelectorAction() called");
 					currCountry = (currCountry + 1) % countryNameList.length;
 					newKontaktAction.setToolTipText(countryNameList[currCountry]);
-					countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor(countryIconList[currCountry]));
+					countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor(countryIconBasePath + countryIso2List[currCountry] + countryIconSuffix));
 					searchForm.setCountry(countryIso2List[currCountry]);
 				}
 			};
 			countrySelectorAction.setText("Land");
 			countrySelectorAction.setToolTipText("Land für die Suche auswählen");
-			countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor("../medshare-directories_marlovits/rsc/switzerland.png"));
+			countrySelectorAction.setImageDescriptor(Hub.getImageDescriptor(countryIconBasePath + countryIso2List[currCountry] + countryIconSuffix));
 		}
 }
 
