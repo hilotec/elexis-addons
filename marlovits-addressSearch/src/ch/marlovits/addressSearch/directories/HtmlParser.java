@@ -22,6 +22,15 @@ public class HtmlParser {
 		this.htmlText = new StringBuffer(htmlText);
 	}
 	
+	public HtmlParser() {
+		super();
+		this.htmlText = new StringBuffer("");
+	}
+	
+	public void setHtmlText(String htmlText)	{
+		this.htmlText = new StringBuffer(htmlText);
+	}
+	
 	public void reset() {
 		this.currentPos = 0;
 	}
