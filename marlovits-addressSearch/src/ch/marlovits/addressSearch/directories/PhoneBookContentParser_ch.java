@@ -25,6 +25,8 @@ import java.util.Locale;
 import java.util.Vector;
 
 public class PhoneBookContentParser_ch extends PhoneBookContentParser {
+	protected static String country = "ch";
+	
 	// markers for identifying html parts
 	private static final String ADR_LIST_TAG = "class=\"vcard searchResult resrowclr"; //$NON-NLS-1$
 	private static final String ADR_DETAIL_TAG = "<div class=\"resrowclr";; //$NON-NLS-1$
@@ -36,6 +38,23 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	private static String LOCAL_COPYRIGHT      = "\\[Copyright \\(c\\) local\\.ch ag\\]";
 	
 	private static final int htmlReadTimeout = 7000;
+	
+	private static String[] extractionSpecs = {
+			PhoneBookEntry.FLD_NAME       + ":N:0",
+			PhoneBookEntry.FLD_FIRSTNAME  + ":N:1",
+			PhoneBookEntry.FLD_STREET     + ":Item1.ADR;TYPE=HOME:2",  //home/work
+			PhoneBookEntry.FLD_ZIP        + ":Item1.ADR;TYPE=HOME:5",  //home/work
+			PhoneBookEntry.FLD_PLACE      + ":Item1.ADR;TYPE=HOME:3",  //home/work
+			PhoneBookEntry.FLD_PHONE1     + ":TEL;TYPE=VOICE,HOME:0",  //home/work
+			PhoneBookEntry.FLD_PHONE2     + ":TEL;TYPE=VOICE,WORK:0",  //home/work
+			PhoneBookEntry.FLD_FAX        + ":TEL;TYPE=FAX,HOME:0",    // home/work
+			PhoneBookEntry.FLD_MOBILE     + ":TEL;TYPE=CELL,HOME:0",   //home/work
+			PhoneBookEntry.FLD_EMAIL      + ":EMAIL;TYPE=INTERNET:0",
+			PhoneBookEntry.FLD_WEBSITE    + ":URL;TYPE=HOME:0",        //home/work
+			PhoneBookEntry.FLD_PROFESSION + ":TITLE:0",
+			PhoneBookEntry.FLD_NOTE       + ":NOTE:0",
+			PhoneBookEntry.FLD_ISORG      + ":X-ABShowAs:0"
+		};
 	
 	private static String[] ADR_TITLES = {	"", // 
 		"Prof. Dr. med. dent. ",
@@ -62,13 +81,12 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 
 	/**
 	 * this is the constructor: save html, name, geo and country in members
-	 * @param htmlText
 	 * @param name
 	 * @param geo
-	 * @param country
+	 * @param pageNum
 	 */
-	public PhoneBookContentParser_ch(String htmlText, String name, String geo){
-		super(htmlText, name, geo);
+	public PhoneBookContentParser_ch(final String name, final String geo, final int pageNum)	{
+		super(name, geo, pageNum);
 	}
 	
 	/**
@@ -181,6 +199,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	public HashMap<String, String> extractKontaktFromList()	{
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
+		initHashMap(result);
 		
 		// if there is no next entry just return
 		if (!moveTo(ADR_LIST_TAG)) {
@@ -237,14 +256,14 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		vCard = vCard.split("\\?what=")[0];
 		
 		// populate the hashMap
-		result.put(KontaktEntryHash.FLD_FIRSTNAME, firstname);
-		result.put(KontaktEntryHash.FLD_LASTNAME,  lastname);
-		result.put(KontaktEntryHash.FLD_ZUSATZ,    zusatz);
-		result.put(KontaktEntryHash.FLD_PHONE,     phone);
-		result.put(KontaktEntryHash.FLD_STREET,    street);
-		result.put(KontaktEntryHash.FLD_ZIP,       zip);
-		result.put(KontaktEntryHash.FLD_CITY,      city);
-		result.put(KontaktEntryHash.FLD_VCARDLINK, vCard);
+		result.put(PhoneBookEntry.FLD_FIRSTNAME, firstname);
+		result.put(PhoneBookEntry.FLD_NAME,      lastname);
+		result.put(PhoneBookEntry.FLD_ZUSATZ,    zusatz);
+		result.put(PhoneBookEntry.FLD_PHONE1,    phone);
+		result.put(PhoneBookEntry.FLD_STREET,    street);
+		result.put(PhoneBookEntry.FLD_ZIP,       zip);
+		result.put(PhoneBookEntry.FLD_PLACE,     city);
+		result.put(PhoneBookEntry.FLD_VCARDLINK, vCard);
 		
 		// return hashMap
 		return result;
@@ -315,6 +334,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	public HashMap<String, String> extractKontaktFromDetail(){
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
+		initHashMap(result);
 		
 		// if there is no next entry just return
 		if (!moveTo(ADR_DETAIL_TAG)) {
@@ -393,18 +413,18 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		
 		
 		// populate the hashMap
-		result.put(KontaktEntryHash.FLD_FIRSTNAME,  firstname);
-		result.put(KontaktEntryHash.FLD_LASTNAME,   lastname);
-		result.put(KontaktEntryHash.FLD_ZUSATZ,     zusatz);
-		result.put(KontaktEntryHash.FLD_PHONE,      phone);
-		result.put(KontaktEntryHash.FLD_STREET,     street);
-		result.put(KontaktEntryHash.FLD_ZIP,        zip);
-		result.put(KontaktEntryHash.FLD_CITY,       city);
-		result.put(KontaktEntryHash.FLD_VCARDLINK,  vCard);
-		result.put(KontaktEntryHash.FLD_MAIDENNAME, maidenname);
-		result.put(KontaktEntryHash.FLD_POBOX,      poBox);
-		result.put(KontaktEntryHash.FLD_FAX,        fax);
-		result.put(KontaktEntryHash.FLD_EMAIL,      email);
+		result.put(PhoneBookEntry.FLD_FIRSTNAME,  firstname);
+		result.put(PhoneBookEntry.FLD_NAME,       lastname);
+		result.put(PhoneBookEntry.FLD_ZUSATZ,     zusatz);
+		result.put(PhoneBookEntry.FLD_PHONE1,     phone);
+		result.put(PhoneBookEntry.FLD_STREET,     street);
+		result.put(PhoneBookEntry.FLD_ZIP,        zip);
+		result.put(PhoneBookEntry.FLD_PLACE,      city);
+		result.put(PhoneBookEntry.FLD_VCARDLINK,  vCard);
+		result.put(PhoneBookEntry.FLD_MAIDENNAME, maidenname);
+		result.put(PhoneBookEntry.FLD_POBOX,      poBox);
+		result.put(PhoneBookEntry.FLD_FAX,        fax);
+		result.put(PhoneBookEntry.FLD_EMAIL,      email);
 		
 		// return hashMap
 		return result;
@@ -415,18 +435,19 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	 * @param kontaktHashMap Kontakt for which to extract the info
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	public HashMap<String, String> parseVCard(HashMap<String, String> kontaktHashMap)	{
+	public HashMap<String, String> extractMaxInfo(HashMap<String, String> kontaktHashMap)	{
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
+		initHashMap(result);
 		
 		// read vCardLink from kontaktHashMap
-		String vCardLink = kontaktHashMap.get(KontaktEntryHash.FLD_VCARDLINK);
+		String vCardLink = kontaktHashMap.get(PhoneBookEntry.FLD_VCARDLINK);
 		if (vCardLink.equalsIgnoreCase("")){
 			return result;
 		}
 		
 		// ****** read contents of vCard
-		String vCardContents = readContent(vCardLink, htmlReadTimeout);
+		String vCardContents = readContent(vCardLink, "UTF-8", htmlReadTimeout);
 		// strip ENCODING, CHARSET and PREF from vCard
 		vCardContents = vCardContents.replaceAll(";CHARSET=[a-zA-Z1-9-_]+", "");
 		vCardContents = vCardContents.replaceAll(";ENCODING=[a-zA-Z1-9-_]+", "");
@@ -438,25 +459,9 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		// test if this is a company entry
 		boolean isCompany = (vCardParser.getVCardValue("X-ABShowAs", 0).equalsIgnoreCase("COMPANY"));
 		
-		String[] extractionSpecs = {
-				KontaktEntryHash.FLD_LASTNAME   + ":N:0",
-				KontaktEntryHash.FLD_FIRSTNAME  + ":N:1",
-				KontaktEntryHash.FLD_STREET     + ":Item1.ADR;TYPE=HOME:2",  //home/work
-				KontaktEntryHash.FLD_ZIP        + ":Item1.ADR;TYPE=HOME:5",  //home/work
-				KontaktEntryHash.FLD_CITY       + ":Item1.ADR;TYPE=HOME:3",  //home/work
-				KontaktEntryHash.FLD_PHONE      + ":TEL;TYPE=VOICE,HOME:0",  //home/work
-				KontaktEntryHash.FLD_PHONE2     + ":TEL;TYPE=VOICE,WORK:0",  //home/work
-				KontaktEntryHash.FLD_FAX        + ":TEL;TYPE=FAX,HOME:0",    //home/work
-				KontaktEntryHash.FLD_MOBILE     + ":TEL;TYPE=CELL,HOME:0",   //home/work
-				KontaktEntryHash.FLD_EMAIL      + ":EMAIL;TYPE=INTERNET:0",
-				KontaktEntryHash.FLD_WEBSITE    + ":URL;TYPE=HOME:0",        //home/work
-				KontaktEntryHash.FLD_PROFESSION + ":TITLE:0",
-				KontaktEntryHash.FLD_NOTE       + ":NOTE:0"
-			};
-		
 		// ****** read from vCard into hashMap
 		for (int i = 0; i < extractionSpecs.length; i++)	{
-			String extractionSpec = formatString(extractionSpecs[i]);
+			String extractionSpec = extractionSpecs[i];
 			// switch "HOME" and "WORK" for company entries
 			if (isCompany){
 				if (extractionSpec.indexOf("HOME") >= 0){
@@ -467,7 +472,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 			}
 			// split extraction spec on ":"
 			String[] specParts = extractionSpec.split(":");
-			String kontaktKey = specParts[0];	// write  to  this key in KontaktEntryHash
+			String kontaktKey = specParts[0];	// write  to  this key in PhoneBookEntry
 			String vCardKey   = specParts[1];	// search for this key in vCard-Info
 			String infoIndex  = specParts[2];	// index in info of vCard (comma-separated)
 			String vCardValue = formatString(vCardParser.getVCardValue(vCardKey, Integer.parseInt(infoIndex)));
@@ -476,18 +481,25 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		
 		// ****** postprocess values read from vCard
 		// extract distinct firstnames from field firstname
-		String firstName = result.get(KontaktEntryHash.FLD_FIRSTNAME);
+		String firstName = result.get(PhoneBookEntry.FLD_FIRSTNAME);
 		firstName = extractFirstnames(formatString(firstName), ";");
-		result.put(KontaktEntryHash.FLD_FIRSTNAME, firstName);
+		result.put(PhoneBookEntry.FLD_FIRSTNAME, firstName);
+		
+		// ****** set company boolean
+		if (isCompany)	{
+			result.put(PhoneBookEntry.FLD_ISORG, "1");
+		} else	{
+			result.put(PhoneBookEntry.FLD_ISORG, "0");
+		}
 		
 		// format phone numbers
-		result.put(KontaktEntryHash.FLD_PHONE,  formatPhoneNumber(result.get(KontaktEntryHash.FLD_PHONE)));
-		result.put(KontaktEntryHash.FLD_FAX,    formatPhoneNumber(result.get(KontaktEntryHash.FLD_FAX)));
-		result.put(KontaktEntryHash.FLD_PHONE2, formatPhoneNumber(result.get(KontaktEntryHash.FLD_PHONE2)));
-		result.put(KontaktEntryHash.FLD_MOBILE, formatPhoneNumber(result.get(KontaktEntryHash.FLD_MOBILE)));
+		result.put(PhoneBookEntry.FLD_PHONE1, formatPhoneNumber(result.get(PhoneBookEntry.FLD_PHONE1)));
+		result.put(PhoneBookEntry.FLD_FAX,    formatPhoneNumber(result.get(PhoneBookEntry.FLD_FAX)));
+		result.put(PhoneBookEntry.FLD_PHONE2, formatPhoneNumber(result.get(PhoneBookEntry.FLD_PHONE2)));
+		result.put(PhoneBookEntry.FLD_MOBILE, formatPhoneNumber(result.get(PhoneBookEntry.FLD_MOBILE)));
 		
 		// title may be contained in vCardProfession -> extract to vCardTitle
-		String vCardProfession = result.get(KontaktEntryHash.FLD_PROFESSION);
+		String vCardProfession = result.get(PhoneBookEntry.FLD_PROFESSION);
 		String vCardTitle = "";
 		for (int i = 1; i < ADR_TITLES.length; i++)	{
 			String currTitle = ADR_TITLES[i];
@@ -498,10 +510,10 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 				break;
 			}
 		}
-		result.put(KontaktEntryHash.FLD_TITLE, vCardTitle);
+		result.put(PhoneBookEntry.FLD_TITLE, vCardTitle);
 		
 		// strip copyright notice [Copyright (c) local.ch ag] from vCard-field NOTE
-		String vCardZusatz = result.get(KontaktEntryHash.FLD_NOTE);
+		String vCardZusatz = result.get(PhoneBookEntry.FLD_NOTE);
 		String MARKER_VCARD_NEWLINE = VCardParser.getDocReturnCharacter(vCardContents);
 		vCardZusatz = vCardZusatz.replaceAll(MARKER_VCARD_NEWLINE + LOCAL_COPYRIGHT, "");
 		vCardZusatz = vCardZusatz.replaceAll(LOCAL_COPYRIGHT, "");
@@ -514,8 +526,8 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 			additionalRole = vCardZusatz.substring(parPos + 1).trim();
 			additionalRole = additionalRole.substring(0, additionalRole.length() - 1);
 		}
-		result.put(KontaktEntryHash.FLD_ZUSATZ, vCardZusatz);
-		result.put(KontaktEntryHash.FLD_CATEGORY, category);
+		result.put(PhoneBookEntry.FLD_ZUSATZ, vCardZusatz);
+		result.put(PhoneBookEntry.FLD_CATEGORY, category);
 		
 		// profession calculated: add part from vCardZusatz if found
 		if (!vCardProfession.isEmpty())	{
@@ -524,43 +536,40 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		} else	{
 			vCardProfession = additionalRole;
 		}
-		result.put(KontaktEntryHash.FLD_PROFESSION, vCardProfession);
+		result.put(PhoneBookEntry.FLD_PROFESSION, vCardProfession);
 		
 		// ****** extract missing parts from html
 		String maidenname = "";
 		String poBox      = "";
-		try {
-			// calc the url of the detail entry
-			String htmlUrl = vCardLink.replace("/vcard/", "/de/d/");
-			String htmlContents = readContent(htmlUrl, "UTF-8", htmlReadTimeout);
-			HtmlParser subParser = new HtmlParser(htmlContents);
-			if (subParser.moveTo(ADR_DETAIL_TAG)) {
-				// move to lsatname/firstname
-				String lastnameFirstnameText = subParser.extract("<h2 class=\"fn\">", "</h2>");
-				// no empty contents
-				if (lastnameFirstnameText != null && lastnameFirstnameText.length() > 0) {
-					// extract maidenname from lastnameFirstnameText
-					String[] firstnameMaidenname = lastnameFirstnameText.split(ADR_MAIDENNAMESEPARATOR);
-					maidenname = "";
-					if (firstnameMaidenname.length > 1)	{
-						maidenname = cleanupUmlaute(firstnameMaidenname[1].split(ADR_MAIDENNAMEEND)[0].trim());
-					}
-					// address -> pobox if present
-					String adressTxt = subParser.extract("<div class=\"streetAddress\">", "</div>");
-					HtmlParser parser = new HtmlParser(adressTxt);
-					poBox = removeDirt(parser.extract("<span class=\"post-office-box\">", "</span>"));
-					poBox = poBox.replaceAll("^\\<br /\\>", "");
-					poBox = poBox.replaceAll("\\<br /\\>$", "");
-					poBox = poBox.replaceAll("\\<br /\\>", ", ");
-					poBox = cleanupUmlaute(poBox);
+		// calc the url of the detail entry
+		String htmlUrl = vCardLink.replace("/vcard/", "/de/d/");
+		String htmlContents = readContent(htmlUrl, "UTF-8", htmlReadTimeout);
+		HtmlParser subParser = new HtmlParser(htmlContents);
+		if (subParser.moveTo(ADR_DETAIL_TAG)) {
+			// move to lsatname/firstname
+			String lastnameFirstnameText = subParser.extract("<h2 class=\"fn\">", "</h2>");
+			// no empty contents
+			if (lastnameFirstnameText != null && lastnameFirstnameText.length() > 0) {
+				// extract maidenname from lastnameFirstnameText
+				String[] firstnameMaidenname = lastnameFirstnameText.split(ADR_MAIDENNAMESEPARATOR);
+				maidenname = "";
+				if (firstnameMaidenname.length > 1)	{
+					maidenname = firstnameMaidenname[1].split(ADR_MAIDENNAMEEND)[0].trim();
 				}
-			}		
-		} catch (MalformedURLException e) {
-		} catch (IOException e) {
-		}
-		result.put(KontaktEntryHash.FLD_MAIDENNAME, maidenname);
-		result.put(KontaktEntryHash.FLD_POBOX,      poBox);
-		result.put(KontaktEntryHash.FLD_LAND,       "CH");
+				// address -> pobox if present
+				String adressTxt = subParser.extract("<div class=\"streetAddress\">", "</div>");
+				HtmlParser parser = new HtmlParser(adressTxt);
+				poBox = removeDirt(parser.extract("<span class=\"post-office-box\">", "</span>"));
+				poBox = poBox.replaceAll("^\\<br /\\>", "");
+				poBox = poBox.replaceAll("\\<br /\\>$", "");
+				poBox = poBox.replaceAll("\\<br /\\>", ", ");
+				poBox = poBox;
+			}
+		}		
+		
+		result.put(PhoneBookEntry.FLD_MAIDENNAME, maidenname);
+		result.put(PhoneBookEntry.FLD_POBOX,      poBox);
+		result.put(PhoneBookEntry.FLD_LAND,       "CH");
 		
 		// return result
 		return result;
