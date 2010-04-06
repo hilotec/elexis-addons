@@ -28,27 +28,36 @@ import java.util.Locale;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringEscapeUtils;
+
+import ch.elexis.data.Patient;
+
 import java.util.HashMap;
 
 public abstract class PhoneBookContentParser extends HtmlParser {	
 	private static final String[] ADR_FIRSTNAMESEPARATORS = {" und ",  " u\\. ",  " e ",  " et "};
+	protected static String country = "ch";
+	protected static int readTimeOut = 7000;
 	
 	// members
-	protected int entriesPerPage    = 20;
+	protected int    entriesPerPage = 20;
 	protected String name           = "";
 	protected String geo            = "";
-	protected static String country = "ch";
+	protected int    pageNum        = 0;
 	
 	/**
-	 * this is the constructor: save html, name and geo in members
-	 * @param htmlText
-	 * @param name
-	 * @param geo
+	 * this is the constructor: save name, geo and pageNum in members, calc htmlText and save in
+	 * members too
+	 * @param  name    search for this name
+	 * @param  geo     search in this city/location
+	 * @param  pageNum which page to get, zero-based
 	 */
-	public PhoneBookContentParser(String htmlText, String name, String geo){
-		super(htmlText);
-		this.name = name;
-		this.geo  = geo;
+	public PhoneBookContentParser(final String name, final String geo, final int pageNum)	{
+		super();
+		String htmlText = readContent(name, geo, pageNum, readTimeOut);
+		this.setHtmlText(htmlText);
+		this.name     = name;
+		this.geo      = geo;
+		this.pageNum  = pageNum;
 	}
 	
 	/**
@@ -100,11 +109,12 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	public abstract HashMap<String, String> extractKontaktFromDetail();
 	
 	/**
-	 * extracts a Kontakt with ALL available info from a vCard and /or html combined
+	 * extracts a Kontakt with ALL available info from a vCard and /or html combined   <br>
+	 * usually if there is a vCard then it is better to use this to get the data
 	 * @param kontaktHashMap Kontakt for which to extract the info
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
-	public abstract HashMap<String, String> parseVCard(HashMap<String, String> kontaktHashMap);
+	public abstract HashMap<String, String> extractMaxInfo(HashMap<String, String> kontaktHashMap);
 	
 	/*********************************************************************/
 	/*** Some Helping Functions                                        ***/
@@ -159,12 +169,17 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * @param text
 	 * @return
 	 */
-	protected static String cleanupUmlaute(String text) {
+	protected static String cleanupSpecialChars(String text) {
 		// this version is prepared for any characters
 		String tmp = text;
+		// this is already included here for tel.local.ch for convenience...
 		tmp = tmp.replaceAll("&#x([0-9A-Fa-f]{2,2});", "%$1");
 		try {
+			// avoid errors... 
+			tmp = tmp.replaceAll("%([^0-9A-Fa-f])", "&ç&ç&ç&ç$1");
 			tmp = URLDecoder.decode(tmp, "ISO-8859-1");
+			tmp = StringEscapeUtils.unescapeHtml(tmp);
+			tmp = tmp.replaceAll("&ç&ç&ç&ç([^0-9A-Fa-f])", "%$1");
 		} catch (UnsupportedEncodingException e) {
 		}
 		return tmp;
@@ -242,17 +257,19 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 *  read and return the contents of a html page, uses default character encoding
 	 *  timeout needed because on telefonbuch.de vCards sometimes do not work correctly...
 	 *  
-	 * @param urlText = the url from where the page should be read
+	 * @param  name    search for this name
+	 * @param  geo     search in this city/location
+	 * @param  pageNum which page to get
 	 * @param timeOut = how long to wait for the page to be returned in milliseconds, 0 = no timeout
 	 * 
 	 * @return String, the contents of the page
 	 */
-	protected static String readContent(final String urlText, final int timeout)	{
+	public String readContent(final String name, final String geo, final int pageNum, final int timeout)	{
 		StringBuffer sb = new StringBuffer();
 		URL url;
 		InputStream input = null;
 		try {
-			url = new URL(urlText);
+			url = getURL(name, geo, pageNum);
 			// set timeout
 			URLConnection urlConnection = url.openConnection();
 			urlConnection.setConnectTimeout(timeout);
@@ -278,7 +295,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 				}
 			}
 		}
-		return sb.toString();
+		return cleanupSpecialChars(sb.toString());
 	}
 	
 	/**
@@ -290,7 +307,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * 
 	 * @return String, the contents of the page
 	 */
-	public static String readContent(final String urlText, final String charSet, final int timeout) throws IOException, MalformedURLException{
+	public static String readContent(final String urlText, final String charSet, final int timeout) {
 		StringBuffer sb = new StringBuffer();
 		URL url;
 		InputStream input = null;
@@ -321,7 +338,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 				}
 			}
 		}
-		return sb.toString();
+		return cleanupSpecialChars(sb.toString());
 	}
 	
 	/**
@@ -340,5 +357,33 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	
 	protected static String removeDirt(String text){
 		return text.replace("<span class=\"highlight\">", "").replace("</span>", "");
+	}
+
+	public void initHashMap(HashMap<String, String> entry)	{
+		entry.put(PhoneBookEntry.FLD_FIRSTNAME, "");
+		entry.put(PhoneBookEntry.FLD_NAME, "");
+		entry.put(PhoneBookEntry.FLD_ZUSATZ, "");
+		entry.put(PhoneBookEntry.FLD_STREET, "");
+		entry.put(PhoneBookEntry.FLD_ZIP, "");
+		entry.put(PhoneBookEntry.FLD_PLACE, "");
+		entry.put(PhoneBookEntry.FLD_PHONE1, "");
+		entry.put(PhoneBookEntry.FLD_PHONE2, "");
+		entry.put(PhoneBookEntry.FLD_FAX, "");
+		entry.put(PhoneBookEntry.FLD_EMAIL, "");
+		entry.put(PhoneBookEntry.FLD_MOBILE, "");
+		entry.put(PhoneBookEntry.FLD_MAIDENNAME, "");
+		entry.put(PhoneBookEntry.FLD_TITLE, "");
+		entry.put(PhoneBookEntry.FLD_COUNTRY, "");
+		entry.put(PhoneBookEntry.FLD_PROFESSION, "");
+		entry.put(PhoneBookEntry.FLD_WEBSITE, "");
+		entry.put(PhoneBookEntry.FLD_CATEGORY, "");
+		entry.put(PhoneBookEntry.FLD_ISORG, "");
+		entry.put(PhoneBookEntry.FLD_VCARDLINK, "");
+		entry.put(PhoneBookEntry.FLD_POBOX, "");
+		entry.put(PhoneBookEntry.FLD_NOTE, "");
+		entry.put(PhoneBookEntry.FLD_LAND, "");
+		entry.put(PhoneBookEntry.FLD_PATID, "");
+		entry.put(PhoneBookEntry.FLD_SEX, "");
+		entry.put(PhoneBookEntry.FLD_DOB, "");
 	}
 }
