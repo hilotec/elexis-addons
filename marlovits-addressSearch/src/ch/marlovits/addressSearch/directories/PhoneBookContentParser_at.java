@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
-import ch.elexis.util.SWTHelper;
-
 public class PhoneBookContentParser_at extends PhoneBookContentParser {
 	
 	public PhoneBookContentParser_at(String name, String geo, int pageNum) {
@@ -32,60 +30,77 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		initHashMap(result);
 		
 		// get detail info links
-		moveTo("http://www.herold.at/telefonbuch/");
+		moveTo("<h3><a href=\"http://www.herold.at/telefonbuch/");
 		String detailInfoLink = "http://www.herold.at/telefonbuch/" + extractTo("\">");
 		
 		// get lastname, firstname, title if any (separated by comma)
-		String lastnameFistname = extractTo("</a>");
-		String[] firstnameLastname = getFirstnameLastname(lastnameFistname);
+		String lastnameFirstname = extractTo("</a>");
+		String[] firstnameLastname = getFirstnameLastname(lastnameFirstname);
 		String firstname = firstnameLastname[0].trim();
 		String lastname  = firstnameLastname[1].trim();
 		String[] firstnameTitle = firstname.split(",");
 		firstname = firstnameTitle[0].trim();
 		String title = "";
 		if (firstnameTitle.length > 1)	{
-			title = firstnameTitle[1].trim();
+			int commaPos = lastnameFirstname.indexOf(",");
+			title = lastnameFirstname.substring(commaPos + 1).trim();
 		}
 		
 		// extract group info if present
 		int groupPos = getNextPos("<div class=\"group\">");
-		int addrPos = getNextPos("<div class=\"group\">");
+		int addrPos = getNextPos("class=\"addrF\"><p");
 		String group = "";
 		if ((groupPos >= 0) && (groupPos < addrPos))	{
 			moveTo("<div class=\"group\">");
-			group = extractTo("</div>");
+			group = extractTo("</div>").trim();
 		}
 		
-		// get firstLine/secondline (zip, city, street, street number)
-		moveTo("class=\"addrF\"><p");
+		// get firstLine/second line/third line
+		// last line contains the actual address (zip, city, street, street number)
+		// BUT: the zip may be missing... and the street, and the number...
+		// SO: use the LAST line as the address line and extract address
+		// the lines before is additional data -> combine into one single line
+		moveTo("class=\"addr");
+		moveTo("\"><p");
 		moveTo(">");
 		String dataLines= extractTo("<br /></p>");
 		// split lines
 		String[] linesArr = dataLines.split("<br />");
-		String zusatz = "";
-		String zipCityStreetNum = "";
-		if (linesArr.length > 1){
-			zusatz = linesArr[0].trim();
-			zipCityStreetNum = linesArr[1].trim();
-		} else	{
-			zipCityStreetNum = linesArr[0].trim();
+		String lastLine = linesArr[linesArr.length - 1].trim();
+		String otherLines = "";
+		String delim = "";
+		for (int i = 0; i < linesArr.length - 1; i++)	{
+			otherLines = otherLines + delim + linesArr[i].trim();
+			delim = ", ";
 		}
-		String[] splitted = zipCityStreetNum.split(",");
-		String zipCity = splitted[0].trim();
-		String[] zipCityArray = getFirstnameLastname(zipCity);
-		String zip  = zipCityArray[1].trim();
-		String city = zipCityArray[0].trim();
-		String street    = splitted[1].trim();
-		if (splitted.length > 2)	{
-			street = street + ", " + splitted[2].trim();
+		String[] zipCityStreetNum = lastLine.split(",");
+		String zipCity = zipCityStreetNum[0].trim();
+		String zip = zipCity.split(" ")[0];
+		String city = "";
+		if ((zip.length() != 4) || (!zip.replaceAll("[0-9]", "").equalsIgnoreCase("")))	{
+			// no zip specified
+			zip  = "";
+			city = zipCity;
+		} else	{
+			// data to the right of " " is the city
+			city = zipCity.substring(5).trim();
+		}
+		
+		String street = "";
+		if (zipCityStreetNum.length > 1)	{
+			street = zipCityStreetNum[1].trim();
+			if (zipCityStreetNum.length > 2)	{
+				street = street + ", " + zipCityStreetNum[2].trim();
+			}
 		}
 		
 		// populate the hashMap
 		result.put(PhoneBookEntry.FLD_DETAILINFOLINK, detailInfoLink);
+		result.put(PhoneBookEntry.FLD_DISPLAYNAME,    lastnameFirstname);
 		result.put(PhoneBookEntry.FLD_NAME,           lastname);
 		result.put(PhoneBookEntry.FLD_FIRSTNAME,      firstname);
 		result.put(PhoneBookEntry.FLD_TITLE,          title);
-		result.put(PhoneBookEntry.FLD_ZUSATZ,         zusatz);
+		result.put(PhoneBookEntry.FLD_ZUSATZ,         otherLines);
 		
 		result.put(PhoneBookEntry.FLD_ZIP,            zip);
 		result.put(PhoneBookEntry.FLD_PLACE,          city);
@@ -106,14 +121,14 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		if (foundit) return kontakte;
 		foundit = moveTo("<!--begin: results-->");
 		if (foundit)	{
-			int listIndex = getNextPos("http://www.herold.at/telefonbuch/");
+			int listIndex = getNextPos("<h3><a href=\"http://www.herold.at/telefonbuch/");
 			while (listIndex >= 0) {
 				HashMap<String, String> entry = null;
 				entry = extractKontaktFromList();
 				if (entry != null) {
 					kontakte.add(entry);
 				}
-				listIndex = getNextPos("http://www.herold.at/telefonbuch/");
+				listIndex = getNextPos("<h3><a href=\"http://www.herold.at/telefonbuch/");
 				// as long as there still is an end marker, there is more data - else break
 				int endMarkerPos = getNextPos("<!--end: results-->", listIndex);
 				if (endMarkerPos < 0) break;
@@ -161,12 +176,12 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		int lPageNum = pageNum;
 		int recCount = 10;
 		String urlPattern = "";
-		try {
-			name = URLEncoder.encode(name, "ISO-8859-1");
-			geo  = URLEncoder.encode(geo,  "ISO-8859-1");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		//try {
+			//name = URLEncoder.encode(name, "ISO-8859-1");
+			//geo  = URLEncoder.encode(geo,  "ISO-8859-1");
+		//} catch (UnsupportedEncodingException e) {
+		//	e.printStackTrace();
+		//}
 		recCount = 20;
 		lPageNum = lPageNum * 20 + 1;
 		// language not supported in herold.at ???

@@ -30,4 +30,5 @@ public class PhoneBookEntry {
 	public static final String FLD_SEX            = Patient.FLD_SEX;
 	public static final String FLD_DOB            = Patient.FLD_DOB;
 	public static final String FLD_DETAILINFOLINK = "DetailInfoLink";
+	public static final String FLD_DISPLAYNAME    = "DisplayName";
 }

@@ -174,6 +174,7 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		}
 		
 		// populate the hashMap
+		result.put(PhoneBookEntry.FLD_DISPLAYNAME,    fullName);
 		result.put(PhoneBookEntry.FLD_NAME,           lastname);
 		result.put(PhoneBookEntry.FLD_FIRSTNAME,      firstname);
 		result.put(PhoneBookEntry.FLD_STREET,         street);

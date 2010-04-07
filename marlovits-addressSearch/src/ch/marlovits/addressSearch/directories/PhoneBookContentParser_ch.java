@@ -256,14 +256,16 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		vCard = vCard.split("\\?what=")[0];
 		
 		// populate the hashMap
-		result.put(PhoneBookEntry.FLD_FIRSTNAME, firstname);
-		result.put(PhoneBookEntry.FLD_NAME,      lastname);
-		result.put(PhoneBookEntry.FLD_ZUSATZ,    zusatz);
-		result.put(PhoneBookEntry.FLD_PHONE1,    phone);
-		result.put(PhoneBookEntry.FLD_STREET,    street);
-		result.put(PhoneBookEntry.FLD_ZIP,       zip);
-		result.put(PhoneBookEntry.FLD_PLACE,     city);
-		result.put(PhoneBookEntry.FLD_VCARDLINK, vCard);
+		result.put(PhoneBookEntry.FLD_DISPLAYNAME, lastNameFirstNameText);
+		result.put(PhoneBookEntry.FLD_FIRSTNAME,   firstname);
+		result.put(PhoneBookEntry.FLD_NAME,        lastname);
+		result.put(PhoneBookEntry.FLD_ZUSATZ,      zusatz);
+		result.put(PhoneBookEntry.FLD_PHONE1,      phone);
+		result.put(PhoneBookEntry.FLD_STREET,      street);
+		result.put(PhoneBookEntry.FLD_ZIP,         zip);
+		result.put(PhoneBookEntry.FLD_PLACE,       city);
+		result.put(PhoneBookEntry.FLD_VCARDLINK,   vCard);
+		result.put(PhoneBookEntry.FLD_LAND,        "CH");
 		
 		// return hashMap
 		return result;
@@ -413,18 +415,20 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		
 		
 		// populate the hashMap
-		result.put(PhoneBookEntry.FLD_FIRSTNAME,  firstname);
-		result.put(PhoneBookEntry.FLD_NAME,       lastname);
-		result.put(PhoneBookEntry.FLD_ZUSATZ,     zusatz);
-		result.put(PhoneBookEntry.FLD_PHONE1,     phone);
-		result.put(PhoneBookEntry.FLD_STREET,     street);
-		result.put(PhoneBookEntry.FLD_ZIP,        zip);
-		result.put(PhoneBookEntry.FLD_PLACE,      city);
-		result.put(PhoneBookEntry.FLD_VCARDLINK,  vCard);
-		result.put(PhoneBookEntry.FLD_MAIDENNAME, maidenname);
-		result.put(PhoneBookEntry.FLD_POBOX,      poBox);
-		result.put(PhoneBookEntry.FLD_FAX,        fax);
-		result.put(PhoneBookEntry.FLD_EMAIL,      email);
+		result.put(PhoneBookEntry.FLD_DISPLAYNAME, lastnameFirstnameText);
+		result.put(PhoneBookEntry.FLD_FIRSTNAME,   firstname);
+		result.put(PhoneBookEntry.FLD_NAME,        lastname);
+		result.put(PhoneBookEntry.FLD_ZUSATZ,      zusatz);
+		result.put(PhoneBookEntry.FLD_PHONE1,      phone);
+		result.put(PhoneBookEntry.FLD_STREET,      street);
+		result.put(PhoneBookEntry.FLD_ZIP,         zip);
+		result.put(PhoneBookEntry.FLD_PLACE,       city);
+		result.put(PhoneBookEntry.FLD_VCARDLINK,   vCard);
+		result.put(PhoneBookEntry.FLD_MAIDENNAME,  maidenname);
+		result.put(PhoneBookEntry.FLD_POBOX,       poBox);
+		result.put(PhoneBookEntry.FLD_FAX,         fax);
+		result.put(PhoneBookEntry.FLD_EMAIL,       email);
+		result.put(PhoneBookEntry.FLD_LAND,        "CH");
 		
 		// return hashMap
 		return result;
