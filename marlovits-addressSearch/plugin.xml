@@ -3,6 +3,12 @@
 <plugin>
 
    <extension
+         point="ch.elexis.PersistentReference">
+      <Factory
+            Class="ch.marlovits.addressSearch.directories.PhoneBookContentParser_ch"
+            name="PhoneBookSearch_ch"/>
+   </extension>
+   <extension
          point="org.eclipse.ui.views">
       <view
             allowMultiple="true"
