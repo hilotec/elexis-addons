@@ -254,18 +254,17 @@ public class PhoneBookSearchForm extends Composite {
 
 		try {
 			// *** call constructor for parser for currently selected country
-			Class cls;
+			Class<?> cls;
 			cls = Class.forName("ch.marlovits.addressSearch.directories.PhoneBookContentParser_" + country);
-			Class partypes[] = new Class[3];
+			Class<?> partypes[] = new Class[3];
 			partypes[0] = String.class;
 			partypes[1] = String.class;
 			partypes[2] = int.class;
-			Constructor ct = cls.getConstructor(partypes);
+			Constructor<?> ct = cls.getConstructor(partypes);
 			Object arglist[] = new Object[3];
 			arglist[0] = new String(name);
 			arglist[1] = new String(geo);
 			arglist[2] = new Integer(startPageNum);
-			Object retobj = ct.newInstance(arglist);
 			parser = (PhoneBookContentParser) ct.newInstance(arglist);
 			
 			kontakte = parser.extractKontakte();
@@ -306,7 +305,6 @@ public class PhoneBookSearchForm extends Composite {
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();

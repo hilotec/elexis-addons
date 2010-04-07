@@ -84,7 +84,7 @@ public class PhoneBookSearchView extends ViewPart {
 			HashMap<String, String> entry = (HashMap<String, String>) element;
 			switch (columnIndex) {
 			case 0:
-				return entry.get(PhoneBookEntry.FLD_NAME) + " " + entry.get(PhoneBookEntry.FLD_FIRSTNAME);
+				return entry.get(PhoneBookEntry.FLD_DISPLAYNAME);
 			case 1:
 				return entry.get(PhoneBookEntry.FLD_STREET);
 			case 2:
