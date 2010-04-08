@@ -1,9 +1,7 @@
 package ch.marlovits.addressSearch.directories;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +11,7 @@ import java.util.Vector;
 public class PhoneBookContentParser_at extends PhoneBookContentParser {
 	
 	public PhoneBookContentParser_at(String name, String geo, int pageNum) {
-		super(name, geo, pageNum);
+		super(name, geo, pageNum, "UTF-8");
 	}
 	
 	@Override
@@ -206,4 +204,18 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		}
 	}
 
+	@Override
+	public String[][] getCitiesList() {
+		return null;
+	}
+
+	@Override
+	public String getCitiesListMessage() {
+		return "";
+	}
+
+	@Override
+	public boolean hasCitiesList() {
+		return false;
+	}
 }

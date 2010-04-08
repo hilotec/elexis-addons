@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import ch.elexis.util.SWTHelper;
 
 public class PhoneBookContentParser_de extends PhoneBookContentParser {
@@ -35,7 +37,7 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		};
 	
 	public PhoneBookContentParser_de(String name, String geo, int pageNum) {
-		super(name, geo, pageNum);
+		super(name, geo, pageNum, "ISO-8859-1");
 	}
 	
 	@Override
@@ -224,56 +226,64 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		/* many many times, this vCard link doesn't work (not even on the homepage itself...)
 		 * and returns an empty doc
 		 * usually the vCard link on the detail page is working -> try to read this one
-		 * read contents of detail page
 		 * NO - CHANGE: ALWAYS read vCard from detailPage since we need to read some additional
 		 *              info from the detail page anyway
 		 */
-		
-		// read vCardLink from kontaktHashMap
-		String vCardLink = kontaktHashMap.get(PhoneBookEntry.FLD_VCARDLINK);
-		if (vCardLink.equalsIgnoreCase("")){
-			System.out.println("PhoneBookContentParser_de: no vCardLink found");
-			return kontaktHashMap;
+		// read contents of detail page
+		String detailPageLink = kontaktHashMap.get(PhoneBookEntry.FLD_DETAILINFOLINK);
+		// find kw, extract and delete from link string
+		int kwPos = detailPageLink.indexOf("&kw=");
+		if (kwPos >= 0)	{
+			int kwEndPos = detailPageLink.indexOf("&", kwPos + 1);
+			String kwString = detailPageLink.substring(kwPos + 4, kwEndPos);
+			// append converted string to end of link string
+			try {
+				detailPageLink = detailPageLink.replace("&kw=" + kwString, "");
+				kwString = URLEncoder.encode(kwString, "ISO-8859-1");
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+			detailPageLink = detailPageLink + "&kw=" + kwString;
+		}
+		// find ci, extract and delete from link string
+		int ciPos = detailPageLink.indexOf("&ci=");
+		if (ciPos >= 0)	{
+			int ciEndPos = detailPageLink.indexOf("&", ciPos + 1);
+			String ciString = detailPageLink.substring(ciPos + 4, ciEndPos);
+			// append converted string to end of link string
+			try {
+				detailPageLink = detailPageLink.replace("&ci=" + ciString, "");
+				ciString = URLEncoder.encode(ciString, "ISO-8859-1");
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+			detailPageLink = detailPageLink + "&ci=" + ciString;
 		}
 		
-		// ****** read contents of vCard
-		// strip session id
-		vCardLink = vCardLink.replaceAll(";jsessionid=[^?]*", "");
-		vCardLink = vCardLink.replaceAll("\\+", "%2B");
-		String vCardContents = readContent(vCardLink, "UTF-8", htmlReadTimeout);
-		if (vCardContents.isEmpty()) {
-			// read contents of detail page
-			String detailPageLink = kontaktHashMap.get(PhoneBookEntry.FLD_DETAILINFOLINK);
-			String detailPageContent = readContent(detailPageLink, "ISO-8859-1", htmlReadTimeout * 5);
-			if (detailPageContent.equalsIgnoreCase(""))	{
-				System.out.println("PhoneBookContentParser_de: no Detailpage info read");
-				return kontaktHashMap;
-			}
-			// find start of vCardLink on detailPage
-			int vCard2Start = detailPageContent.indexOf("href=\"VCard");
-			String vCardLink2 = "";
-			if (vCard2Start >= 0)	{
-				// extract vCardLink from detailPage
-				vCard2Start = vCard2Start + "href=\"VCard".length();
-				int vCard2End   = detailPageContent.indexOf("\"", vCard2Start);
-				vCardLink2 = detailPageContent.substring(vCard2Start, vCard2End);
-				// prepare vCardLink
-				vCardLink2 = vCardLink2.replaceAll(";jsessionid=[^?]*", "");
-				vCardLink2 = vCardLink2.replaceAll("%", "%25");
-				vCardLink = vCardLink.replaceAll("\\+", "%2B");
-				// find the correct base address from parentLink
-				// TODO
-				//detailPageLink  http://www3.dastelefonbuch.de
-				String wwwPart = detailPageLink.substring(0, detailPageLink.indexOf("?"));
-				// now read the card
-				String link = wwwPart + "/VCard" + vCardLink2;
-				vCardContents = readContent(link, "UTF-8", 500);
-				if (vCardContents.isEmpty())	{
-					System.out.println("PhoneBookContentParser_de: Leere vCard auf Detailpage!");
-					return kontaktHashMap;
-				}
-			}
-			if (vCardContents.isEmpty()) {
+		String detailPageContent = readContent(detailPageLink, "ISO-8859-1", htmlReadTimeout * 5);
+		if (detailPageContent.equalsIgnoreCase(""))	{
+			System.out.println("PhoneBookContentParser_de: no Detailpage info read");
+			return kontaktHashMap;
+		}
+		// find start of vCardLink on detailPage
+		int vCard2Start = detailPageContent.indexOf("href=\"VCard");
+		String vCardLink2 = "";
+		String vCardContents = "";
+		if (vCard2Start >= 0)	{
+			// extract vCardLink from detailPage
+			vCard2Start = vCard2Start + "href=\"VCard".length();
+			int vCard2End   = detailPageContent.indexOf("\"", vCard2Start);
+			vCardLink2 = detailPageContent.substring(vCard2Start, vCard2End);
+			// prepare vCardLink
+			vCardLink2 = vCardLink2.replaceAll(";jsessionid=[^?]*", "");
+			vCardLink2 = vCardLink2.replaceAll("%", "%25");
+			vCardLink2 = vCardLink2.replaceAll("\\+", "%2B");
+			// find the correct base address from parentLink
+			String wwwPart = detailPageLink.substring(0, detailPageLink.indexOf("?"));
+			// now read the card
+			String link = wwwPart + "/VCard" + vCardLink2;
+			vCardContents = readContent(link, "ISO-8859-1", 500);
+			if (vCardContents.isEmpty())	{
 				System.out.println("PhoneBookContentParser_de: Leere vCard auf Detailpage!");
 				return kontaktHashMap;
 			}
@@ -332,95 +342,64 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		result.put(PhoneBookEntry.FLD_PHONE2, formatPhoneNumber(result.get(PhoneBookEntry.FLD_PHONE2)));
 		result.put(PhoneBookEntry.FLD_MOBILE, formatPhoneNumber(result.get(PhoneBookEntry.FLD_MOBILE)));
 		
-		// title may be contained in vCardProfession -> extract to vCardTitle
-		// TODO
-		/*
-		String vCardProfession = result.get(PhoneBookEntry.FLD_PROFESSION);
+		// title may be appended to Entry FLD_NAME
+		// or appended to Entry FLD_DISPLAYNAME
+		String vCardName = result.get(PhoneBookEntry.FLD_NAME);
 		String vCardTitle = "";
+		// try to extract from FLD_NAME first
+		boolean foundTitle = false;
 		for (int i = 1; i < ADR_TITLES.length; i++)	{
 			String currTitle = ADR_TITLES[i];
-			if (vCardProfession.indexOf(currTitle) >= 0)	{
+			if (vCardName.indexOf(currTitle) >= 0)	{
 				vCardTitle = currTitle;
 				// strip title off vCardProfession
-				vCardProfession = vCardProfession.replace(currTitle, "");
+				vCardName = vCardName.replace(currTitle, "");
+				foundTitle = true;
+				break;
+			}
+			currTitle = ADR_TITLES[i].replaceAll(" ", "");
+			if (vCardName.indexOf(currTitle) >= 0)	{
+				vCardTitle = currTitle;
+				// strip title off vCardProfession
+				vCardName = vCardName.replace(currTitle, "");
+				foundTitle = true;
 				break;
 			}
 		}
-		result.put(PhoneBookEntry.FLD_TITLE, vCardTitle);
-		*/
-		
-		// strip copyright notice [Copyright (c) local.ch ag] from vCard-field NOTE
-		// TODO
-		/*
-		String vCardZusatz = result.get(PhoneBookEntry.FLD_NOTE);
-		String MARKER_VCARD_NEWLINE = VCardParser.getDocReturnCharacter(vCardContents);
-		vCardZusatz = vCardZusatz.replaceAll(MARKER_VCARD_NEWLINE + LOCAL_COPYRIGHT, "");
-		vCardZusatz = vCardZusatz.replaceAll(LOCAL_COPYRIGHT, "");
-		// part between () belongs to "role"/profession
-		String category = vCardZusatz;
-		String additionalRole = "";
-		int parPos = vCardZusatz.indexOf("(");
-		if (parPos >= 0)	{
-			category   = vCardZusatz.substring(0, parPos).trim();
-			additionalRole = vCardZusatz.substring(parPos + 1).trim();
-			additionalRole = additionalRole.substring(0, additionalRole.length() - 1);
-		}
-		result.put(PhoneBookEntry.FLD_ZUSATZ, vCardZusatz);
-		result.put(PhoneBookEntry.FLD_CATEGORY, category);
-		
-		// profession calculated: add part from vCardZusatz if found
-		if (!vCardProfession.isEmpty())	{
-			if (!additionalRole.isEmpty()) additionalRole = " " + additionalRole;
-			vCardProfession = vCardProfession + additionalRole;
-		} else	{
-			vCardProfession = additionalRole;
-		}
-		result.put(PhoneBookEntry.FLD_PROFESSION, vCardProfession);
-		*/
-		
-		// ****** extract missing parts from html
-		// Category
-		/*
-		<!-- Kategorie -->
-            <div class="category">
-                <div class="hl">Kategorie:</div>
-                <div class="content">
-                    Fach&auml;rzte f&uuml;r Innere Medizin und Allgemeinmedizin</div>
-            </div>
-        <!-- Kategorie Ende --> 
-		 */
-		/*
-		String maidenname = "";
-		String poBox      = "";
-		// calc the url of the detail entry
-		String htmlUrl = vCardLink.replace("/vcard/", "/de/d/");
-		String htmlContents = readContent(htmlUrl, "UTF-8", htmlReadTimeout);
-		HtmlParser subParser = new HtmlParser(htmlContents);
-		if (subParser.moveTo(ADR_DETAIL_TAG)) {
-			// move to lsatname/firstname
-			String lastnameFirstnameText = subParser.extract("<h2 class=\"fn\">", "</h2>");
-			// no empty contents
-			if (lastnameFirstnameText != null && lastnameFirstnameText.length() > 0) {
-				// extract maidenname from lastnameFirstnameText
-				String[] firstnameMaidenname = lastnameFirstnameText.split(ADR_MAIDENNAMESEPARATOR);
-				maidenname = "";
-				if (firstnameMaidenname.length > 1)	{
-					maidenname = firstnameMaidenname[1].split(ADR_MAIDENNAMEEND)[0].trim();
+		// now try to extract from FLD_DISPLAY
+		String vCardName2 = kontaktHashMap.get(PhoneBookEntry.FLD_DISPLAYNAME);
+		if (!foundTitle)	{
+			for (int i = 1; i < ADR_TITLES.length; i++)	{
+				String currTitle = ADR_TITLES[i];
+				if (vCardName2.indexOf(currTitle) >= 0)	{
+					vCardTitle = currTitle;
+					// strip title off vCardProfession
+					//vCardName = vCardName2.replace(currTitle, "");
+					break;
 				}
-				// address -> pobox if present
-				String adressTxt = subParser.extract("<div class=\"streetAddress\">", "</div>");
-				HtmlParser parser = new HtmlParser(adressTxt);
-				poBox = removeDirt(parser.extract("<span class=\"post-office-box\">", "</span>"));
-				poBox = poBox.replaceAll("^\\<br /\\>", "");
-				poBox = poBox.replaceAll("\\<br /\\>$", "");
-				poBox = poBox.replaceAll("\\<br /\\>", ", ");
-				poBox = poBox;
+				currTitle = ADR_TITLES[i].replaceAll(" ", "");
+				if (vCardName2.indexOf(currTitle) >= 0)	{
+					vCardTitle = currTitle;
+					// strip title off vCardProfession
+					//vCardName = vCardName2.replace(currTitle, "");
+					break;
+				}
 			}
-		}		
+		}
+		result.put(PhoneBookEntry.FLD_TITLE, vCardTitle);
+		result.put(PhoneBookEntry.FLD_NAME,  vCardName);
 		
-		result.put(PhoneBookEntry.FLD_MAIDENNAME, maidenname);
-		result.put(PhoneBookEntry.FLD_POBOX,      poBox);
-		*/
+		// ****** extract missing parts from html: Kategorie
+		String category = "";
+		HtmlParser subParser = new HtmlParser(detailPageContent);
+		// move to <div class="category">
+		if (subParser.moveTo("<div class=\"category\">")) {
+			category = subParser.extract("<div class=\"content\">", "</div>");
+			category = category.replaceAll("<[^>]+>", ""); //$NON-NLS-1$
+			category = category.replaceAll("[\t\r\n]", "").trim();
+		}		
+		result.put(PhoneBookEntry.FLD_PROFESSION, category);
+		
 		result.put(PhoneBookEntry.FLD_LAND,       "DE");
 		
 		// return result
@@ -463,8 +442,9 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		int recCount = 10;
 		String urlPattern = "";
 		try {
+			//name = new String (name.getBytes(),"UTF-8");
 			name = URLEncoder.encode(name, "ISO-8859-1");
-			geo  = URLEncoder.encode(geo,  "ISO-8859-1");
+			geo  = URLEncoder.encode(geo,  "ISO-8859-1"); 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -481,6 +461,95 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		} catch (MalformedURLException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public String[][] getCitiesList() {
+		reset();
+		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">"))	{
+			// get all categories
+			boolean hasNextCategory = moveTo("<div class=\"functionbar\">");
+			int rowCount = 0;
+			String tempResult = "";
+			String delim = "";
+			while(hasNextCategory)	{
+				String category = extractTo("</div>").trim();
+				// if last char is ")" then it IS a category
+				if (category.endsWith(")"))	{
+					System.out.println("category: " + category);
+					tempResult = tempResult + delim + category;
+					delim = ";";
+					tempResult = tempResult + delim + 0;
+					rowCount++;
+					// extract part up to next category
+					hasNextCategory = (getNextPos("<div class=\"functionbar\">") >= 0);
+					String part = extractTo("<div class=\"functionbar\">");
+					// replace splitters 
+					part = part.replaceAll("</table>", "___ROWSPLITTER___");
+					part = part.replaceAll("</a>",     "___CELLSPLITTER___");
+					// strip html tags and blanks/returns
+					part = part.replaceAll("<[^>]+>", "");
+					part = part.replaceAll("[\\r\\n\\t]", "");
+					// split on </table> -> rows
+					String[] rows = part.split("___ROWSPLITTER___");
+					// start with second row because first row is the header
+					for (int rowNum = 1; rowNum < rows.length; rowNum++)	{
+						String row = rows[rowNum];
+						// split on </a> -> cells
+						String[] cells = row.split("___CELLSPLITTER___");
+						if (cells.length > 2)	{
+							rowCount++;
+							String cell = cells[2].trim();
+							System.out.println("cell: " + cell);
+							tempResult = tempResult + delim + cell + delim + 1;
+						}
+					}
+				} else {
+					hasNextCategory = false;
+				}
+			}
+			System.out.println(tempResult);
+			String [][] cities  = new String[rowCount][2];
+			String[] splittedTemp = tempResult.split(";");
+			for (int i = 0; i < splittedTemp.length; i++)	{
+				String name = splittedTemp[i];
+				i++;
+				String selectable = splittedTemp[i];
+				cities[i/2][0] = name;
+				cities[i/2][1] = selectable;
+			}
+			return cities;
+		}
+		return null;
+	}
+
+	@Override
+	public String getCitiesListMessage() {
+		if (!hasCitiesList()) return "";
+		reset();
+		if (!moveTo("<!-- Meldung -->")) return "";
+		String message = extract("<div id=\"msg-caution\">", "</div>");
+		message = message.replaceAll("[\\r\\n\\t]", "").trim();
+		message = message.replaceAll("<br[ ]*[/]*[ ]*>", "\n");
+		message = StringEscapeUtils.unescapeHtml(message);
+		return message;
+	}
+
+	@Override
+	public boolean hasCitiesList() {
+		reset();
+		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">"))	{
+			boolean hasNextCategory = moveTo("<div class=\"functionbar\">");
+			while(hasNextCategory)	{
+				String category = extractTo("</div>").trim();
+				// if last char is ")" then it IS a category
+				if (category.endsWith(")"))	{
+					return true;
+				}
+				hasNextCategory = moveTo("<div class=\"functionbar\">");
+			}
+		}
+		return false;
 	}
 
 }

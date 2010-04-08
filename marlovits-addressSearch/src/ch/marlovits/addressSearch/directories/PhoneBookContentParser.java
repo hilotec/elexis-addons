@@ -38,6 +38,38 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	protected static String country = "ch";
 	protected static int readTimeOut = 7000;
 	
+	protected static String[] ADR_TITLES = {	"", // 
+		"Prof. Dr. med. dent.",
+		"Prof. Dr. méd. dent.",
+		"Prof. Dr. med. vet.",
+		"Prof. Dr. méd. vét.",
+		"Prof. Dr. med.",
+		"Prof. Dr. méd.",
+		"Prof. Dr.med.dent.",
+		"Prof. Dr.méd.dent.",
+		"Prof. Dr.med.vet.",
+		"Prof. Dr.méd.vét.",
+		"Prof. Dr.med.",
+		"Prof. Dr.méd.",
+		"Prof. Dr.med.",
+		"Prof. Dr.méd.",
+		"Prof. Dr. med.",
+		"Prof. Dr. méd.",
+		"Prof. Dr.",
+		"Prof.",
+		"Dr. med. dent.",
+		"Dr. méd. dent.",
+		"Dr. med. vet.",
+		"Dr. méd. vét.",
+		"Dr. med.",
+		"Dr. méd.",
+		"PD. Dr. med. dent.",
+		"PD. Dr. méd. dent.",
+		"PD. Dr. med.",
+		"PD. Dr. méd."
+		};
+
+
 	// members
 	protected int    entriesPerPage = 20;
 	protected String name           = "";
@@ -51,9 +83,9 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * @param  geo     search in this city/location
 	 * @param  pageNum which page to get, zero-based
 	 */
-	public PhoneBookContentParser(final String name, final String geo, final int pageNum)	{
+	public PhoneBookContentParser(final String name, final String geo, final int pageNum, final String charSet)	{
 		super();
-		String htmlText = readContent(name, geo, pageNum, readTimeOut);
+		String htmlText = readContent(name, geo, pageNum, charSet, readTimeOut);
 		this.setHtmlText(htmlText);
 		this.name     = name;
 		this.geo      = geo;
@@ -115,6 +147,27 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
 	public abstract HashMap<String, String> extractMaxInfo(HashMap<String, String> kontaktHashMap);
+	
+	/**
+	 * test if the query returned saying that there is more than one city to select from
+	 * @return boolean true if there is more than one city to select from
+	 */
+	public abstract boolean hasCitiesList();
+	
+	/**
+	 * if there is more than one city to select from then this procedure extracts
+	 * the error message to show to the user for explaining
+	 * @return the error/explanation string
+	 */
+	public abstract String getCitiesListMessage();
+	
+	/**
+	 * returns a list of possible city names if the entered city could not be found or matched exactly
+	 * @return String[] the list of city-pairs, null if none found. 
+	 *                  each entry consist of following parts: city - selectable.
+	 *                  if the entry is not selectable, then it is just a category for the following entries
+	 */
+	public abstract String[][] getCitiesList();
 	
 	/*********************************************************************/
 	/*** Some Helping Functions                                        ***/
@@ -264,7 +317,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 * 
 	 * @return String, the contents of the page
 	 */
-	public String readContent(final String name, final String geo, final int pageNum, final int timeout)	{
+	public String readContent(final String name, final String geo, final int pageNum, final String charSet, final int timeout)	{
 		StringBuffer sb = new StringBuffer();
 		URL url;
 		InputStream input = null;
@@ -279,7 +332,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 			// read from stream
 			int count = 0;
 			char[] c = new char[10000];
-			InputStreamReader isr = new InputStreamReader(input);
+			InputStreamReader isr = new InputStreamReader(input, charSet);
 			while ((count = isr.read(c)) > 0) {
 				sb.append(c, 0, count);
 			}

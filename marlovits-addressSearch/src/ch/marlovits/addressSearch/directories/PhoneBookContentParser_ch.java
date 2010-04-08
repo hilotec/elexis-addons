@@ -13,7 +13,6 @@
 
 package ch.marlovits.addressSearch.directories;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -56,29 +55,6 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 			PhoneBookEntry.FLD_ISORG      + ":X-ABShowAs:0"
 		};
 	
-	private static String[] ADR_TITLES = {	"", // 
-		"Prof. Dr. med. dent. ",
-		"Prof. Dr. méd. dent. ",
-		"Prof. Dr. med. vet. ",
-		"Prof. Dr. méd. vét. ",
-		"Prof. Dr. med. ",
-		"Prof. Dr. méd. ",
-		"Prof. Dr. ",
-		"Prof. Dr. med. ",
-		"Prof. Dr. méd. ",
-		"Prof. ",
-		"Dr. med. dent. ",
-		"Dr. méd. dent. ",
-		"Dr. med. vet. ",
-		"Dr. méd. vét. ",
-		"Dr. med. ",
-		"Dr. méd. ",
-		"PD. Dr. med. dent. ",
-		"PD. Dr. méd. dent. ",
-		"PD. Dr. med. ",
-		"PD. Dr. méd. "
-		};
-
 	/**
 	 * this is the constructor: save html, name, geo and country in members
 	 * @param name
@@ -86,7 +62,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	 * @param pageNum
 	 */
 	public PhoneBookContentParser_ch(final String name, final String geo, final int pageNum)	{
-		super(name, geo, pageNum);
+		super(name, geo, pageNum, "UTF-8");
 	}
 	
 	/**
@@ -567,7 +543,6 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 				poBox = poBox.replaceAll("^\\<br /\\>", "");
 				poBox = poBox.replaceAll("\\<br /\\>$", "");
 				poBox = poBox.replaceAll("\\<br /\\>", ", ");
-				poBox = poBox;
 			}
 		}		
 		
@@ -646,5 +621,20 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 						phoneNumber.substring( 8, 10) + " " +
 						phoneNumber.substring(10, 12);
 		return result;
+	}
+
+	@Override
+	public String[][] getCitiesList() {
+		return null;
+	}
+
+	@Override
+	public String getCitiesListMessage() {
+		return "";
+	}
+
+	@Override
+	public boolean hasCitiesList() {
+		return false;
 	}
 }
