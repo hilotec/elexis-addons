@@ -21,6 +21,7 @@ public class VCardParser {
 	// constants
 	private static String MARKER_VCARD_BEGIN_ = "BEGIN:VCARD";
 	private static String MARKER_VCARD_END_   = "END:VCARD";
+	private static String ITEMSEPARATOR       = "|";
 	
 	// members
 	private String vCardContents = "";					// the full text of the vCard
@@ -28,6 +29,8 @@ public class VCardParser {
 	
 	/**
 	 * the constructor: save full contents and parse contents into the internal HashMap
+	 * be careful: there may be more than just one entry for a single key!
+	 *             -> combine into one single entry, separate entries by ITEMSEPARATOR
 	 * @param vCardContents
 	 */
 	public VCardParser(String vCardContents){
@@ -57,7 +60,12 @@ public class VCardParser {
 				String key   = vCardLine.substring(0, colonPos).toUpperCase();
 				String value = vCardLine.substring(colonPos + 1);
 				if (!key.isEmpty()){
-					vCardValues.put(key, value);
+					String oldVal = getVCardValue(key, 0);
+					if (oldVal.isEmpty())	{
+						vCardValues.put(key, value);
+					} else	{
+						vCardValues.put(key, oldVal + ITEMSEPARATOR + value);
+					}
 				}
 			}
 			lineStartIx = nextLinestartIx + MARKER_VCARD_NEWLINE.length();

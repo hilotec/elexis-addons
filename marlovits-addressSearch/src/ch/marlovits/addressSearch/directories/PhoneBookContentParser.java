@@ -327,9 +327,7 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 				sb.append(c, 0, count);
 			}
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
 		} finally {
 			if (input != null) {
 				try {

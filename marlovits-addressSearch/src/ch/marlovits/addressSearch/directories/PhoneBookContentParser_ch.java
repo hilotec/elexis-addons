@@ -486,7 +486,7 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		// ****** postprocess values read from vCard
 		// extract distinct firstnames from field firstname
 		String firstName = result.get(PhoneBookEntry.FLD_FIRSTNAME);
-		firstName = extractFirstnames(formatString(firstName), ";");
+		firstName = extractFirstnames(formatString(firstName), "|");
 		result.put(PhoneBookEntry.FLD_FIRSTNAME, firstName);
 		
 		// ****** set company boolean

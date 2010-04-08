@@ -20,7 +20,7 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 	
 	String[] extractionSpecs = {
 			PhoneBookEntry.FLD_NAME       + ":N:0",
-			PhoneBookEntry.FLD_FIRSTNAME  + ":N:1",
+			PhoneBookEntry.FLD_FIRSTNAME  + ":FN:0",
 			PhoneBookEntry.FLD_STREET     + ":ADR:2",            //home/work
 			PhoneBookEntry.FLD_ZIP        + ":ADR:5",            //home/work
 			PhoneBookEntry.FLD_PLACE      + ":ADR:3",            //home/work
@@ -221,9 +221,18 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		HashMap<String, String> result = new HashMap<String, String>();
 		initHashMap(result);
 		
+		/* many many times, this vCard link doesn't work (not even on the homepage itself...)
+		 * and returns an empty doc
+		 * usually the vCard link on the detail page is working -> try to read this one
+		 * read contents of detail page
+		 * NO - CHANGE: ALWAYS read vCard from detailPage since we need to read some additional
+		 *              info from the detail page anyway
+		 */
+		
 		// read vCardLink from kontaktHashMap
 		String vCardLink = kontaktHashMap.get(PhoneBookEntry.FLD_VCARDLINK);
 		if (vCardLink.equalsIgnoreCase("")){
+			System.out.println("PhoneBookContentParser_de: no vCardLink found");
 			return kontaktHashMap;
 		}
 		
@@ -233,23 +242,41 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		vCardLink = vCardLink.replaceAll("\\+", "%2B");
 		String vCardContents = readContent(vCardLink, "UTF-8", htmlReadTimeout);
 		if (vCardContents.isEmpty()) {
-			SWTHelper.alert("Error", "Leere vCard!");
-			// many times, this vCard link dosn't work (not even on the homepage itself...)
-			// usually the vCard link on the detail page is working -> try to read this one
 			// read contents of detail page
-			String temp222 = kontaktHashMap.get(PhoneBookEntry.FLD_DETAILINFOLINK);
-			String detailPageContent = readContent(temp222, "UTF-8", htmlReadTimeout * 5);
-			int vCard2Start = detailPageContent.indexOf("href=\"vcard");
+			String detailPageLink = kontaktHashMap.get(PhoneBookEntry.FLD_DETAILINFOLINK);
+			String detailPageContent = readContent(detailPageLink, "ISO-8859-1", htmlReadTimeout * 5);
+			if (detailPageContent.equalsIgnoreCase(""))	{
+				System.out.println("PhoneBookContentParser_de: no Detailpage info read");
+				return kontaktHashMap;
+			}
+			// find start of vCardLink on detailPage
+			int vCard2Start = detailPageContent.indexOf("href=\"VCard");
+			String vCardLink2 = "";
 			if (vCard2Start >= 0)	{
+				// extract vCardLink from detailPage
 				vCard2Start = vCard2Start + "href=\"VCard".length();
 				int vCard2End   = detailPageContent.indexOf("\"", vCard2Start);
-				String vCardLink2 = detailPageContent.substring(vCard2Start, vCard2End);
-				vCardContents = readContent(vCardLink, "UTF-8", htmlReadTimeout);
+				vCardLink2 = detailPageContent.substring(vCard2Start, vCard2End);
+				// prepare vCardLink
+				vCardLink2 = vCardLink2.replaceAll(";jsessionid=[^?]*", "");
+				vCardLink2 = vCardLink2.replaceAll("%", "%25");
+				vCardLink = vCardLink.replaceAll("\\+", "%2B");
+				// find the correct base address from parentLink
+				// TODO
+				//detailPageLink  http://www3.dastelefonbuch.de
+				String wwwPart = detailPageLink.substring(0, detailPageLink.indexOf("?"));
+				// now read the card
+				String link = wwwPart + "/VCard" + vCardLink2;
+				vCardContents = readContent(link, "UTF-8", 500);
+				if (vCardContents.isEmpty())	{
+					System.out.println("PhoneBookContentParser_de: Leere vCard auf Detailpage!");
+					return kontaktHashMap;
+				}
 			}
 			if (vCardContents.isEmpty()) {
-				SWTHelper.alert("Error", "Leere vCard 2!");
+				System.out.println("PhoneBookContentParser_de: Leere vCard auf Detailpage!");
+				return kontaktHashMap;
 			}
-			return kontaktHashMap;
 		}
 		
 		// strip ENCODING, CHARSET and PREF from vCard
@@ -261,9 +288,7 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		VCardParser vCardParser = new VCardParser(vCardContents);
 		
 		// test if this is a company entry: if "TEL;WORK can be found then assume work-address
-		boolean isCompany = (vCardParser.getVCardValue("X-ABShowAs", 0).equalsIgnoreCase("COMPANY"));
-		// test if this is company: X-ABShowAs:COMPANY entry
-		isCompany = false;
+		boolean isCompany = false;
 		if (vCardContents.indexOf("TEL;WORK") >= 0)	{
 			if (vCardContents.indexOf("TEL;HOME") >= 0)	{
 				isCompany = false;
@@ -293,10 +318,6 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		}
 		
 		// ****** postprocess values read from vCard
-		// extract distinct firstnames from field firstname
-		String firstName = result.get(PhoneBookEntry.FLD_FIRSTNAME);
-		firstName = extractFirstnames(formatString(firstName), ";");
-		result.put(PhoneBookEntry.FLD_FIRSTNAME, firstName);
 		
 		// ****** set company boolean
 		if (isCompany)	{
@@ -358,6 +379,16 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		*/
 		
 		// ****** extract missing parts from html
+		// Category
+		/*
+		<!-- Kategorie -->
+            <div class="category">
+                <div class="hl">Kategorie:</div>
+                <div class="content">
+                    Fach&auml;rzte f&uuml;r Innere Medizin und Allgemeinmedizin</div>
+            </div>
+        <!-- Kategorie Ende --> 
+		 */
 		/*
 		String maidenname = "";
 		String poBox      = "";
