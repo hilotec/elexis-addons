@@ -499,7 +499,7 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 						String[] cells = row.split("___CELLSPLITTER___");
 						if (cells.length > 2)	{
 							rowCount++;
-							String cell = cells[2].trim();
+							String cell = cells[2].replaceAll("\\xA0", " ").trim();
 							System.out.println("cell: " + cell);
 							tempResult = tempResult + delim + cell + delim + 1;
 						}
@@ -525,7 +525,7 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 
 	@Override
 	public String getCitiesListMessage() {
-		if (!hasCitiesList()) return "";
+		//if (!hasCitiesList()) return "";
 		reset();
 		if (!moveTo("<!-- Meldung -->")) return "";
 		String message = extract("<div id=\"msg-caution\">", "</div>");
@@ -534,10 +534,15 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 		message = StringEscapeUtils.unescapeHtml(message);
 		return message;
 	}
-
+	
 	@Override
 	public boolean hasCitiesList() {
 		reset();
+		if (getNextPos("ortsliste") == -1)	{
+			return false;
+		}
+		return true;
+		/*
 		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">"))	{
 			boolean hasNextCategory = moveTo("<div class=\"functionbar\">");
 			while(hasNextCategory)	{
@@ -550,6 +555,34 @@ public class PhoneBookContentParser_de extends PhoneBookContentParser {
 			}
 		}
 		return false;
+		*/
 	}
-
+	
+	@Override
+	public boolean noCityFound() {
+		if (getNextPos("FEHLER_KEIN_ORT_GEFUNDEN") == -1)	{
+			return false;
+		}
+		return true;
+	}
+	
+	public String[][] getCitySuggestions(final String part)	{
+		String result = readContent("http://www.telefonbuch.de/Suggestor?source=sm&max_res=20&where=" + part, "UTF-8", this.htmlReadTimeout);
+		result = result.replaceAll("zeige\\(0, new Array\\(\"ort\"\\), new Array\\(new Array\\(\"", "");
+		result = result.replaceAll("\"\\), new Array\\(\"", ";");
+		result = result.replaceAll("\"\\)\\)\\);", " ");
+		System.out.println(result);
+		String[] splitted = result.split(";");
+		String results[][] = new String[splitted.length][2];
+		for (int i = 0; i < splitted.length; i ++)	{
+			results[i][0] = splitted[i];
+			results[i][1] = "1";
+		}
+		return results;
+	}
+	
+	/*
+	 * http://www.telefonbuch.de/Suggestor?source=sm&max_res=20&where=Singen
+	 * zeige(0, new Array("ort"), new Array(new Array("Singen Hohentwiel"), new Array("Singhofen"), new Array("Singwitz Gem. Obergurig"), new Array("Singlis Stadt Borken (Hessen)"), new Array("Singelbert Gem. Reichshof"), new Array("Singen Gem. Remchingen"), new Array("Singer Gem. Sankt Wolfgang"), new Array("Singenbach"), new Array("Singern"), new Array("Singlding Stadt Erding")));
+	 */
 }

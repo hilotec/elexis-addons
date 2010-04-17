@@ -218,4 +218,15 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 	public boolean hasCitiesList() {
 		return false;
 	}
+
+	@Override
+	public boolean noCityFound() {
+		return false;
+	}
+
+	@Override
+	public String[][] getCitySuggestions(String part) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

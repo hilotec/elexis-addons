@@ -637,4 +637,42 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 	public boolean hasCitiesList() {
 		return false;
 	}
+
+	@Override
+	public boolean noCityFound() {
+		return false;
+	}
+
+/*
+<li class="WLSep"><ul><li>Ortschaften, Gemeinden, Quartiere</li></ul></li>
+<li class="WLRow"><a href="javascript:void(0)" onClick="javascript:whereLiveSearch.update('Bülach')">Bülach</a></li>
+<li class="WLRow"><a href="javascript:void(0)" onClick="javascript:whereLiveSearch.update('Eschenmosen (Bülach)')">Eschenmosen (Bülach)</a></li>
+<li class="WLRow"><a href="javascript:void(0)" onClick="javascript:whereLiveSearch.update('Nussbaumen (Bülach)')">Nussbaumen (Bülach)</a></li>
+<li class="WLSep"><ul><li>Kantone, Bezirke, Regionen</li></ul></li>
+<li class="WLRow"><a href="javascript:void(0)" onClick="javascript:whereLiveSearch.update('Bülach (Bezirk/Amt)')">Bülach (Bezirk/Amt)</a></li>
+*/
+	public String[][] getCitySuggestions(String part) {
+		String urlText = "http://tel.local.ch/{0}/geoservice/searchArea/" + part;
+		urlText = MessageFormat.format(urlText, new Object[] { Locale.getDefault().getLanguage() });
+		String result = readContent(urlText, "UTF-8", htmlReadTimeout);
+		// mark as separator row for my cities list
+		result = result.replaceAll("<li class=\"WLSep\">", "0; ");
+		// mark as data row for my cities list
+		result = result.replaceAll("<li class=\"WLRow\">", "1; ");
+		// mark row omitted-line (comments on last line, not selectable)
+		result = result.replaceAll("<li class=\"WLRowOmitted\">", "0; ");
+		// mark end-of-row
+		result = result.replaceAll("</li></ul></li>", ";");
+		result = result.replaceAll("</li>", ";");
+		// strip all html tags
+		result = result.replaceAll("<[^>]+>", ""); //$NON-NLS-1$
+	
+		String[] splitted = result.split(";");
+		// if num of entries is uneven, then the last line contains a messgae
+		String results[][] = new String[splitted.length/2][2];
+		for (int i = 0; i < splitted.length; i ++)	{
+			results[i/2][(i%2==0) ? 1 : 0] = splitted[i].trim();
+		}
+		return results;
+	}
 }

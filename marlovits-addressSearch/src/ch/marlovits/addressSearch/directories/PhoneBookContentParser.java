@@ -169,6 +169,14 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	 */
 	public abstract String[][] getCitiesList();
 	
+	/**
+	 * test if the there entered city has been found or not
+	 * @return false if no city found
+	 */
+	public abstract boolean noCityFound();
+	
+	public abstract String[][] getCitySuggestions(final String part);
+	
 	/*********************************************************************/
 	/*** Some Helping Functions                                        ***/
 	/*********************************************************************/
