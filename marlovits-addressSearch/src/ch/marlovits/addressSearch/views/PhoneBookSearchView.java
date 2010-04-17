@@ -151,8 +151,9 @@ public class PhoneBookSearchView extends ViewPart {
 				showResult();
 			}
 		});
-		searchForm.setCountry("ch");
-
+		
+//		searchForm.setCountry("ch");
+		
 		// Liste
 		Composite listArea = new Composite(parent, SWT.NONE);
 		listArea.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
