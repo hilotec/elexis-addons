@@ -217,12 +217,11 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 		// address, city, zip
 		String adressTxt = extract("<p class=\"adr\">", "</p>");
 		// 5.5.09 ts: verschachtelte spans -> alles bis zur nächsten span klasse holen
-		String street =
-			removeDirt(new HtmlParser(adressTxt).extract("<span class=\"street-address\">",	", <span class="));
-		String zip =
-			removeDirt(new HtmlParser(adressTxt).extract("<span class=\"postal-code\">", "</span>"));
-		String city =
-			removeDirt(new HtmlParser(adressTxt).extract("<span class=\"locality\">", "</span>"));
+		String street = removeDirt(new HtmlParser(adressTxt).extract("<span class=\"street-address\">",	", <span class="));
+		String zip = removeDirt(new HtmlParser(adressTxt).extract("<span class=\"postal-code\">", "</span>"));
+		HtmlParser cityParser = new HtmlParser(adressTxt);
+		cityParser.moveTo("<span class=\"locality\">");
+		String city = removeDirt(cityParser.getTail());
 		
 		// read DetailPage-Link
 		String vCard = extract("<a class=\"detaillink\" href=\"", "\">");
@@ -652,7 +651,14 @@ public class PhoneBookContentParser_ch extends PhoneBookContentParser {
 <li class="WLRow"><a href="javascript:void(0)" onClick="javascript:whereLiveSearch.update('Bülach (Bezirk/Amt)')">Bülach (Bezirk/Amt)</a></li>
 */
 	public String[][] getCitySuggestions(String part) {
-		String urlText = "http://tel.local.ch/{0}/geoservice/searchArea/" + part;
+		String lPart;
+		try {
+			lPart = URLEncoder.encode(part, "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			String results[][] = {{""}, {""}};
+			return results;
+		}
+		String urlText = "http://tel.local.ch/{0}/geoservice/searchArea/" + lPart;
 		urlText = MessageFormat.format(urlText, new Object[] { Locale.getDefault().getLanguage() });
 		String result = readContent(urlText, "UTF-8", htmlReadTimeout);
 		// mark as separator row for my cities list
