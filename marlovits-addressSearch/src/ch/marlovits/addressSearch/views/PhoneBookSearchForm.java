@@ -13,6 +13,7 @@
 
 package ch.marlovits.addressSearch.views;
 
+import java.awt.Toolkit;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -22,8 +23,6 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.DragDetectEvent;
-import org.eclipse.swt.events.DragDetectListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -33,7 +32,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,10 +39,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import ch.elexis.dialogs.KontaktErfassenDialog;
@@ -62,7 +60,6 @@ public class PhoneBookSearchForm extends Composite {
 	private String searchInfoText = "";
 	private Composite parentComposite;
 	private Shell hitListComposite = null;
-	private Button hitListCloseBox;
 	private org.eclipse.swt.widgets.List hitList = null;
 	private Composite infoComposite;
 	private Text searchInfoTextField;
@@ -77,8 +74,11 @@ public class PhoneBookSearchForm extends Composite {
 	private int numOfEntries = 1;
 	private String country = "ch";
 	private PhoneBookContentParser parser = null;
-
+	private String[][] citySuggestions = {{""}, {""}};
+	
 	int			leftMarginOffset = 4;   // +++++ for WindowsXP
+	
+	int listSelectionIndex = -1;
 
 	public PhoneBookContentParser getPhoneBookContentParser()	{
 		return parser;
@@ -92,115 +92,6 @@ public class PhoneBookSearchForm extends Composite {
 	private void createPartControl(final Composite parent) {
 		parentComposite = parent;
 		
-		/*
-		parent.addDragDetectListener(new DragDetectListener()	{
-			@Override
-			public void dragDetected(DragDetectEvent e) {
-				SWTHelper.alert("", "dragDetected1");
-			}
-		}
-		);
-		parent.getParent().addDragDetectListener(new DragDetectListener()	{
-			@Override
-			public void dragDetected(DragDetectEvent e) {
-				SWTHelper.alert("", "dragDetected2");
-			}
-		}
-		);
-		parent.getParent().getParent().addDragDetectListener(new DragDetectListener()	{
-			@Override
-			public void dragDetected(DragDetectEvent e) {
-				SWTHelper.alert("", "dragDetected3");
-			}
-		}
-		);
-		parent.addFocusListener(new FocusListener(){
-			@Override
-			public void focusGained(FocusEvent e) {
-				SWTHelper.alert("", "focusGained");
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-				SWTHelper.alert("", "focusLost");
-			}
-		});
-		parent.addControlListener(new ControlListener(){
-			@Override
-			public void controlMoved(ControlEvent e) {
-				if (hitListComposite != null)	{
-					hitListComposite.dispose();
-					hitListComposite = null;
-				}
-				if (hitListComposite == null)	{
-					createHitListComposite(parent);
-				}
-				repositionHitList();
-			}
-			@Override
-			public void controlResized(ControlEvent e) {
-				if (hitListComposite != null)	{
-					hitListComposite.dispose();
-					hitListComposite = null;
-				}
-				if (hitListComposite == null)	{
-					createHitListComposite(parent);
-				}
-				repositionHitList();
-			}
-		}
-		);
-		parent.getParent().addControlListener(new ControlListener(){
-			@Override
-			public void controlMoved(ControlEvent e) {
-				if (hitListComposite != null)	{
-					hitListComposite.dispose();
-					hitListComposite = null;
-				}
-				if (hitListComposite == null)	{
-					createHitListComposite(parent);
-				}
-				repositionHitList();
-			}
-			@Override
-			public void controlResized(ControlEvent e) {
-				if (hitListComposite != null)	{
-					hitListComposite.dispose();
-					hitListComposite = null;
-				}
-				if (hitListComposite == null)	{
-					createHitListComposite(parent);
-				}
-				repositionHitList();
-			}
-		}
-		);
-		
-		parent.getParent().getParent().addControlListener(new ControlListener(){
-			@Override
-			public void controlMoved(ControlEvent e) {
-				if (hitListComposite != null)	{
-					hitListComposite.dispose();
-					hitListComposite = null;
-				}
-				if (hitListComposite == null)	{
-					createHitListComposite(parent);
-				}
-				repositionHitList();
-			}
-			@Override
-			public void controlResized(ControlEvent e) {
-				if (hitListComposite != null)	{
-					hitListComposite.dispose();
-					hitListComposite = null;
-				}
-				if (hitListComposite == null)	{
-					createHitListComposite(parent);
-				}
-				repositionHitList();
-			}
-		}
-		);
-		*/
 		createParser();
 		
 		setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
@@ -259,28 +150,54 @@ public class PhoneBookSearchForm extends Composite {
 			}
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (parser != null)	{
-					int currLen = geoText.getText().length();
-					String[][] citiesList = {{""}, {""}};
-					if (currLen > 0)	{
-						citiesList = parser.getCitySuggestions(geoText.getText());
+				recalcHitList(false);
+				boolean handleIt = true;
+				switch (e.keyCode)	{
+				case SWT.ARROW_DOWN:
+					System.out.println("ARROW_DOWN: get into menu items");
+					// if no item selected    -> select first selectable item in list
+					// if an item is selected -> select next  selectable item in list
+					// if the last selectable item is selected -> remain there 
+					if (citySuggestions != null)	{
+						if (citySuggestions.length > 0) {
+							if (listSelectionIndex < (citySuggestions.length - 1))	{
+								int resultCounter = 0;
+								String resultString = "";
+								for (int i = listSelectionIndex + 1; i < citySuggestions.length; i++)	{
+									if (citySuggestions[i][1].equalsIgnoreCase("1"))	{
+										listSelectionIndex = i;
+										hitList.setSelection(listSelectionIndex);
+										break;
+									}
+								}
+							}
+						}
 					}
-					if (hitListComposite != null)	{
-						hitListComposite.dispose();
-						hitListComposite = null;
-					}
-					if (hitListComposite == null)	{
-						createHitListComposite(parent);
-					}
-					if ((citiesList.length > 0) && (hitListComposite != null)) {
-						fillCitiesCombo(citiesList);
-						repositionHitList();
-						hitListComposite.setVisible(true);
-					}
-					repositionHitList();
+					handleIt = false;
+					break;
+				case SWT.ARROW_UP:
+					System.out.println("ARROW_DOWN: get into menu items");
+					handleIt = false;
+					break;
+				case SWT.ARROW_LEFT:	// move caret inside text
+				case SWT.ARROW_RIGHT:	// move caret inside text
+				case SWT.DEL:			// delete selection, delete to the right of the caret
+				case SWT.BS:			// delete selection, delete to the left of the caret
+				case SWT.ESC:			// yepp...
+					handleIt = false;
+					break;
+				}
+				if (handleIt)	{
+				// if there is just a single result, then directly select this one
+				String singleHitListResult = getSingleHitListResult();
+				if (!singleHitListResult.isEmpty() && handleIt)	{
+					int oldLen = geoText.getText().length();
+					geoText.setText(singleHitListResult);
+					geoText.setSelection(new Point(oldLen, 32000));
+				}
+				repositionHitList();
 				}
 			}
-			
 		});
 		geoText.addSelectionListener(new SelectionListener()	{
 			@Override
@@ -386,33 +303,120 @@ public class PhoneBookSearchForm extends Composite {
 			@Override
 			public void focusGained(FocusEvent e) {
 				if (hitListComposite == null) return;
-				hitListComposite.setVisible(true);
-				repositionHitList();
+				//hitListComposite.setVisible(true);
+				//repositionHitList();
 			}
 			@Override
 			public void focusLost(FocusEvent e) {
 				if (hitListComposite == null) return;
-				hitListComposite.setVisible(false);
+				//hitListComposite.setVisible(false);
+				//System.out.println("focus lost on Text");
 			}
 		});
-		
-		geoText.addControlListener(new ControlListener() {
+		/*
+		// make sure menu is correctly positioned after moving or resizing
+		geoText.getParent().getParent().addControlListener(new ControlListener() {
 			@Override
 			public void controlMoved(ControlEvent e) {
-				System.out.println("controlMoved");
+				repositionHitList();
 			}
 			@Override
 			public void controlResized(ControlEvent e) {
-				System.out.println("controlResized");
+				repositionHitList();
 			}
 		});
-		
+		*/
 		searchBtn.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				startEntryIndex = 0;
-				searchAction(nameText.getText(), geoText.getText());
+				String tmp1 = nameText.getText();
+				String tmp2 = geoText.getText();
+				searchAction(tmp1, tmp2);
 			}
 		});
+		/*
+		getShell().addListener(SWT.Activate, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				hitListComposite.setVisible(false);
+			}
+		});
+		*/
+		
+		geoText.addListener(SWT.Deactivate, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				hitListComposite.setVisible(false);
+				System.out.println("Deactivate on " + event.widget);
+			}
+		});
+		geoText.addListener(SWT.Activate, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				hitListComposite.setVisible(true);
+				System.out.println("Activate on " + event.widget);
+			}
+		});
+		
+	}
+	
+	private void recalcHitList(final boolean doChangeVisibilityOrPosition)	{
+		if (parser != null)	{
+			int currLen = geoText.getText().length();
+			//citySuggestions. = {{""}, {""}};
+			String getSingleHitListResult = "";
+			if (currLen > 0)	{
+				citySuggestions = parser.getCitySuggestions(geoText.getText());
+				getSingleHitListResult = getSingleHitListResult();
+			} else {
+				hitListComposite.setVisible(false);
+				listSelectionIndex = -1;
+				return;
+			}
+			if (!getSingleHitListResult.isEmpty())	{
+				//citySuggestions = new String[][] {{""}, {""}};
+				//fillCitiesCombo(citySuggestions);
+				hitListComposite.setVisible(false);
+			} else {
+				if (hitListComposite != null)	{
+					hitListComposite.dispose();
+					hitListComposite = null;
+				}
+				if (hitListComposite == null)	{
+					createHitListComposite(parentComposite);
+				}
+				if ((citySuggestions.length > 0) && (hitListComposite != null)) {
+					fillCitiesCombo(citySuggestions);
+					repositionHitList();
+					hitListComposite.setVisible(true);
+				}
+				repositionHitList();
+			}
+		}
+		listSelectionIndex = -1;
+	}
+	
+	/**
+	 * if the list contains a SINGLE result entry then return this string. 
+	 * if it contains more than one matching entry then just return an empty string
+	 * @return
+	 */
+	private String getSingleHitListResult()	{
+		if ((citySuggestions == null) || (citySuggestions.length == 0))	{
+			return "";
+		}
+		int resultCounter = 0;
+		String resultString = "";
+		for (int i = 0; i < citySuggestions.length; i++)	{
+			if (citySuggestions[i][1].equalsIgnoreCase("1"))	{
+				// this is the second result found -> return ""
+				if (resultCounter >= 1) return "";
+				// set result string
+				resultString = citySuggestions[i][0];
+				resultCounter = resultCounter + 1;
+			}
+		}
+		return resultString;
 	}
 	
 	private void repositionHitList()	{
@@ -429,6 +433,7 @@ public class PhoneBookSearchForm extends Composite {
 			hitList.setBounds(-1, -1, bestSize.x, bestSize.y);
 			hitListComposite.setVisible(true);
 		} else	{
+			hitListComposite.setBounds(0, 0, 0, 0);
 			hitListComposite.setVisible(false);
 		}
 	}
@@ -439,20 +444,54 @@ public class PhoneBookSearchForm extends Composite {
 		hitList = new org.eclipse.swt.widgets.List(hitListComposite, SWT.BORDER | SWT.V_SCROLL);
 		hitListComposite.moveAbove(null);
 		repositionHitList();
-	}
-	
-	private int getMaxStringWidth()	{
-		// loop through items of column linked to text field, find widest string (in pixels)
-		GC gc = new GC(geoText);
-		int spacer = gc.stringExtent(" ").x; //$NON-NLS-1$
-		int textWidth = gc.stringExtent(geoText.getText()).x;
-		String[] items = hitList.getItems();
-		for (int i = 0; i < items.length; i++) {
-			String str = items[i];
-			textWidth = Math.max(gc.stringExtent(items[i]).x, textWidth);
-		}
-		gc.dispose();
-		return textWidth;
+		hitListComposite.addListener(SWT.Deactivate, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				hitListComposite.setVisible(false);
+				System.out.println("SWT.Deactivate " + event.widget);
+			}
+		});
+		hitListComposite.addListener(SWT.Activate, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				hitListComposite.setVisible(true);
+				System.out.println("SWT.Activate on " + event.widget);
+			}
+		});
+		
+		hitList.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int newSelection = hitList.getSelectionIndex();
+				String newSelectionText = hitList.getItem(hitList.getSelectionIndex());
+				if (newSelectionText.startsWith(" ***"))	{
+					// this is a divider - cannot select -> deselect all, do NOT close the list
+					hitList.setSelection(-1);
+					geoText.getParent().setFocus();
+					Toolkit.getDefaultToolkit().beep();
+				} else {
+					geoText.setText(newSelectionText);
+					listSelectionIndex = newSelection;
+					// first set focus to avoid focusGained event on geoText and making it visibile again
+					geoText.setFocus();
+					recalcHitList(true);
+					hitListComposite.setVisible(false);
+				}
+			}
+		});
+		/*hitListComposite.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("focus gained on List");
+			}
+			@Override
+			public void focusLost(FocusEvent e) {
+			}
+		});*/
+		//hitListComposite.add
 	}
 	
 	private void setSearchText()	{
@@ -481,22 +520,24 @@ public class PhoneBookSearchForm extends Composite {
 	public void setCountry(final String countryIso2)	{
 		country = countryIso2;
 		createParser();
-		String[][] citiesList = parser.getCitySuggestions(geoText.getText());
-		fillCitiesCombo(citiesList);
+		citySuggestions = parser.getCitySuggestions(geoText.getText());
+		fillCitiesCombo(citySuggestions);
 		repositionHitList();
 	}
 	
 	public String getCountry()	{
 		return country;
 	}
+	private void createParser()	{
+		createParser("", "", 0);
+	}
 	
 	/**
 	 * create the content parser for the currently selected country
 	 */
-	private void createParser()	{
+	private void createParser(final String name, final String geo, final int pageNum)	{
 		// *** call constructor for parser for currently selected country
 		try {
-			System.out.println("blubb");
 			Class<?> cls;
 			cls = Class.forName("ch.marlovits.addressSearch.directories.PhoneBookContentParser_" + country);
 			Class<?> partypes[] = new Class[3];
@@ -505,9 +546,9 @@ public class PhoneBookSearchForm extends Composite {
 			partypes[2] = int.class;
 			Constructor<?> ct = cls.getConstructor(partypes);
 			Object arglist[] = new Object[3];
-			arglist[0] = new String("");
-			arglist[1] = new String("");
-			arglist[2] = new Integer(0);
+			arglist[0] = new String(name);
+			arglist[1] = new String(geo);
+			arglist[2] = new Integer(pageNum);
 			parser = (PhoneBookContentParser) ct.newInstance(arglist);
 		} catch (ClassNotFoundException e) {
 			SWTHelper.alert("Implementierungsfehler", "Für das ausgewählte Land (" + country.toUpperCase() + ") ist die Suchroutine nicht implementiert.");
@@ -539,7 +580,7 @@ public class PhoneBookSearchForm extends Composite {
 		getShell().setCursor(waitCursor);
 
 		try {
-			createParser();
+			createParser(name, geo, startPageNum);
 			kontakte = parser.extractKontakte();
 			searchInfoText = parser.getSearchInfo();
 			setSearchText(/*parser*/);
@@ -568,8 +609,8 @@ public class PhoneBookSearchForm extends Composite {
 		}
 		if (parser.noCityFound())	{
 			SWTHelper.showInfo("", parser.getCitiesListMessage());
-			String[][] citiesList = parser.getCitySuggestions("Sing");
-			fillCitiesCombo(citiesList);
+			citySuggestions = parser.getCitySuggestions("Sing");
+			fillCitiesCombo(citySuggestions);
 			}
 	}
 	
