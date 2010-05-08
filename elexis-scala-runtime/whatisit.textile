@@ -1,0 +1,3 @@
+h1. Elexis-Scala-Runtime
+
+This plugin provides a wrapper around the "scala runtime library":http://www.scala-lang.org. A Olugin programmed in Scala or programmed in a mix of Scala and Java should depend on this plugin instead of embedding its own scala library.
