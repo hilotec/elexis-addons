@@ -5,7 +5,8 @@ Bundle-SymbolicName: ch.elexis.scala.runtime
 Bundle-Version: 1.0.0
 Bundle-ClassPath: scala-library.jar
 Bundle-Vendor: G. Weirich
-Export-Package: scala,
+Export-Package: ch.elexis.scala.runtime,
+ scala,
  scala.actors,
  scala.actors.remote,
  scala.actors.scheduler,
