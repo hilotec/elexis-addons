@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Impfplan für Elexis
+Bundle-Localization: plugin
+Bundle-SymbolicName: ch.elexis.impfplan;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Vendor: G. Weirich
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: ch.elexis;bundle-version="2.0.0",
+ ch.rgw.utility;bundle-version="2.0.0",
+ org.eclipse.ui;bundle-version="3.5.2",
+ org.eclipse.core.runtime;bundle-version="3.5.0",
+ org.eclipse.ui.forms;bundle-version="3.4.1",
+ ch.elexis.scala.runtime;bundle-version="1.0.0"
+Bundle-ClassPath: bin/,
+ .

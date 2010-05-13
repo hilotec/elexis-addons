@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="ch.elexis.impfplan.view.ImpfplanView"
+            id="elexis-impfplan.view"
+            name="Impfplan"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="ch.elexis.preferences.cdss"
+            class="ch.elexis.impfplan.view.ImpfplanPreferences"
+            id="ch.elexis.impfplan.prefs"
+            name="%Impfplan">
+      </page>
+   </extension>
+   <extension
+         point="ch.elexis.PersistentReference">
+      <Factory
+            Class="ch.elexis.impfplan.model.ImpfplanFactory"
+            name="%Impfplan">
+      </Factory>
+   </extension>
+   <extension
+         point="ch.elexis.documentTemplates">
+      <variable
+            name="Impfplan">
+      </variable>
+   </extension>
+
+</plugin>

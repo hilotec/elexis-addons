@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service:service category="feature" id="ch.elexis.impfplan" name="Impfkontrolle und Impfempfehlungen" provider="support@medelexis.ch" type="KG-Führung" version="0.1.0" xmlns:service="http://www.medelexis.ch/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ">
+  <service:conditions>
+  	<service:roles>
+  		<service:role priceClass="fixed-low"></service:role>
+  	</service:roles>
+  </service:conditions>
+  <service:docURL>http://www.rgw.ch/elexis/dox/elexis-impfplan.html</service:docURL>
+  <service:description>Ein Plugin zum Verwalten von Impfungen und erstellen von Impfempfehlungen, sowie Drucken von Impfausweisen</service:description>
+  <service:depends>ch.medelexis.nucleus ch.elexis.scala.runtime</service:depends>
+</service:service>
