@@ -4,7 +4,8 @@ Bundle-Name: Runtime for Scala plugins in Elexis
 Bundle-SymbolicName: ch.elexis.scala.runtime
 Bundle-Version: 1.0.0
 Bundle-ClassPath: scala-library.jar,
- bin/
+ bin/,
+ .
 Bundle-Vendor: G. Weirich
 Export-Package: ch.elexis.scala.runtime,
  scala,
