@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="ch.elexis.RezeptHook">
+      <Hook
+            RpToolbarAction="ch.elexis.regiomed.estudio.RegiomedAction">
+      </Hook>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="ch.elexis.regiomed.estudio.PreferencePage"
+            id="ch.elexis.regiomed.prefs"
+            name="Regiomed eStudio">
+      </page>
+   </extension>
+
+</plugin>

@@ -1,0 +1,3 @@
+d:
+cd \source\elexis_trunk\elexis-rosenstudio
+java -cp .;./lib;./lib/log4j-1.2.4.jar;./lib/axis.jar;./lib/axis-ant.jar;./lib/commons-discovery.jar;./lib/commons-logging.jar;./lib/ejb2.0.jar;./lib/estudio_ejb_client.jar;./lib/jaxrpc.jar;./lib/saaj.jar;./lib/wsdl4j.jar;./lib/xercesImpl.jar;./lib/xml-apis.jar;./lib/jsse.jar;./lib/jnet.jar;./lib/jcert.jar;./lib/servlet.jar ch.ct.patientenerfassung.client.PatientenErfClient 

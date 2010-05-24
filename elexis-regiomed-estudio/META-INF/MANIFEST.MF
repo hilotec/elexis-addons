@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Elexis Adapter für Regiomed eStudio
+Bundle-SymbolicName: ch.elexis.regiomed.estudio;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: elexis.ch
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: ch.elexis;bundle-version="2.1.0",
+ ch.rgw.utility;bundle-version="2.0.0",
+ org.eclipse.core.runtime;bundle-version="3.5.0",
+ org.eclipse.ui;bundle-version="3.5.2",
+ ch.elexis.arzttarife_ch;bundle-version="2.0.0"
