@@ -1,0 +1,12 @@
+h1. Bestellung Medicom Pharma
+
+Dieses Plugin dient dazu, Artikel bei Medicom Pharma automatisch aus Elexis zu bestellen.
+
+h2. Vorausetzungen
+
+* Elexis 2.0 oder höher
+* Eine Kundennummer bei Medicom
+
+h2. Installation
+
+D

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="ch.elexis.Transporter">
+      <Transporter
+            ExporterClass="ch.elexis.order.medicom.MedicomSender"
+            id="elexis-order-medicom-pharma.Transporter1"
+            name="Medicom"
+            type="ch.elexis.data.Bestellung">
+      </Transporter>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="ch.elexis.preferences.transporters"
+            class="ch.elexis.order.medicom.Preferences"
+            id="ch.elexis.order.medicom.preferences"
+            name="Medicom">
+      </page>
+   </extension>
+   <extension
+         point="ch.elexis.ACLContribution">
+      <ACLContribution
+            ACLContributor="ch.elexis.order.medicom.ACLContributor"
+            name="Medicom">
+      </ACLContribution>
+   </extension>
+
+</plugin>
