@@ -7,6 +7,33 @@ h2. Vorausetzungen
 * Elexis 2.0 oder höher
 * Eine Kundennummer bei Medicom
 
-h2. Installation
+h2. Bezugsquelle und Installation
 
-D
+Das Plugin kann entweder über den Medelexis Configurator, oder von Ihrem Medicom-Repräsentanten bezogen werden. Bei ersterem erfolgt die Installation und Updates automatisch, bei manueller Instalation kopieren Sie das Plugin einfach ins Elexis-Pluginverzeichnis.
+
+h2. Konfiguration
+
+Die Bestellung wird per e-Mail übermittelt. Sie müssen daher das Mail-Modul von Elexis korrekt konfigurieren, so dass zumindest ein funktionierender SMTP-Server für den Mailversand eingestellt ist:
+
+!bild1.png!
+
+Danach stellen Sie die für Medicom benötigten Angaben ein:
+
+!bild2.png!
+
+Sie erhalten die Angaben zu Kunden-ID und Bestell-Adresse von Ihrem Medicom-Repräsentanten.
+
+h2. Bedienung
+
+Sie erfassen Ihre Bestellungen wie gewohnt in Elexis und klicken auf den Übermittlungs-Button:
+!bild3.png!
+Falls Sie bisher noch keinen Standardlieferanten definiert haben, und falls nicht bei allen bestellten medikamenten ein Lieferant angegeben ist, werden Sie noch aufgefordert, Ihren Standardlieferanten zu wählen. Wählen oder erstellen Sie hier einen Kontakt "Medicom Pharma". Künfig wird dann immer dieser Lieferant gewählt, wenn bei einem Artikel kein anderer Lieferant angegeben ist.
+
+Wenn Ihre E-Mail Daten korrekt eingegeben sind, wird schliesslich ein Fenster erscheinen, welches den korrekten Vorgang quittiert:
+
+!bild4.png!
+
+Oder andernfalls eine Fehlermeldung zeigt.
+
+
+

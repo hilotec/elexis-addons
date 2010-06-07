@@ -54,18 +54,9 @@ public class MedicomSender implements IDataSender {
 		}
 		Message msg=mailer.createMultipartMessage("Bestellung", sender);
 		String orderText=order.createFile();
-		try {
-			File out=File.createTempFile("mail", ".eml");
-			FileWriter fwout=new FileWriter(out);
-			fwout.write(orderText);
-			fwout.close();
-			Program.launch(out.getAbsolutePath());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
-		mailer.addTextPart(msg, orderText);
+		mailer.addTextPart(msg, "Bestellung von:\n\n"+Hub.actMandant.getPostAnschrift(true)+"\nVielen Dank und Gruss");
+		mailer.addTextPart(msg, orderText, "transfer.dat");
 		Result<String> result=mailer.send(msg, receiver);
 		if(!result.isOK()){
 			throw new XChangeException("Error sending mail "+result.toString());
