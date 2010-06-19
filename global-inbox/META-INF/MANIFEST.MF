@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Global Inbox
+Bundle-SymbolicName: ch.elexis.global_inbox;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: ch.elexis.global_inbox.Activator
+Bundle-Vendor: weirich@elexis.ch
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ ch.elexis;bundle-version="2.1.0",
+ ch.rgw.utility;bundle-version="2.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
