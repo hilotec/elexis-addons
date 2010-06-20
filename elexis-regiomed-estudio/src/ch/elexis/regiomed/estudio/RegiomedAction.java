@@ -53,7 +53,8 @@ public class RegiomedAction extends Action implements IAction {
 			}
 			fout=new FileWriter(inifile);
 			fout.write("[Patient]"+crlf);
-			writeLn("ArztNr",TarmedRequirements.normalizeKSK(KSK, false));
+			//writeLn("ArztNr",TarmedRequirements.normalizeKSK(KSK, false));
+			writeLn("ArztNr", Hub.localCfg.get(PreferencePage.USERID, "00000"));
 			writeLn("PatientNr",pat.get("PatientNr"));
 			String anr=pat.getGeschlecht().equals(Person.MALE) ? "Herr" : "Frau";
 			writeLn("Anrede",anr);
