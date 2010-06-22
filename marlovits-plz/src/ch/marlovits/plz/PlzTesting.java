@@ -2,12 +2,22 @@ package ch.marlovits.plz;
 
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.zip.ZipOutputStream;
 
+import javax.mail.Message;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -33,12 +43,18 @@ import org.eclipse.ui.ISaveablePart2;
 import org.eclipse.ui.part.ViewPart;
 
 import ch.elexis.Desk;
+import ch.elexis.Hub;
 import ch.elexis.actions.GlobalActions;
 import ch.elexis.commands.Handler;
 import ch.elexis.data.PersistentObject;
+import ch.elexis.data.PersistentObjectFactory;
+import ch.elexis.mail.Mailer;
+import ch.elexis.mail.PreferenceConstants;
+import ch.elexis.util.Extensions;
 import ch.elexis.util.SWTHelper;
 import ch.elexis.util.ViewMenus;
 import ch.marlovits.plz.MCCombo.MCComboDataProvider;
+import ch.rgw.io.FileTool;
 import ch.rgw.tools.JdbcLink;
 import ch.rgw.tools.StringTool;
 import ch.rgw.tools.JdbcLink.Stm;
@@ -557,7 +573,53 @@ public class PlzTesting extends ViewPart implements ISaveablePart2 {
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_REFRESH));
 				setToolTipText("Testing Methods");
 			}			
+			@SuppressWarnings("unchecked")
 			public void run(){
+				
+				// test settings
+				String mailSubjectName = "OP-Anmeldung";
+				String mailDatum       = "2010_06_22";
+				String mailPatientSpec = "Name, Vorname, 21.07.1976";
+				String sender          = "marlovits@hin.ch";
+				String recipient       = "marlovits@hin.ch";
+				
+				// create mailer
+				Mailer mailer = new Mailer();
+				
+				//create mailSubject: OP-Anmeldung, yyyy_mm_dd, Name Vorname, Geburtsdatum
+				String mailSubject = mailSubjectName + ", " + mailDatum + ", " + mailPatientSpec;
+				
+				// create empty mail
+				Message myMsg = mailer.createMultipartMessage(mailSubject, recipient);
+				//mailer.addTextPart(myMsg, "text added by addTextPart");
+				
+				// read pdf-file into stream
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				try {
+					FileInputStream fis = new FileInputStream("C:\\Dokumente und Einstellungen\\Harry66\\Desktop\\HIN\\hin.pdf");
+					FileTool.copyStreams(fis, baos);
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				// add pdf-stream to mail as binary
+				mailer.addBinaryPart(myMsg, mailSubject + ".pdf", baos.toByteArray());
+				boolean bool = mailer.addTextPart(myMsg, "adfasdf adsf");
+				mailer.send(myMsg, "marlovits@hin.ch");
+				
+				int dummy = 1;
+				if (dummy==0)	{
+				List<PersistentObjectFactory> exts=Extensions.getClasses("ch.elexis.PersistentReference","Class");
+		        for(PersistentObjectFactory po:exts){
+		        	System.out.println(po.getClass().getName());
+		         }
+		        System.out.println("regular");
+				
+		        
 				//System.out.println("SWT.Drag: " + SWT.DRAG);
 				//System.out.println("SWT.KeyDown: " + SWT.KeyDown);
 				
@@ -565,42 +627,37 @@ public class PlzTesting extends ViewPart implements ISaveablePart2 {
 				//MarlovitsVornamen.extractVornamen();
 				
 				
-				if (1==0)	{
 				JdbcLink myJdbcLink = JdbcLink.createODBCLink("FromAeskulap");
 				//System.out.println("myJdbcLink: " + myJdbcLink);
 				boolean err = myJdbcLink.connect("postgres", "Knorrli_66_07");
 				System.out.println("err: " + err);
 				String testQueryString = myJdbcLink.queryString("select STATION_NAME from STATION");
 				System.out.println("testQueryString: " + testQueryString);
-				}
-				if (1==0) {
+				
 				JFrame frame = new JFrame("Hello!!");
 				frame.setAlwaysOnTop(true);
 				frame.setLocationByPlatform(true);
 				frame.add(new JLabel("             Textbausteinauswahl              "));
 				frame.pack();
 				frame.setVisible(true);
-				}
+				
 //				marloCombo.dbgSet(marloCombo.DBG_TableEvent);
 //				marloCombo.dbgSet(marloCombo.DBG_TextEvent);
 				
-				if (1==0) {
 				int dayDiff;
 				GregorianCalendar gc1 = new GregorianCalendar( 2005, Calendar.MAY, 21);
 				GregorianCalendar gc2 = new GregorianCalendar( 2009, Calendar.JUNE, 6);
 
 				dayDiff = (int)((gc1.getTimeInMillis() - gc2.getTimeInMillis()) / (24*60*60*1000));
 				System.out.println("dayDiff: " + dayDiff);
-				}
+				
 				
 				// ENVIRONS, PROPERTIES
-				if (1==0) {
 				System.out.println(System.getenv());
 				System.out.println(System.getProperties());
-				}
+				
 				
 				// PROGRESS MONITOR ***********************************************
-				if (1==0)	{
 				ExecutionEvent eev = new ExecutionEvent();
 				IProgressMonitor monitor = Handler.getMonitor(eev);
 				monitor.beginTask("theName", 100);
@@ -608,7 +665,7 @@ public class PlzTesting extends ViewPart implements ISaveablePart2 {
 					monitor.worked(i);
 				}
 				}
-				}
+			}
 		};
 		testingAction.setActionDefinitionId("testingAction");
 		GlobalActions.registerActionHandler(this, testingAction);
@@ -871,5 +928,4 @@ public static String[][] recordSetToStringArray2(ResultSet rs, int[] columnIndex
 	}
 	return strArray;
 	}
-
 }
