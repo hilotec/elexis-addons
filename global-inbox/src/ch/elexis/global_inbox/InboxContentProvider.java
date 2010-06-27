@@ -18,6 +18,7 @@ import ch.elexis.data.Patient;
 import ch.elexis.data.Query;
 import ch.elexis.services.GlobalServiceDescriptors;
 import ch.elexis.services.IDocumentManager;
+import ch.elexis.text.FileDocument;
 import ch.elexis.util.Extensions;
 import ch.elexis.util.SWTHelper;
 import ch.elexis.util.viewers.ViewerConfigurer.ContentProviderAdapter;
@@ -67,7 +68,7 @@ public class InboxContentProvider extends ContentProviderAdapter {
 					List<Patient> lPat = new Query(Patient.class,
 							Patient.FLD_PATID, num).execute();
 					if (lPat.size() == 1) {
-						Patient pat=lPat.get(0);
+						Patient pat = lPat.get(0);
 						String cat = Activator.getDefault().getCategory(file);
 						if (cat.equals("-") || cat.equals("??")) {
 							cat = null;
@@ -75,18 +76,19 @@ public class InboxContentProvider extends ContentProviderAdapter {
 						IDocumentManager dm = (IDocumentManager) Extensions
 								.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 						try {
-							FileInputStream fis = new FileInputStream(file);
-							dm.addDocument(pat, fis, nam, cat, "", //$NON-NLS-1$
-									new TimeTool().toString(TimeTool.DATE_GER));
-							fis.close();
-							file.delete();
+							FileDocument fd = new FileDocument(pat, nam, cat,
+									file,
+									new TimeTool().toString(TimeTool.DATE_GER),
+									"");
+							dm.addDocument(fd);
+							fd.delete();
 							Activator.getDefault().getContentProvider()
 									.reload();
 							return;
 						} catch (Exception ex) {
 							ExHandler.handle(ex);
-							SWTHelper.alert(Messages.InboxView_error, ex
-									.getMessage());
+							SWTHelper.alert(Messages.InboxView_error,
+									ex.getMessage());
 						}
 					}
 				}

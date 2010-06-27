@@ -28,6 +28,7 @@ import ch.elexis.actions.ElexisEventDispatcher;
 import ch.elexis.data.Patient;
 import ch.elexis.services.GlobalServiceDescriptors;
 import ch.elexis.services.IDocumentManager;
+import ch.elexis.text.FileDocument;
 import ch.elexis.util.Extensions;
 import ch.elexis.util.SWTHelper;
 import ch.elexis.util.ViewMenus;
@@ -147,12 +148,9 @@ public class InboxView extends ViewPart {
 						IDocumentManager dm = (IDocumentManager) Extensions
 								.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 						try {
-							FileInputStream fis = new FileInputStream(sel);
-							dm.addDocument(pat, fis, sel.getName(), Activator
-									.getDefault().getCategory(sel), "", //$NON-NLS-1$
-									new TimeTool().toString(TimeTool.DATE_GER));
-							fis.close();
-							sel.delete();
+							FileDocument fd=new FileDocument(pat, sel.getName(), Activator.getDefault().getCategory(sel), sel, new TimeTool().toString(TimeTool.DATE_GER), "");
+							dm.addDocument(fd);
+							fd.delete();
 							Activator.getDefault().getContentProvider().reload();
 						} catch (Exception ex) {
 							ExHandler.handle(ex);
