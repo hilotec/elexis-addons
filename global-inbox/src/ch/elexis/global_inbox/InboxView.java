@@ -1,7 +1,6 @@
 package ch.elexis.global_inbox;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.action.Action;
@@ -148,9 +147,16 @@ public class InboxView extends ViewPart {
 						IDocumentManager dm = (IDocumentManager) Extensions
 								.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 						try {
-							FileDocument fd=new FileDocument(pat, sel.getName(), Activator.getDefault().getCategory(sel), sel, new TimeTool().toString(TimeTool.DATE_GER), "");
+							String cat=Activator.getDefault().getCategory(sel);
+							if(cat.equals("-")){
+								cat="";
+							}
+							tv.remove(sel);
+							FileDocument fd=new FileDocument(pat, sel.getName(), cat, sel, new TimeTool().toString(TimeTool.DATE_GER), "");
+							
 							dm.addDocument(fd);
 							fd.delete();
+							fd=null;
 							Activator.getDefault().getContentProvider().reload();
 						} catch (Exception ex) {
 							ExHandler.handle(ex);
