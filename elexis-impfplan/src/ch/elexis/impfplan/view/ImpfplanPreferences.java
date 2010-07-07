@@ -69,7 +69,7 @@ public class ImpfplanPreferences extends PreferencePage implements
 				if(element instanceof VaccinationType){
 					return ((VaccinationType)element).getLabel();
 				}
-				return "?";
+				return "?"; //$NON-NLS-1$
 			}
 			
 		});
@@ -85,11 +85,11 @@ public class ImpfplanPreferences extends PreferencePage implements
 		cButtons.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		cButtons.setLayout(new RowLayout(SWT.HORIZONTAL));
 		Button bAdd=new Button(cButtons,SWT.PUSH);
-		bAdd.setText("Hinzu");
+		bAdd.setText(Messages.ImpfplanPreferences_addCaption);
 		bAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				EditVaccinationDialog dlg=new EditVaccinationDialog(getShell(), new VaccinationType("Name", "Impfstoff"));
+				EditVaccinationDialog dlg=new EditVaccinationDialog(getShell(), new VaccinationType(Messages.ImpfplanPreferences_nameDummy, Messages.ImpfplanPreferences_vaccDummy));
 				if(dlg.open()==Dialog.OK){
 					tv.refresh();
 				}
@@ -121,10 +121,10 @@ public class ImpfplanPreferences extends PreferencePage implements
 
 	}
 	private void makeActions(){
-		removeAction=new Action("Impfung entfernen") {
+		removeAction=new Action(Messages.ImpfplanPreferences_removeVaccination) {
 			{
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_DELETE));
-				setToolTipText("Diese Impfdefinition unwiderruflich entfernen");
+				setToolTipText(Messages.ImpfplanPreferences_removeVaccWarning);
 			}
 
 			@Override

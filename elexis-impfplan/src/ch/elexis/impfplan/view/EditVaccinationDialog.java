@@ -28,14 +28,14 @@ public class EditVaccinationDialog extends TitleAreaDialog{
 	VaccinationType vt;
 
 	FieldDescriptor<VaccinationType>[] fields=new FieldDescriptor[]{
-		new FieldDescriptor<VaccinationType>("Name der Impfung",VaccinationType.NAME,FieldDescriptor.Typ.STRING,null),
-		new FieldDescriptor<VaccinationType>("Impfstoff",VaccinationType.PRODUCT,null),
-		new FieldDescriptor<VaccinationType>("Empfohlenes Alter (von-bis)",VaccinationType.RECOMMENDED_AGE,null),
-		new FieldDescriptor<VaccinationType>("Empfohlener Abstand zur 2. Impfung",VaccinationType.DELAY1TO2,null),
-		new FieldDescriptor<VaccinationType>("Empfohlener Abstand zur 3. Impfung",VaccinationType.DELAY2TO3,null),
-		new FieldDescriptor<VaccinationType>("Empfohlener Abstand zur 4. Impfung",VaccinationType.DELAY3TO4,null),
-		new FieldDescriptor<VaccinationType>("Empfohlener Abstand zwischen Rappels",VaccinationType.DELAY_REP,null),
-		new FieldDescriptor<VaccinationType>("Bemerkungen",VaccinationType.REMARKS,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_nameOfVaccination,VaccinationType.NAME,FieldDescriptor.Typ.STRING,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_vaccinationSubstance,VaccinationType.PRODUCT,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_ageFromTo,VaccinationType.RECOMMENDED_AGE,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance1_2,VaccinationType.DELAY1TO2,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance2_3,VaccinationType.DELAY2TO3,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance3_4,VaccinationType.DELAY3TO4,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distanceRappel,VaccinationType.DELAY_REP,null),
+		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_remarks,VaccinationType.REMARKS,null),
 		
 	};
 	public EditVaccinationDialog(Shell shell, VaccinationType vacc){
@@ -56,8 +56,8 @@ public class EditVaccinationDialog extends TitleAreaDialog{
 	@Override
 	public void create() {
 		super.create();
-		setTitle("Impfung eintragen");
-		getShell().setText("Impfung definieren");
+		setTitle(Messages.EditVaccinationDialog_enterVaccination);
+		getShell().setText(Messages.EditVaccinationDialog_defineVaccination);
 		getShell().setSize(800,600);
 		SWTHelper.center(getShell());
 	}

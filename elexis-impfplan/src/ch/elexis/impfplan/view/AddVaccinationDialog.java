@@ -43,7 +43,7 @@ public class AddVaccinationDialog extends TitleAreaDialog {
 		//di.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		di.setDate(new TimeTool());
 		bCa=new Button(lower,SWT.CHECK);
-		bCa.setText("Datum nur ungefähr");
+		bCa.setText(Messages.AddVaccinationDialog_dateOnlyAbout);
 		tv.setContentProvider(new ContentProviderAdapter(){
 			@Override
 			public Object[] getElements(Object arg0) {
@@ -58,8 +58,8 @@ public class AddVaccinationDialog extends TitleAreaDialog {
 	@Override
 	public void create() {
 		super.create();
-		getShell().setText("Impfung eintragen");
-		setMessage("Bitte wählen Sie die applizierte Impfung und das Impfdatum aus");
+		getShell().setText(Messages.AddVaccinationDialog_enterVaccinationTitle);
+		setMessage(Messages.AddVaccinationDialog_enterVaccinationText);
 	}
 
 	@Override

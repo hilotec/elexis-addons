@@ -6,7 +6,7 @@
       <view
             class="ch.elexis.impfplan.view.ImpfplanView"
             id="elexis-impfplan.view"
-            name="Impfplan"
+            name="%Impfplan"
             restorable="true">
       </view>
    </extension>

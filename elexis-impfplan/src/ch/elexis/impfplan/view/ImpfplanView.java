@@ -51,7 +51,7 @@ public class ImpfplanView extends ViewPart {
 	TableViewer tvVaccsDone;
 	TableViewer tvVaccsRecommended;
 	int[] columnWidths = new int[] { 300, 100 };
-	String[] columnTitles = new String[] { "Impfstoff", "Datum" };
+	String[] columnTitles = new String[] { Messages.ImpfplanView_vaccinationColumn, Messages.ImpfplanView_dateColumn };
 	ScrolledForm form;
 	VaccinationSorter sorter=new VaccinationSorter();
 
@@ -80,7 +80,7 @@ public class ImpfplanView extends ViewPart {
 		ViewMenus menu=new ViewMenus(getViewSite());
 		menu.createToolbar(addVacination,printVaccinations);
 		Label lblVaccsDone = new Label(body, SWT.NONE);
-		lblVaccsDone.setText("Durchgeführte Impfungen");
+		lblVaccsDone.setText(Messages.ImpfplanView_vaccinationsDOne);
 		Table tVaccsDone = new Table(body, SWT.FULL_SELECTION);
 		tVaccsDone.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		for (int i = 0; i < columnTitles.length; i++) {
@@ -112,7 +112,7 @@ public class ImpfplanView extends ViewPart {
 		
 	
 		Label lblVaccsReccomended=new Label(body,SWT.NONE);
-		lblVaccsReccomended.setText("Empfohlene Impfungen");
+		lblVaccsReccomended.setText(Messages.ImpfplanView_vaccinationsRecommended);
 		Table tVaccsRecommended = new Table(body, SWT.FULL_SELECTION);
 		tVaccsRecommended.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		for (int i = 0; i < columnTitles.length; i++) {
@@ -166,9 +166,9 @@ public class ImpfplanView extends ViewPart {
 	}
 
 	private void makeActions(){
-		addVacination=new Action("Impfen") {
+		addVacination=new Action(Messages.ImpfplanView_vaccinateActionTitle) {
 			{
-				setToolTipText("Eine Impfung eintragen");
+				setToolTipText(Messages.ImpfplanView_vaccinateActionTooltip);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_ADDITEM));
 			}
 			@Override
@@ -183,9 +183,9 @@ public class ImpfplanView extends ViewPart {
 			
 		};
 		
-		printVaccinations=new Action("Drucken"){
+		printVaccinations=new Action(Messages.ImpfplanView_printActionTitle){
 			{
-				setToolTipText("Impfplan drucken");
+				setToolTipText(Messages.ImpfplanView_printActionTooltip);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_PRINTER));
 			}
 			@Override
@@ -195,9 +195,9 @@ public class ImpfplanView extends ViewPart {
 			}
 		};
 		
-		removeVaccination=new Action("Eintrag entfernen"){
+		removeVaccination=new Action(Messages.ImpfplanView_removeActionTitle){
 			{
-				setToolTipText("Diesen Impfeintrag löschen");
+				setToolTipText(Messages.ImpfplanView_removeActionTooltip);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_DELETE));
 			}
 			@Override

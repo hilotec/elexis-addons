@@ -32,7 +32,7 @@ public class VaccinationLabelProvider extends LabelProvider implements
 				return ((VaccinationType) element).getLabel();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 }

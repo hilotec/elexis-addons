@@ -41,14 +41,14 @@ public class ImpfplanPrinter extends TitleAreaDialog implements ICallback {
 			ret.setLayout(new FillLayout());
 			ret.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 
-			String template = "Impfplan";
+			String template = Messages.ImpfplanPrinter_templateName;
 
 			text = new TextContainer(getShell());
 			text.getPlugin().createContainer(ret, this);
 			text.getPlugin().showMenu(true);
 			text.getPlugin().showToolbar(true);
 			text.createFromTemplateName(null, template, Brief.UNKNOWN,
-					Hub.actUser, "Impfplan");
+					Hub.actUser, Messages.ImpfplanPrinter_templateType);
 			Collection<Vaccination> r = JavaConversions
 					.asCollection(ImpfplanController
 							.getVaccinations(actPatient));
@@ -60,15 +60,15 @@ public class ImpfplanPrinter extends TitleAreaDialog implements ICallback {
 				tbl[line][1]=vt.get(VaccinationType.PRODUCT);
 				tbl[line++][2]=vacc.getDateAsString();
 			}
-			text.getPlugin().insertTable("[Impfungen]", 0, tbl, null);
+			text.getPlugin().insertTable(Messages.ImpfplanPrinter_templatePlaceHolder, 0, tbl, null);
 			List<VaccinationType> vts;
 			try {
 				vts = VaccinationType.findDueFor(actPatient);
 				StringBuilder sb=new StringBuilder();
 				for(VaccinationType vt:vts){
-					sb.append(vt.get(VaccinationType.NAME)).append("\n");
+					sb.append(vt.get(VaccinationType.NAME)).append("\n"); //$NON-NLS-1$
 				}
-				text.replace("\\[Vorschlag\\]", sb.toString());
+				text.replace(Messages.ImpfplanPrinter_recommendPlaceholder, sb.toString());
 			} catch (ElexisException e) {
 				ExHandler.handle(e);
 			}
@@ -79,9 +79,9 @@ public class ImpfplanPrinter extends TitleAreaDialog implements ICallback {
 	@Override
 	public void create() {
 		super.create();
-		setMessage("Impfplan ausdrucken");
-		setTitle("Impfplan");
-		getShell().setText("Impfliste");
+		setMessage(Messages.ImpfplanPrinter_printPlanMessage);
+		setTitle(Messages.ImpfplanPrinter_printPlanTitle);
+		getShell().setText(Messages.ImpfplanPrinter_printListHeading);
 		getShell().setSize(800, 700);
 
 	}
