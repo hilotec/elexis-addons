@@ -18,7 +18,7 @@ import ch.elexis.data.Patient;
 import ch.elexis.data.Query;
 import ch.elexis.services.GlobalServiceDescriptors;
 import ch.elexis.services.IDocumentManager;
-import ch.elexis.text.FileDocument;
+import ch.elexis.text.GenericDocument;
 import ch.elexis.util.Extensions;
 import ch.elexis.util.SWTHelper;
 import ch.elexis.util.viewers.ViewerConfigurer.ContentProviderAdapter;
@@ -76,12 +76,12 @@ public class InboxContentProvider extends ContentProviderAdapter {
 						IDocumentManager dm = (IDocumentManager) Extensions
 								.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 						try {
-							FileDocument fd = new FileDocument(pat, nam, cat,
+							GenericDocument fd = new GenericDocument(pat, nam, cat,
 									file,
 									new TimeTool().toString(TimeTool.DATE_GER),
 									"");
+							file.delete();
 							dm.addDocument(fd);
-							fd.delete();
 							Activator.getDefault().getContentProvider()
 									.reload();
 							return;

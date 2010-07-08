@@ -27,7 +27,7 @@ import ch.elexis.actions.ElexisEventDispatcher;
 import ch.elexis.data.Patient;
 import ch.elexis.services.GlobalServiceDescriptors;
 import ch.elexis.services.IDocumentManager;
-import ch.elexis.text.FileDocument;
+import ch.elexis.text.GenericDocument;
 import ch.elexis.util.Extensions;
 import ch.elexis.util.SWTHelper;
 import ch.elexis.util.ViewMenus;
@@ -152,10 +152,10 @@ public class InboxView extends ViewPart {
 								cat="";
 							}
 							tv.remove(sel);
-							FileDocument fd=new FileDocument(pat, sel.getName(), cat, sel, new TimeTool().toString(TimeTool.DATE_GER), "");
-							
+							GenericDocument fd=new GenericDocument(pat, sel.getName(), cat, sel, new TimeTool().toString(TimeTool.DATE_GER), "");
+							boolean bSucc=sel.delete();
+							sel=null;
 							dm.addDocument(fd);
-							fd.delete();
 							fd=null;
 							Activator.getDefault().getContentProvider().reload();
 						} catch (Exception ex) {
