@@ -21,6 +21,7 @@ import ch.elexis.services.IDocumentManager;
 import ch.elexis.text.GenericDocument;
 import ch.elexis.util.Extensions;
 import ch.elexis.util.SWTHelper;
+import ch.elexis.util.viewers.ContentProviderAdapter;
 import ch.elexis.util.viewers.CommonContentProviderAdapter;
 import ch.rgw.tools.ExHandler;
 import ch.rgw.tools.TimeTool;
