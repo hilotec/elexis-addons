@@ -7,5 +7,4 @@ Bundle-Vendor: weirich@elexis.ch
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: ch.elexis;bundle-version="2.1.0",
  ch.elexis.scala.runtime;bundle-version="1.0.0",
- org.eclipse.core.runtime;bundle-version="3.6.0",
- scala.library
+ org.eclipse.core.runtime;bundle-version="3.6.0"
