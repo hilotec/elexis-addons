@@ -152,7 +152,7 @@ public class InboxView extends ViewPart {
 								cat="";
 							}
 							tv.remove(sel);
-							GenericDocument fd=new GenericDocument(pat, sel.getName(), cat, sel, new TimeTool().toString(TimeTool.DATE_GER), "");
+							GenericDocument fd=new GenericDocument(pat, sel.getName(), cat, sel, new TimeTool().toString(TimeTool.DATE_GER), "", null);
 							boolean bSucc=sel.delete();
 							sel=null;
 							dm.addDocument(fd);
