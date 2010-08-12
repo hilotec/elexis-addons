@@ -80,7 +80,7 @@ public class InboxContentProvider extends CommonContentProviderAdapter {
 							GenericDocument fd = new GenericDocument(pat, nam, cat,
 									file,
 									new TimeTool().toString(TimeTool.DATE_GER),
-									"");
+									"",null);
 							file.delete();
 							dm.addDocument(fd);
 							Activator.getDefault().getContentProvider()
