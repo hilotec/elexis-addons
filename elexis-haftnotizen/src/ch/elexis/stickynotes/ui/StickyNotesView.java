@@ -95,7 +95,7 @@ public class StickyNotesView extends ViewPart implements IActivationListener, He
 				if (actNote == null) {
 					actNote = StickyNote.load(actPatient);
 				}
-				actNote.setText(etf.getDocumentAsText());
+				actNote.setText(etf.getContentsAsXML());
 			}
 		}
 		
