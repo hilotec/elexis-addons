@@ -8,5 +8,5 @@
   	</service:roles>
   </service:conditions>
   <service:description>Globale Eingangsbox für Dokumente aller Art</service:description>
-  <service:depends>ch.elexis</service:depends>
+  <service:depends>ch.medelexis.nucleus</service:depends>
   <service:docURL>http://www.rgw.ch/elexis/dox/inbox/global-inbox.html</service:docURL></service:service>

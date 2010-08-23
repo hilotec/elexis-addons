@@ -5,4 +5,4 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ">
 	<service:description>Dienst zum EInbinden von Scala plugins</service:description>
-</service:service>
+	<service:depends>ch.medelexis.nucleus</service:depends></service:service>
