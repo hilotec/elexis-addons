@@ -56,7 +56,7 @@ public class MythicAction extends Action implements ComPortListener {
 		if (isChecked()) {
 			KontaktSelektor ksl =
 				new KontaktSelektor(Hub.getActiveShell(), Patient.class, "Patient auswählen",
-				"Wem soll der Mythic-Befund zugeordnet werden?");
+				"Wem soll der Mythic-Befund zugeordnet werden?",Patient.DEFAULT_SORT);
 			ksl.create();
 			ksl.getShell().setText("Mythic Patientenauswahl");
 			if (ksl.open() == org.eclipse.jface.dialogs.Dialog.OK) {

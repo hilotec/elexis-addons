@@ -97,7 +97,7 @@ public class MedicomSender implements IDataSender {
 								Messages
 										.getString("Medicom.UnknownDistributor.Situation"),
 								Messages
-										.getString("Medicom.UnknownDistributor.Todo"));
+										.getString("Medicom.UnknownDistributor.Todo"),Organisation.DEFAULT_SORT);
 						ksl.create();
 						ksl
 								.getShell()
