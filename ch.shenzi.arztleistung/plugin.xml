@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="ch.unibe.iam.scg.archie.dataprovider">
+      <DataProvider
+            class="ch.shenzi.arztleistung.Leistungsstatistik"
+            name="name">
+      </DataProvider>
+   </extension>
+
+</plugin>
