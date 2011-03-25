@@ -1,0 +1,6 @@
+h1. ch.shenzi.arztleistung
+
+Dieses Plugin berechnet separat für jeden Mandanten TL und AL aller Tarmed-Leistungen in einem einstellbaren Zeitraum.
+
+Abhängigkeit: Archie.
+

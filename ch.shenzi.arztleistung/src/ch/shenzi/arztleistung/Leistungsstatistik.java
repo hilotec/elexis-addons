@@ -54,6 +54,10 @@ public class Leistungsstatistik extends AbstractTimeSeries {
 		return Arrays.asList(headings);
 	}
 
+	/**
+	 * Die TarmedLeistungen des eingestellten Zeitraums einlesen und separat nach den Kriterien TL/AL, bezahlt/offen 
+	 * aufsummieren.
+	 */
 	@Override
 	protected IStatus createContent(IProgressMonitor monitor) {
 		Query<Konsultation> qbe=new Query<Konsultation>(Konsultation.class);
@@ -61,6 +65,7 @@ public class Leistungsstatistik extends AbstractTimeSeries {
 		qbe.add(Konsultation.FLD_DATE, Query.GREATER_OR_EQUAL, tt.toString(TimeTool.DATE_COMPACT));
 		tt=new TimeTool(getEndDate().getTimeInMillis());
 		qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, tt.toString(TimeTool.DATE_COMPACT));
+		// Hashes zum aufsummieren
 		HashMap<Mandant, Money> alHash=new HashMap<Mandant, Money>();
 		HashMap<Mandant, Money> tlHash=new HashMap<Mandant, Money>();
 		HashMap<Mandant, Money> alHashOffen=new HashMap<Mandant, Money>();
@@ -71,11 +76,15 @@ public class Leistungsstatistik extends AbstractTimeSeries {
 			Fall actFall=k.getFall();
 			Mandant mandant=k.getMandant();
 			if(r!=null && r.getStatus()==RnStatus.BEZAHLT){
+				// wenn eine Rechnung existiert, UND diese den Status "Bezahlt" hat
 				zaehleLeistungen(tt, alHash, tlHash, k, actFall, mandant);
 			}else{
+				// es existiert keine Rechnung, ODER sie hat einen anderen Status als "Bezahlt". 
 				zaehleLeistungen(tt, alHashOffen, tlHashOffen, k, actFall, mandant);
 			}
 		}
+		
+		// Resultat-Array für Archie aufbauen
 		final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
 		
 		for(Mandant m:alHashOffen.keySet()){
@@ -88,7 +97,7 @@ public class Leistungsstatistik extends AbstractTimeSeries {
 			row[4]=getMoneyAsString(tlHash, m);
 			result.add(row);
 		}
-		// Set content.
+		// Und an Archie übermitteln
 		this.dataSet.setContent(result);
 		
 		// Job finished successfully
@@ -107,6 +116,7 @@ public class Leistungsstatistik extends AbstractTimeSeries {
 			return money.getAmountAsString();
 		}
 	}
+	// Alle leistungen einer Konsultation aufsummieren.
 	private void zaehleLeistungen(TimeTool tt, HashMap<Mandant, Money> alHash,
 			HashMap<Mandant, Money> tlHash, Konsultation k, Fall actFall,
 			Mandant mandant) {
