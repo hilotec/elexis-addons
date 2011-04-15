@@ -25,18 +25,18 @@ import java.util.regex.Pattern;
 
 import ch.elexis.util.SWTHelper;
 
-class WikiTableExtractor	{
-	//prettytable sortable
-	private static final String WIKI_LAND_STARTINFO_MARKER	= "<table class=\"prettytable sortable*\">";
-	private static final String TABLE_ENDMARKER	= "</table*>";
-	private static final String TABLEROW_STARTMARKER	= "<tr";
-	private static final String TABLEROW_ENDMARKER		= "</tr>";
-	private static final String TABLEDATA_STARTMARKER	= "<td>";
-	private static final String TABLEDATA_ENDMARKER		= "</td>";
+class WikiTableExtractor {
+	// prettytable sortable
+	private static final String WIKI_LAND_STARTINFO_MARKER =
+		"<table class=\"prettytable sortable*\">";
+	private static final String TABLE_ENDMARKER = "</table*>";
+	private static final String TABLEROW_STARTMARKER = "<tr";
+	private static final String TABLEROW_ENDMARKER = "</tr>";
+	private static final String TABLEDATA_STARTMARKER = "<td>";
+	private static final String TABLEDATA_ENDMARKER = "</td>";
 	
-	public static String[][] getWikiTable(final String	url,
-										  final String	tableName,
-										  final boolean	skipFirstLine)	{
+	public static String[][] getWikiTable(final String url, final String tableName,
+		final boolean skipFirstLine){
 		String wholeHTMLPage = null;
 		try {
 			// TO DO: abhängig von language
@@ -56,7 +56,8 @@ class WikiTableExtractor	{
 		Pattern p = Pattern.compile(tableName);
 		Matcher myMatcher = p.matcher(wholeHTMLPage);
 		boolean foundIt = myMatcher.find();
-		if (!foundIt) return null;
+		if (!foundIt)
+			return null;
 		int markerEndPos = myMatcher.end();
 		
 		// das Ende des Tabelleninhaltes suchen
@@ -64,12 +65,13 @@ class WikiTableExtractor	{
 		myMatcher = p.matcher(wholeHTMLPage);
 		foundIt = myMatcher.find(markerEndPos);
 		int tableEndPos = myMatcher.start();
-		if (!foundIt) return null;
+		if (!foundIt)
+			return null;
 		
 		// den Tabelleninhalt einlesen
 		String tableText = wholeHTMLPage.subSequence(markerEndPos, tableEndPos).toString();
 		
-		//System.out.println(tableText);
+		// System.out.println(tableText);
 		
 		boolean removeHtmlTags = true;
 		String[] resultLine = new String[100];
@@ -79,31 +81,33 @@ class WikiTableExtractor	{
 		// durch die Tabelle loopen und die einzelnen Datensätze einlesen
 		tableText = tableText.replaceAll("</tr*>", "");
 		String[] rows = tableText.split("<tr*>");
-		int startRow = 1;	// die erste Zeile ist immer leer
-		if (skipFirstLine) startRow = 2;
+		int startRow = 1; // die erste Zeile ist immer leer
+		if (skipFirstLine)
+			startRow = 2;
 		boolean arrayInitialized = false;
-		for (int i = startRow; i < rows.length; i++)	{
+		for (int i = startRow; i < rows.length; i++) {
 			String row = rows[i];
 			System.out.print(rows[i]);
 			String[] cells = row.split("<t[dh]*>");
 			// beim ersten Durchgang den Array in der richtigen Grösse initialisieren
-			if (arrayInitialized == false){
+			if (arrayInitialized == false) {
 				arrayOfStrings = new String[rows.length][cells.length];
 				arrayInitialized = true;
 			}
 			resultLine[0] = Boolean.toString(cells[1].indexOf("</th") != -1);
-			arrayOfStrings[i-1][0] = resultLine[0]; 
-			for (int c = 1; c < cells.length; c++)	{
+			arrayOfStrings[i - 1][0] = resultLine[0];
+			for (int c = 1; c < cells.length; c++) {
 				String cell = cells[c].split("</t[dh]*>")[0];
 				resultLine[c] = cell;
-				if (removeHtmlTags) cell = stripHTMLTags(cell);
-				arrayOfStrings[i-1][c] = cell;
+				if (removeHtmlTags)
+					cell = stripHTMLTags(cell);
+				arrayOfStrings[i - 1][c] = cell;
 				System.out.println(cell);
 			}
 		}
 		return arrayOfStrings;
 	}
-
+	
 	public static String readHTMLPage(final String url) throws IOException, MalformedURLException{
 		URL content = new URL(url);
 		InputStream input = content.openStream();
@@ -125,13 +129,14 @@ class WikiTableExtractor	{
 	
 	/**
 	 * Entfernt aus einem String alle HTML-Tags <XXX> und </XXX>
+	 * 
 	 * @param inputString
 	 * @return inputString, von welchem alle whiteSpaces weggestrippt sind
 	 */
-	private static String stripHTMLTags(final String inputString)	{
+	private static String stripHTMLTags(final String inputString){
 		String tmp = inputString;
 		tmp = tmp.replaceAll("</.*>", "");
 		tmp = tmp.replaceAll("<.*>", "");
-		return tmp; 
+		return tmp;
 	}
 }

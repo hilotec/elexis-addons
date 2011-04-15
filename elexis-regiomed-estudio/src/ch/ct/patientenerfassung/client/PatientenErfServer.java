@@ -11,10 +11,9 @@ import java.rmi.RemoteException;
 // Referenced classes of package ch.ct.patientenerfassung.client:
 //            ChCtPatientenerfassungPatient
 
-public interface PatientenErfServer
-    extends Remote
-{
-
-    public abstract int speichernPatient(ChCtPatientenerfassungPatient chctpatientenerfassungpatient, String s)
-        throws RemoteException;
+public interface PatientenErfServer extends Remote {
+	
+	public abstract int speichernPatient(
+		ChCtPatientenerfassungPatient chctpatientenerfassungpatient, String s)
+		throws RemoteException;
 }

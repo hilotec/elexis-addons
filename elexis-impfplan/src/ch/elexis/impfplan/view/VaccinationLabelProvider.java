@@ -8,17 +8,16 @@ import ch.elexis.impfplan.model.Vaccination;
 import ch.elexis.impfplan.model.VaccinationType;
 import ch.rgw.tools.TimeTool;
 
-public class VaccinationLabelProvider extends LabelProvider implements
-		ITableLabelProvider {
-
+public class VaccinationLabelProvider extends LabelProvider implements ITableLabelProvider {
+	
 	@Override
-	public Image getColumnImage(Object element, int columnIndex) {
+	public Image getColumnImage(Object element, int columnIndex){
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public String getColumnText(Object element, int columnIndex) {
+	public String getColumnText(Object element, int columnIndex){
 		if (element instanceof Vaccination) {
 			Vaccination vac = (Vaccination) element;
 			VaccinationType vt = vac.getVaccinationType();
@@ -34,5 +33,5 @@ public class VaccinationLabelProvider extends LabelProvider implements
 		}
 		return ""; //$NON-NLS-1$
 	}
-
+	
 }

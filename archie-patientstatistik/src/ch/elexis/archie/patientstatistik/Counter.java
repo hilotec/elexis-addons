@@ -28,17 +28,17 @@ public class Counter extends Job {
 	private Patient p;
 	private TimeTool von;
 	private TimeTool bis;
-
+	
 	public interface IJobFinishedListener {
 		public void jobFinished(Counter counter);
 	}
-
-	public HashMap<IVerrechenbar, List<Verrechnet>> getValues() {
+	
+	public HashMap<IVerrechenbar, List<Verrechnet>> getValues(){
 		return result;
 	}
-
+	
 	public Counter(final Patient p, final TimeTool von, final TimeTool bis,
-			final IJobFinishedListener lis) {
+		final IJobFinishedListener lis){
 		super("Verrechnungszähler");
 		setUser(true);
 		setSystem(false);
@@ -48,45 +48,40 @@ public class Counter extends Job {
 		this.bis = bis;
 		if (lis != null) {
 			addJobChangeListener(new IJobChangeListener() {
-
-				public void sleeping(IJobChangeEvent event) {
-				}
-
-				public void scheduled(IJobChangeEvent event) {
-				}
-
-				public void running(IJobChangeEvent event) {
-				}
-
-				public void done(IJobChangeEvent event) {
+				
+				public void sleeping(IJobChangeEvent event){}
+				
+				public void scheduled(IJobChangeEvent event){}
+				
+				public void running(IJobChangeEvent event){}
+				
+				public void done(IJobChangeEvent event){
 					Desk.getDisplay().asyncExec(new Runnable() {
-						public void run() {
+						public void run(){
 							lis.jobFinished(Counter.this);
-
+							
 						}
 					});
 				}
-
-				public void awake(IJobChangeEvent event) {
-				}
-
-				public void aboutToRun(IJobChangeEvent event) {
+				
+				public void awake(IJobChangeEvent event){}
+				
+				public void aboutToRun(IJobChangeEvent event){
 
 				}
 			});
 		}
 	}
-
+	
 	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-
+	protected IStatus run(IProgressMonitor monitor){
+		
 		monitor.beginTask("Zähle Verrechnungen", tasksum);
 		result = new HashMap<IVerrechenbar, List<Verrechnet>>();
 		Fall[] faelle = p.getFaelle();
 		if (faelle.length > 0) {
 			perCase = tasksum / faelle.length;
-			Query<Konsultation> qbe = new Query<Konsultation>(
-					Konsultation.class);
+			Query<Konsultation> qbe = new Query<Konsultation>(Konsultation.class);
 			qbe.startGroup();
 			for (Fall fall : faelle) {
 				qbe.add(Konsultation.FLD_CASE_ID, Query.EQUALS, fall.getId());
@@ -96,10 +91,11 @@ public class Counter extends Job {
 			qbe.and();
 			if (von != null) {
 				qbe.add(Konsultation.DATE, Query.GREATER_OR_EQUAL, von
-						.toString(TimeTool.DATE_COMPACT));
+					.toString(TimeTool.DATE_COMPACT));
 			}
 			if (bis != null) {
-				qbe.add(Konsultation.DATE, Query.LESS_OR_EQUAL, bis
+				qbe
+					.add(Konsultation.DATE, Query.LESS_OR_EQUAL, bis
 						.toString(TimeTool.DATE_COMPACT));
 			}
 			List<Konsultation> kk = qbe.execute();

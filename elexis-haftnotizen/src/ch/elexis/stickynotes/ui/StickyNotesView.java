@@ -57,13 +57,13 @@ public class StickyNotesView extends ViewPart implements IActivationListener, He
 	
 	private final ElexisEventListenerImpl eeli_user =
 		new ElexisEventListenerImpl(Anwender.class, ElexisEvent.EVENT_USER_CHANGED) {
-		
-		@Override
-		public void catchElexisEvent(ElexisEvent ev){
-			prefs = new SettingsPreferenceStore(Hub.userCfg);
-		}
-		
-	};
+			
+			@Override
+			public void catchElexisEvent(ElexisEvent ev){
+				prefs = new SettingsPreferenceStore(Hub.userCfg);
+			}
+			
+		};
 	
 	@Override
 	public void createPartControl(Composite parent){

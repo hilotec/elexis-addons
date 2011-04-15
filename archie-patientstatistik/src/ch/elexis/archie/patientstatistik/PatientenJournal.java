@@ -25,7 +25,9 @@ import ch.unibe.iam.scg.archie.model.AbstractTimeSeries;
 import ch.unibe.iam.scg.archie.ui.widgets.WidgetTypes;
 
 public class PatientenJournal extends AbstractTimeSeries {
-	String[] headings={"Name","Konsultationen","Kosten"};
+	String[] headings = {
+		"Name", "Konsultationen", "Kosten"
+	};
 	
 	public PatientenJournal(){
 		super("Patienten");
@@ -40,6 +42,7 @@ public class PatientenJournal extends AbstractTimeSeries {
 	public String getDescription(){
 		return "Kosten pro Patient";
 	}
+	
 	@Override
 	protected IStatus createContent(IProgressMonitor monitor){
 		

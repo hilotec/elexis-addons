@@ -12,15 +12,11 @@ import javax.xml.rpc.ServiceException;
 // Referenced classes of package ch.ct.patientenerfassung.client:
 //            PatientenErfServer
 
-public interface PatientenErfServerService
-    extends Service
-{
-
-    public abstract String getPatientenErfassungAddress();
-
-    public abstract PatientenErfServer getPatientenErfassung()
-        throws ServiceException;
-
-    public abstract PatientenErfServer getPatientenErfassung(URL url)
-        throws ServiceException;
+public interface PatientenErfServerService extends Service {
+	
+	public abstract String getPatientenErfassungAddress();
+	
+	public abstract PatientenErfServer getPatientenErfassung() throws ServiceException;
+	
+	public abstract PatientenErfServer getPatientenErfassung(URL url) throws ServiceException;
 }

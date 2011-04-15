@@ -33,144 +33,142 @@ import ch.elexis.data.Patient;
 
 import java.util.HashMap;
 
-public abstract class PhoneBookContentParser extends HtmlParser {	
-	private static final String[] ADR_FIRSTNAMESEPARATORS = {" und ",  " u\\. ",  " e ",  " et "};
+public abstract class PhoneBookContentParser extends HtmlParser {
+	private static final String[] ADR_FIRSTNAMESEPARATORS = {
+		" und ", " u\\. ", " e ", " et "
+	};
 	protected static String country = "ch";
 	protected static int readTimeOut = 7000;
 	
-	protected static String[] ADR_TITLES = {	"", // 
-		"Prof. Dr. med. dent.",
-		"Prof. Dr. méd. dent.",
-		"Prof. Dr. med. vet.",
-		"Prof. Dr. méd. vét.",
-		"Prof. Dr. med.",
-		"Prof. Dr. méd.",
-		"Prof. Dr.med.dent.",
-		"Prof. Dr.méd.dent.",
-		"Prof. Dr.med.vet.",
-		"Prof. Dr.méd.vét.",
-		"Prof. Dr.med.",
-		"Prof. Dr.méd.",
-		"Prof. Dr.med.",
-		"Prof. Dr.méd.",
-		"Prof. Dr. med.",
-		"Prof. Dr. méd.",
-		"Prof. Dr.",
-		"Prof.",
-		"Dr. med. dent.",
-		"Dr. méd. dent.",
-		"Dr. med. vet.",
-		"Dr. méd. vét.",
-		"Dr. med.",
-		"Dr. méd.",
-		"PD. Dr. med. dent.",
-		"PD. Dr. méd. dent.",
-		"PD. Dr. med.",
-		"PD. Dr. méd."
+	protected static String[] ADR_TITLES =
+		{
+			"", // 
+			"Prof. Dr. med. dent.", "Prof. Dr. méd. dent.", "Prof. Dr. med. vet.",
+			"Prof. Dr. méd. vét.", "Prof. Dr. med.", "Prof. Dr. méd.", "Prof. Dr.med.dent.",
+			"Prof. Dr.méd.dent.", "Prof. Dr.med.vet.", "Prof. Dr.méd.vét.", "Prof. Dr.med.",
+			"Prof. Dr.méd.", "Prof. Dr.med.", "Prof. Dr.méd.", "Prof. Dr. med.", "Prof. Dr. méd.",
+			"Prof. Dr.", "Prof.", "Dr. med. dent.", "Dr. méd. dent.", "Dr. med. vet.",
+			"Dr. méd. vét.", "Dr. med.", "Dr. méd.", "PD. Dr. med. dent.", "PD. Dr. méd. dent.",
+			"PD. Dr. med.", "PD. Dr. méd."
 		};
-
-
+	
 	// members
-	protected int    entriesPerPage = 20;
-	protected String name           = "";
-	protected String geo            = "";
-	protected int    pageNum        = 0;
+	protected int entriesPerPage = 20;
+	protected String name = "";
+	protected String geo = "";
+	protected int pageNum = 0;
 	
 	/**
 	 * this is the constructor: save name, geo and pageNum in members, calc htmlText and save in
 	 * members too
-	 * @param  name    search for this name
-	 * @param  geo     search in this city/location
-	 * @param  pageNum which page to get, zero-based
+	 * 
+	 * @param name
+	 *            search for this name
+	 * @param geo
+	 *            search in this city/location
+	 * @param pageNum
+	 *            which page to get, zero-based
 	 */
-	public PhoneBookContentParser(final String name, final String geo, final int pageNum, final String charSet)	{
+	public PhoneBookContentParser(final String name, final String geo, final int pageNum,
+		final String charSet){
 		super();
 		String htmlText = readContent(name, geo, pageNum, charSet, readTimeOut);
 		this.setHtmlText(htmlText);
-		this.name     = name;
-		this.geo      = geo;
-		this.pageNum  = pageNum;
+		this.name = name;
+		this.geo = geo;
+		this.pageNum = pageNum;
 	}
 	
 	/**
-	 * extract infos for the current search from HTML-source                        <br>
-	 *  - für die Suche in ch - tel.search.ch         zBsp "Treffer 1 - 10 von 11"  <br>
-	 *  - für die Suche in de - telefonbuch.de        zBsp "Seite  1 (von 6)"       <br>
-	 *  - für die Suche in at - herold.at/telefonbuch zBsp "Treffer 1-15 von 61"    <br>
+	 * extract infos for the current search from HTML-source <br>
+	 * - für die Suche in ch - tel.search.ch zBsp "Treffer 1 - 10 von 11" <br>
+	 * - für die Suche in de - telefonbuch.de zBsp "Seite  1 (von 6)" <br>
+	 * - für die Suche in at - herold.at/telefonbuch zBsp "Treffer 1-15 von 61" <br>
 	 * Abstract function, must override
+	 * 
 	 * @return the search string to be displayed as info
 	 */
 	public abstract String getSearchInfo();
 	
 	/**
-	 * extracts the total number of found entries  <br>
+	 * extracts the total number of found entries <br>
 	 * Abstract function, must override
+	 * 
 	 * @return number of found entries
 	 */
 	public abstract int getNumOfEntries();
 	
 	/**
-	 * extracts Kontakte from HTML                 <br>
-	 * extract [entriesPerPage] number of entries  <br>
+	 * extracts Kontakte from HTML <br>
+	 * extract [entriesPerPage] number of entries <br>
 	 * Abstract function, must override
+	 * 
 	 * @return the List of KontaktEntry's
 	 */
-	//public List<KontaktEntry> extractKontakte()	{
+	// public List<KontaktEntry> extractKontakte() {
 	public abstract List<HashMap<String, String>> extractKontakte();
 	
 	/**
-	 * extracts a Kontakt from a listEntry (<b>multiple</b> results displayed on a page)  <br>
-	 * this just extracts the parts needed for the display in the results list            <br>
-	 * if the actual detail info is needed, then the vCards are extracted                 <br>
+	 * extracts a Kontakt from a listEntry (<b>multiple</b> results displayed on a page) <br>
+	 * this just extracts the parts needed for the display in the results list <br>
+	 * if the actual detail info is needed, then the vCards are extracted <br>
 	 * Abstract function, must override
+	 * 
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
 	public abstract HashMap<String, String> extractKontaktFromList();
 	
 	/**
-	 * extracts a Kontakt from a DetailEntry (<b>single</b> result displayed on a page)  <br>
-	 * this just extracts the parts needed for the display in the results list           <br>
-	 * if the actual detail info is needed, then the vCards are extracted                <br>
-	 * this procedure can be the same as extracting from a list                          <br>
-	 * - for ch this is different from extractListKontakt                                <br>
-	 * - for de this is the same as extractListKontakt                                   <br>
-	 * - for at this is the same as extractListKontakt
-	 * Abstract function, must override
+	 * extracts a Kontakt from a DetailEntry (<b>single</b> result displayed on a page) <br>
+	 * this just extracts the parts needed for the display in the results list <br>
+	 * if the actual detail info is needed, then the vCards are extracted <br>
+	 * this procedure can be the same as extracting from a list <br>
+	 * - for ch this is different from extractListKontakt <br>
+	 * - for de this is the same as extractListKontakt <br>
+	 * - for at this is the same as extractListKontakt Abstract function, must override
+	 * 
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
 	public abstract HashMap<String, String> extractKontaktFromDetail();
 	
 	/**
-	 * extracts a Kontakt with ALL available info from a vCard and /or html combined   <br>
+	 * extracts a Kontakt with ALL available info from a vCard and /or html combined <br>
 	 * usually if there is a vCard then it is better to use this to get the data
-	 * @param kontaktHashMap Kontakt for which to extract the info
+	 * 
+	 * @param kontaktHashMap
+	 *            Kontakt for which to extract the info
 	 * @return the Kontakt in a HashMap, the possible keys of the HashMap are described above
 	 */
 	public abstract HashMap<String, String> extractMaxInfo(HashMap<String, String> kontaktHashMap);
 	
 	/**
 	 * test if the query returned saying that there is more than one city to select from
+	 * 
 	 * @return boolean true if there is more than one city to select from
 	 */
 	public abstract boolean hasCitiesList();
 	
 	/**
-	 * if there is more than one city to select from then this procedure extracts
-	 * the error message to show to the user for explaining
+	 * if there is more than one city to select from then this procedure extracts the error message
+	 * to show to the user for explaining
+	 * 
 	 * @return the error/explanation string
 	 */
 	public abstract String getCitiesListMessage();
 	
 	/**
-	 * returns a list of possible city names if the entered city could not be found or matched exactly
-	 * @return String[] the list of city-pairs, null if none found. 
-	 *                  each entry consist of following parts: city - selectable.
-	 *                  if the entry is not selectable, then it is just a category for the following entries
+	 * returns a list of possible city names if the entered city could not be found or matched
+	 * exactly
+	 * 
+	 * @return String[] the list of city-pairs, null if none found. each entry consist of following
+	 *         parts: city - selectable. if the entry is not selectable, then it is just a category
+	 *         for the following entries
 	 */
 	public abstract String[][] getCitiesList();
 	
 	/**
 	 * test if the there entered city has been found or not
+	 * 
 	 * @return false if no city found
 	 */
 	public abstract boolean noCityFound();
@@ -178,24 +176,27 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	public abstract String[][] getCitySuggestions(final String part);
 	
 	/*********************************************************************/
-	/*** Some Helping Functions                                        ***/
+	/*** Some Helping Functions ***/
 	/*********************************************************************/
-		
+	
 	/**
 	 * extract the firstnames from the input String
-	 * @param firstnames input
-	 * @param delimiter used to separate the firstnames for the result string
+	 * 
+	 * @param firstnames
+	 *            input
+	 * @param delimiter
+	 *            used to separate the firstnames for the result string
 	 * @return the separated firstnames, delimited by &lt;delimiter&gt;
 	 */
-	public static String extractFirstnames(final String firstnames, final String delimiter)	{
+	public static String extractFirstnames(final String firstnames, final String delimiter){
 		String result = "";
 		String lFirstnames = firstnames;
-		for (int fn_sepIx = 0; fn_sepIx < ADR_FIRSTNAMESEPARATORS.length; fn_sepIx++)	{
+		for (int fn_sepIx = 0; fn_sepIx < ADR_FIRSTNAMESEPARATORS.length; fn_sepIx++) {
 			String fn_sep = ADR_FIRSTNAMESEPARATORS[fn_sepIx];
 			String[] parts = lFirstnames.split(fn_sep);
 			String lDelimiter = "";
 			result = "";
-			for (int partsIx = 0; partsIx < parts.length; partsIx++)	{
+			for (int partsIx = 0; partsIx < parts.length; partsIx++) {
 				result = result + lDelimiter + parts[partsIx].trim();
 				lDelimiter = delimiter;
 			}
@@ -205,13 +206,14 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	}
 	
 	/**
-	 * extract last name and first name from input string.  <br>
+	 * extract last name and first name from input string. <br>
 	 * format: &lt;LastName&gt; &lt;FirstName&gt;
-	 * @param text input string 
+	 * 
+	 * @param text
+	 *            input string
 	 * @return String[]: StringArray, index O: firstname, index 1: lastname
 	 */
-	protected
-	static String[] getFirstnameLastname(String text){
+	protected static String[] getFirstnameLastname(String text){
 		String vorname = ""; //$NON-NLS-1$
 		String nachname = text;
 		int nameEndIndex = text.trim().indexOf(" "); //$NON-NLS-1$
@@ -225,33 +227,34 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	}
 	
 	/**
-	 * convert the encoded characters into regular characters.
-	 * This is used for decoding in tel.local.ch
+	 * convert the encoded characters into regular characters. This is used for decoding in
+	 * tel.local.ch
+	 * 
 	 * @param text
 	 * @return
 	 */
-	protected static String cleanupSpecialChars(String text) {
+	protected static String cleanupSpecialChars(String text){
 		// this version is prepared for any characters
 		String tmp = text;
 		// this is already included here for tel.local.ch for convenience...
 		tmp = tmp.replaceAll("&#x([0-9A-Fa-f]{2,2});", "%$1");
 		try {
-			// avoid errors... 
+			// avoid errors...
 			tmp = tmp.replaceAll("%([^0-9A-Fa-f])", "&ç&ç&ç&ç$1");
 			tmp = URLDecoder.decode(tmp, "ISO-8859-1");
 			tmp = StringEscapeUtils.unescapeHtml(tmp);
 			tmp = tmp.replaceAll("&ç&ç&ç&ç([^0-9A-Fa-f])", "%$1");
-		} catch (UnsupportedEncodingException e) {
-		}
+		} catch (UnsupportedEncodingException e) {}
 		return tmp;
 	}
-
+	
 	/**
 	 * reformat string correctly which came from vCard from tel.local.ch
+	 * 
 	 * @param sourceString
 	 * @return the correctly formatted string
 	 */
-	public static String formatString(final String sourceString)	{
+	public static String formatString(final String sourceString){
 		// unescape, first replace "=" by "%"...
 		String data = sourceString.replaceAll("=([0-9A-Fa-f]{2,2})", "%$1");
 		try {
@@ -262,70 +265,87 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 		}
 	}
 	
-	//****************************************************
+	// ****************************************************
 	/**
 	 * Format a phone number according to the country of the subclass
-	 * @param phoneNumber the phoneNumber as returned from html
+	 * 
+	 * @param phoneNumber
+	 *            the phoneNumber as returned from html
 	 * @return the reformatted phone number. if the input is not formatted correctly, then the
-	 * function returns an empty string
-	 * this implementation just returns the unchanged phone number
+	 *         function returns an empty string this implementation just returns the unchanged phone
+	 *         number
 	 */
-	public static String formatPhoneNumber(final String phoneNumber)	{
+	public static String formatPhoneNumber(final String phoneNumber){
 		return phoneNumber;
 	}
 	
 	/**
 	 * Format a phone number according to your needs. NOT YET IMPLEMENTED
-	 * @param phoneNumber the phoneNumber as returned from html
-	 * @param inFormat the format of the input
-	 * @param outFormat how to format the output
+	 * 
+	 * @param phoneNumber
+	 *            the phoneNumber as returned from html
+	 * @param inFormat
+	 *            the format of the input
+	 * @param outFormat
+	 *            how to format the output
 	 * @return the reformatted phone number. if the input is not formatted correctly, then the
-	 * function returns an empty string
+	 *         function returns an empty string
 	 */
-	public static String formatPhoneNumber(final String phoneNumber, final String inFormat, final String outFormat)	{
+	public static String formatPhoneNumber(final String phoneNumber, final String inFormat,
+		final String outFormat){
 		return phoneNumber;
 	}
 	
 	/**
 	 * Converts a StringArray to a string, delimited by {delimiter}
+	 * 
 	 * @param strArray
 	 * @param delimiter
 	 * @return
 	 */
-	protected static String stringArrayToString(String[] strArray, String delimiter)	{
-	    StringBuffer result = new StringBuffer();
-	    if (strArray.length > 0) {
-	        result.append(strArray[0]);
-	        for (int i=1; i<strArray.length; i++) {
-	            result.append(delimiter);
-	            result.append(strArray[i]);
-	        }
-	    }
-	    return result.toString();
+	protected static String stringArrayToString(String[] strArray, String delimiter){
+		StringBuffer result = new StringBuffer();
+		if (strArray.length > 0) {
+			result.append(strArray[0]);
+			for (int i = 1; i < strArray.length; i++) {
+				result.append(delimiter);
+				result.append(strArray[i]);
+			}
+		}
+		return result.toString();
 	}
 	
 	/**
-	 * creates and returns a URL for reading data from an online-address-query page   <br>
+	 * creates and returns a URL for reading data from an online-address-query page <br>
 	 * Abstract function, must override
-	 * @param  name    search for this name
-	 * @param  geo     search in this city/location
-	 * @param  pageNum which page to get
+	 * 
+	 * @param name
+	 *            search for this name
+	 * @param geo
+	 *            search in this city/location
+	 * @param pageNum
+	 *            which page to get
 	 * @return the url which returns the results, null if any error occurs
 	 */
 	public abstract URL getURL(String name, String geo, int pageNum);
 	
 	/**
-	 *  read and return the contents of a html page, uses default character encoding
-	 *  timeout needed because on telefonbuch.de vCards sometimes do not work correctly...
-	 *  
-	 * @param  name    search for this name
-	 * @param  geo     search in this city/location
-	 * @param  pageNum which page to get
-	 * @param timeOut = how long to wait for the page to be returned in milliseconds, 0 = no timeout
+	 * read and return the contents of a html page, uses default character encoding timeout needed
+	 * because on telefonbuch.de vCards sometimes do not work correctly...
+	 * 
+	 * @param name
+	 *            search for this name
+	 * @param geo
+	 *            search in this city/location
+	 * @param pageNum
+	 *            which page to get
+	 * @param timeOut
+	 *            = how long to wait for the page to be returned in milliseconds, 0 = no timeout
 	 * 
 	 * @return String, the contents of the page
 	 */
-	public String readContent(final String name, final String geo, final int pageNum, final String charSet, final int timeout)	{
+	public String readContent(final String name, final String geo, final int pageNum,
+		final String charSet, final int timeout){
 		StringBuffer sb = new StringBuffer();
 		URL url;
 		InputStream input = null;
@@ -352,23 +372,25 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 			if (input != null) {
 				try {
 					input.close();
-				} catch (IOException e) {
-				}
+				} catch (IOException e) {}
 			}
 		}
 		return cleanupSpecialChars(sb.toString());
 	}
 	
 	/**
-	 *  read and return the contents of a html page
-	 *  
-	 * @param urlText = the url from where the page should be read
-	 * @param charSet = the character set to be used for page-encoding
-	 * @param timeOut = how long to wait for the page to be returned in milliseconds, 0 = no timeout
+	 * read and return the contents of a html page
+	 * 
+	 * @param urlText
+	 *            = the url from where the page should be read
+	 * @param charSet
+	 *            = the character set to be used for page-encoding
+	 * @param timeOut
+	 *            = how long to wait for the page to be returned in milliseconds, 0 = no timeout
 	 * 
 	 * @return String, the contents of the page
 	 */
-	public static String readContent(final String urlText, final String charSet, final int timeout) {
+	public static String readContent(final String urlText, final String charSet, final int timeout){
 		StringBuffer sb = new StringBuffer();
 		URL url;
 		InputStream input = null;
@@ -387,14 +409,11 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 			while ((count = isr.read(c)) > 0) {
 				sb.append(c, 0, count);
 			}
-		} catch (MalformedURLException e) {
-		} catch (IOException e) {
-		} finally {
+		} catch (MalformedURLException e) {} catch (IOException e) {} finally {
 			if (input != null) {
 				try {
 					input.close();
-				} catch (IOException e) {
-				}
+				} catch (IOException e) {}
 			}
 		}
 		return cleanupSpecialChars(sb.toString());
@@ -417,8 +436,8 @@ public abstract class PhoneBookContentParser extends HtmlParser {
 	protected static String removeDirt(String text){
 		return text.replace("<span class=\"highlight\">", "").replace("</span>", "");
 	}
-
-	public void initHashMap(HashMap<String, String> entry)	{
+	
+	public void initHashMap(HashMap<String, String> entry){
 		entry.put(PhoneBookEntry.FLD_FIRSTNAME, "");
 		entry.put(PhoneBookEntry.FLD_NAME, "");
 		entry.put(PhoneBookEntry.FLD_ZUSATZ, "");

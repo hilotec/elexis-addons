@@ -8,20 +8,19 @@ import org.eclipse.swt.graphics.Image;
 
 import ch.elexis.Hub;
 
-public class InboxLabelProvider extends LabelProvider implements
-		ITableLabelProvider {
-
-	public InboxLabelProvider() {
+public class InboxLabelProvider extends LabelProvider implements ITableLabelProvider {
+	
+	public InboxLabelProvider(){
 
 	}
-
+	
 	@Override
-	public Image getColumnImage(Object element, int columnIndex) {
+	public Image getColumnImage(Object element, int columnIndex){
 		return null;
 	}
-
+	
 	@Override
-	public String getColumnText(Object element, int columnIndex) {
+	public String getColumnText(Object element, int columnIndex){
 		if (element instanceof File) {
 			File file = (File) element;
 			if (columnIndex == 0) {
@@ -32,5 +31,5 @@ public class InboxLabelProvider extends LabelProvider implements
 		}
 		return "?"; //$NON-NLS-1$
 	}
-
+	
 }

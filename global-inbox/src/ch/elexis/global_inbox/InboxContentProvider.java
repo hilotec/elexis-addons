@@ -30,33 +30,33 @@ public class InboxContentProvider extends CommonContentProviderAdapter {
 	ArrayList<File> files = new ArrayList<File>();
 	InboxView view;
 	LoadJob loader;
-
-	public void setView(InboxView view) {
+	
+	public void setView(InboxView view){
 		this.view = view;
 	}
-
+	
 	@Override
-	public void dispose() {
+	public void dispose(){
 		super.dispose();
 	}
-
-	public void reload() {
+	
+	public void reload(){
 		loader.run(null);
 	}
-
-	public InboxContentProvider() {
+	
+	public InboxContentProvider(){
 		loader = new LoadJob();
 		loader.schedule(1000);
 	}
-
+	
 	@Override
-	public Object[] getElements(Object inputElement) {
+	public Object[] getElements(Object inputElement){
 		return files == null ? null : files.toArray();
 	}
-
+	
 	Pattern patMatch = Pattern.compile("([0-9]+)_(.+)");
-
-	private void addFiles(List<File> list, File dir) {
+	
+	private void addFiles(List<File> list, File dir){
 		File[] contents = dir.listFiles();
 		for (File file : contents) {
 			if (file.isDirectory()) {
@@ -66,30 +66,27 @@ public class InboxContentProvider extends CommonContentProviderAdapter {
 				if (matcher.matches()) {
 					String num = matcher.group(1);
 					String nam = matcher.group(2);
-					List<Patient> lPat = new Query(Patient.class,
-							Patient.FLD_PATID, num).execute();
+					List<Patient> lPat = new Query(Patient.class, Patient.FLD_PATID, num).execute();
 					if (lPat.size() == 1) {
 						Patient pat = lPat.get(0);
 						String cat = Activator.getDefault().getCategory(file);
 						if (cat.equals("-") || cat.equals("??")) {
 							cat = null;
 						}
-						IDocumentManager dm = (IDocumentManager) Extensions
+						IDocumentManager dm =
+							(IDocumentManager) Extensions
 								.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 						try {
-							GenericDocument fd = new GenericDocument(pat, nam, cat,
-									file,
-									new TimeTool().toString(TimeTool.DATE_GER),
-									"",null);
+							GenericDocument fd =
+								new GenericDocument(pat, nam, cat, file, new TimeTool()
+									.toString(TimeTool.DATE_GER), "", null);
 							file.delete();
 							dm.addDocument(fd);
-							Activator.getDefault().getContentProvider()
-									.reload();
+							Activator.getDefault().getContentProvider().reload();
 							return;
 						} catch (Exception ex) {
 							ExHandler.handle(ex);
-							SWTHelper.alert(Messages.InboxView_error,
-									ex.getMessage());
+							SWTHelper.alert(Messages.InboxView_error, ex.getMessage());
 						}
 					}
 				}
@@ -97,39 +94,36 @@ public class InboxContentProvider extends CommonContentProviderAdapter {
 			}
 		}
 	}
-
+	
 	class LoadJob extends Job {
-
-		public LoadJob() {
+		
+		public LoadJob(){
 			super("GlobalInbox"); //$NON-NLS-1$
 			setPriority(DECORATE);
 			setUser(false);
 			setSystem(true);
 		}
-
+		
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+		protected IStatus run(IProgressMonitor monitor){
 			String filepath = Hub.localCfg.get(Preferences.PREF_DIR, null);
 			if (filepath == null) {
 				return new Status(Status.ERROR, Activator.PLUGIN_ID,
-						"Es ist in den Einstellungen kein Eingangsverzeichnis definiert");
+					"Es ist in den Einstellungen kein Eingangsverzeichnis definiert");
 			}
 			File dir = new File(filepath);
-			Object dm = Extensions
-					.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
+			Object dm = Extensions.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 			if (dm == null) {
-				return new Status(
-						Status.ERROR,
-						Activator.PLUGIN_ID,
-						Messages.InboxContentProvider_thereIsNoDocumentManagerHere);
+				return new Status(Status.ERROR, Activator.PLUGIN_ID,
+					Messages.InboxContentProvider_thereIsNoDocumentManagerHere);
 			}
 			if (dir == null || !dir.isDirectory()) {
 				return new Status(Status.ERROR, Activator.PLUGIN_ID,
-						Messages.InboxContentProvider_noInboxDefined);
+					Messages.InboxContentProvider_noInboxDefined);
 			}
 			IDocumentManager documentManager = (IDocumentManager) dm;
 			String[] cats = documentManager.getCategories();
-
+			
 			if (cats != null) {
 				for (String cat : cats) {
 					File subdir = new File(dir, cat);
@@ -138,7 +132,7 @@ public class InboxContentProvider extends CommonContentProviderAdapter {
 					}
 				}
 			}
-
+			
 			files.clear();
 			addFiles(files, dir);
 			if (view != null) {
@@ -147,7 +141,7 @@ public class InboxContentProvider extends CommonContentProviderAdapter {
 			schedule(120000L);
 			return Status.OK_STATUS;
 		}
-
+		
 	}
-
+	
 }

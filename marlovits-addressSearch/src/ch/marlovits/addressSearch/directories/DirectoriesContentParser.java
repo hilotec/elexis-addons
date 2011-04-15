@@ -24,84 +24,70 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringEscapeUtils;
+
 ;
 
 /*
-http://www1.dastelefonbuch.de/?la=de&kw=Marlovits&ci=&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom=1
+ http://www1.dastelefonbuch.de/?la=de&kw=Marlovits&ci=&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom=1
 
-reccount=10
+ reccount=10
 
-http://www2.dastelefonbuch.de/Erweiterte-Suche.html?la=de&cmd=&s=a30000&sp=1&aktion=26&kw=Marlovits&ort=testort&firstname=Haribo
-http://www2.dastelefonbuch.de/Erweiterte-Suche.html?la=de&cmd=&s=a30000&sp=1&aktion=26&kw=Marlovits&ort=testort&firstname=Haribo
-ist mit method post - get geht auch
+ http://www2.dastelefonbuch.de/Erweiterte-Suche.html?la=de&cmd=&s=a30000&sp=1&aktion=26&kw=Marlovits&ort=testort&firstname=Haribo
+ http://www2.dastelefonbuch.de/Erweiterte-Suche.html?la=de&cmd=&s=a30000&sp=1&aktion=26&kw=Marlovits&ort=testort&firstname=Haribo
+ ist mit method post - get geht auch
  */
 
 public class DirectoriesContentParser extends HtmlParser {
 	
 	// some constants
-	private static String MARKER_VCARD_BEGIN_   = "BEGIN:VCARD";
-	private static String MARKER_VCARD_END_     = "END:VCARD";
-	private static String LOCAL_COPYRIGHT      = "\\[Copyright \\(c\\) local\\.ch ag\\]";
+	private static String MARKER_VCARD_BEGIN_ = "BEGIN:VCARD";
+	private static String MARKER_VCARD_END_ = "END:VCARD";
+	private static String LOCAL_COPYRIGHT = "\\[Copyright \\(c\\) local\\.ch ag\\]";
 	
-	//+++++ flag for testing my new version
+	// +++++ flag for testing my new version
 	private static final Boolean useNewVersion = true;
 	
 	private static final String ADR_LIST_TAG = "class=\"vcard searchResult resrowclr"; //$NON-NLS-1$
 	private static final String ADR_DETAIL_TAG = "<div class=\"resrowclr";; //$NON-NLS-1$
-	//+++++ START
-	private static final String   ADR_LEDIGNAMENSTRENNER = "\\(-";
-	private static final String   ADR_LEDIGNAMENSSCHLUSS = "\\)";
-	private static final String[] ADR_VORNAMENSTRENNER = {" und ",  " u\\. ",  " e ",  " et "};
+	// +++++ START
+	private static final String ADR_LEDIGNAMENSTRENNER = "\\(-";
+	private static final String ADR_LEDIGNAMENSSCHLUSS = "\\)";
+	private static final String[] ADR_VORNAMENSTRENNER = {
+		" und ", " u\\. ", " e ", " et "
+	};
 	
 	//
 	private int entriesPerPage = 20;
 	private String name = "";
-	private String geo  = "";
+	private String geo = "";
 	private String country = "ch";
 	
 	// all titles without period
-	private static String[] ADR_TITLES = {	"", // 
-											"Prof. Dr. med. dent. ",
-											"Prof. Dr. méd. dent. ",
-											"Prof. Dr. med. vet. ",
-											"Prof. Dr. méd. vét. ",
-											"Prof. Dr. med. ",
-											"Prof. Dr. méd. ",
-											"Prof. Dr. ",
-											"Prof. Dr. med. ",
-											"Prof. Dr. méd. ",
-											"Prof. ",
-											"Dr. med. dent. ",
-											"Dr. méd. dent. ",
-											"Dr. med. vet. ",
-											"Dr. méd. vét. ",
-											"Dr. med. ",
-											"Dr. méd. ",
-											"PD. Dr. med. dent. ",
-											"PD. Dr. méd. dent. ",
-											"PD. Dr. med. ",
-											"PD. Dr. méd. "
-											};
-	//+++++ END
-/*
-	public DirectoriesContentParser(String htmlText){
-		super(htmlText);
-	}
-*/	
+	private static String[] ADR_TITLES =
+		{
+			"", // 
+			"Prof. Dr. med. dent. ", "Prof. Dr. méd. dent. ", "Prof. Dr. med. vet. ",
+			"Prof. Dr. méd. vét. ", "Prof. Dr. med. ", "Prof. Dr. méd. ", "Prof. Dr. ",
+			"Prof. Dr. med. ", "Prof. Dr. méd. ", "Prof. ", "Dr. med. dent. ", "Dr. méd. dent. ",
+			"Dr. med. vet. ", "Dr. méd. vét. ", "Dr. med. ", "Dr. méd. ", "PD. Dr. med. dent. ",
+			"PD. Dr. méd. dent. ", "PD. Dr. med. ", "PD. Dr. méd. "
+		};
+	
+	// +++++ END
+	/*
+	 * public DirectoriesContentParser(String htmlText){ super(htmlText); }
+	 */
 	public DirectoriesContentParser(String htmlText, String name, String geo, String country){
 		super(htmlText);
 		this.name = name;
-		this.geo  = geo;
+		this.geo = geo;
 		this.country = country;
 		
-/*		if (ADR_TITLES[0].equalsIgnoreCase(""))	{
-			for (int i = 1; i < ADR_TITLES.length; i++)	{
-				ADR_TITLES[i] = ADR_TITLES[i].replaceAll(" ", "[\\\\.]? ");
-			}
-			ADR_TITLES[0] = "I_N_I_T_E_D";
-		}
-		System.out.println("");
-*/	}
+		/*
+		 * if (ADR_TITLES[0].equalsIgnoreCase("")) { for (int i = 1; i < ADR_TITLES.length; i++) {
+		 * ADR_TITLES[i] = ADR_TITLES[i].replaceAll(" ", "[\\\\.]? "); } ADR_TITLES[0] =
+		 * "I_N_I_T_E_D"; } System.out.println("");
+		 */}
 	
 	/**
 	 * Retourniert String in umgekehrter Reihenfolge
@@ -143,26 +129,29 @@ public class DirectoriesContentParser extends HtmlParser {
 	public String getSearchInfo(){
 		reset();
 		String searchInfoText = "";
-		if (country.equalsIgnoreCase("ch"))	{
+		if (country.equalsIgnoreCase("ch")) {
 			searchInfoText = extract("<div class=\"summary\">", "<div id=\"printlink\"");
 			if (searchInfoText == null) {
 				return "";//$NON-NLS-1$
 			}
 			// noPrint-Anteil aus String entfernen
-			searchInfoText = searchInfoText.replaceAll("<span class=\"totalResults noPrint\">[^<]+</span>", "");
+			searchInfoText =
+				searchInfoText.replaceAll("<span class=\"totalResults noPrint\">[^<]+</span>", "");
 			// alle HTML <xxx> entfernen
 			searchInfoText = searchInfoText.replaceAll("<[^>]+>", "");
 			// obere Grenze Resultate ändern, extract upper bounds
-	/*		String upperBoundsStr = searchInfoText.replaceAll(	"([^-]*[^0-9]+[0-9]+[^0-9]+)", "");
-			upperBoundsStr = upperBoundsStr.replaceAll("([0-9]+)([^0-9]+)", "$1");
-			int upperBounds = Integer.parseInt(upperBoundsStr);
-			// jetzt korrigierte upper bounds einsetzen
-			upperBounds = (upperBounds > maxEntriesToRead) ? maxEntriesToRead : upperBounds;
-			//searchInfoText = searchInfoText.replaceAll("([^-]*[^0-9]+)([0-9]+)([^0-9]+)", "$1$2" + upperBounds + "$3");
-			searchInfoText = searchInfoText.replaceAll("([^-]*[^0-9]+)([0-9]+)([^0-9]+)", "$1" + upperBounds + "$3");
+			/*
+			 * String upperBoundsStr = searchInfoText.replaceAll( "([^-]*[^0-9]+[0-9]+[^0-9]+)",
+			 * ""); upperBoundsStr = upperBoundsStr.replaceAll("([0-9]+)([^0-9]+)", "$1"); int
+			 * upperBounds = Integer.parseInt(upperBoundsStr); // jetzt korrigierte upper bounds
+			 * einsetzen upperBounds = (upperBounds > maxEntriesToRead) ? maxEntriesToRead :
+			 * upperBounds; //searchInfoText =
+			 * searchInfoText.replaceAll("([^-]*[^0-9]+)([0-9]+)([^0-9]+)", "$1$2" + upperBounds +
+			 * "$3"); searchInfoText = searchInfoText.replaceAll("([^-]*[^0-9]+)([0-9]+)([^0-9]+)",
+			 * "$1" + upperBounds + "$3");
 			 */
-		} else	{
-			if (moveTo("<div class=\"functionbar\">"))	{
+		} else {
+			if (moveTo("<div class=\"functionbar\">")) {
 				searchInfoText = extract("<li class=\"blank\">", "</li>");
 				// alle HTML <xxx> entfernen
 				searchInfoText = searchInfoText.replaceAll("<[^>]+>", "");
@@ -175,21 +164,24 @@ public class DirectoriesContentParser extends HtmlParser {
 	
 	/**
 	 * extracts the total number of found entries
+	 * 
 	 * @return number of found entries
 	 */
-	public int getNumOfEntries()	{
+	public int getNumOfEntries(){
 		reset();
 		String resultStr = "0";
-		if (country.equalsIgnoreCase("ch"))	{
+		if (country.equalsIgnoreCase("ch")) {
 			moveTo("<div class=\"printResultSummary printOnly\">");
 			resultStr = extract("</div><strong>", "</strong>");
 			// if not found at all -> return 0
-			if (resultStr.equalsIgnoreCase("")) return 0;
+			if (resultStr.equalsIgnoreCase(""))
+				return 0;
 			// if string contains other than numbers -> return 0
-			if (!resultStr.replaceAll("[0-9]", "").equalsIgnoreCase("")) return 0;
+			if (!resultStr.replaceAll("[0-9]", "").equalsIgnoreCase(""))
+				return 0;
 			// now it should be ok
-		} else if (country.equalsIgnoreCase("de"))	{
-			if (moveTo("<div class=\"hits\">"))	{
+		} else if (country.equalsIgnoreCase("de")) {
+			if (moveTo("<div class=\"hits\">")) {
 				resultStr = extract("<span>", "</span>");
 				resultStr = resultStr.replaceAll("[^0-9]", "");
 				System.out.println("resultStr: " + resultStr);
@@ -198,14 +190,14 @@ public class DirectoriesContentParser extends HtmlParser {
 		return Integer.parseInt(resultStr);
 	}
 	
-	public boolean hasCitiesList()	{
+	public boolean hasCitiesList(){
 		reset();
-		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">"))	{
+		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">")) {
 			boolean hasNextCategory = moveTo("<div class=\"functionbar\">");
-			while(hasNextCategory)	{
+			while (hasNextCategory) {
 				String category = extractTo("</div>").trim();
 				// if last char is ")" then it IS a category
-				if (category.endsWith(")"))	{
+				if (category.endsWith(")")) {
 					return true;
 				}
 				hasNextCategory = moveTo("<div class=\"functionbar\">");
@@ -214,10 +206,12 @@ public class DirectoriesContentParser extends HtmlParser {
 		return false;
 	}
 	
-	public String getCitiesHitListMessage()	{
-		if (!hasCitiesList()) return "";
+	public String getCitiesHitListMessage(){
+		if (!hasCitiesList())
+			return "";
 		reset();
-		if (!moveTo("<!-- Meldung -->")) return "";
+		if (!moveTo("<!-- Meldung -->"))
+			return "";
 		String message = extract("<div id=\"msg-caution\">", "</div>");
 		message = message.replaceAll("[\\r\\n\\t]", "").trim();
 		message = message.replaceAll("<br[ ]*[/]*[ ]*>", "\n");
@@ -227,23 +221,24 @@ public class DirectoriesContentParser extends HtmlParser {
 	
 	/**
 	 * returns a list of possibly matching city names if the entered city could not be found
-	 * @return String[] the list of city-pairs, null if none found. 
-	 *                  each entry consist of following parts: city - selectable.
-	 *                  if the entry is not selectable, then it is a category for the following entries
+	 * 
+	 * @return String[] the list of city-pairs, null if none found. each entry consist of following
+	 *         parts: city - selectable. if the entry is not selectable, then it is a category for
+	 *         the following entries
 	 */
-	//<div id="content" class="hitlist place-sel">
-	public String[][] getCitiesHitList()	{
+	// <div id="content" class="hitlist place-sel">
+	public String[][] getCitiesHitList(){
 		reset();
-		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">"))	{
+		if (moveTo("<div id=\"content\" class=\"hitlist place-sel\">")) {
 			// get all categories
 			boolean hasNextCategory = moveTo("<div class=\"functionbar\">");
 			int rowCount = 0;
 			String tempResult = "";
 			String delim = "";
-			while(hasNextCategory)	{
+			while (hasNextCategory) {
 				String category = extractTo("</div>").trim();
 				// if last char is ")" then it IS a category
-				if (category.endsWith(")"))	{
+				if (category.endsWith(")")) {
 					System.out.println("category: " + category);
 					tempResult = tempResult + delim + category;
 					delim = ";";
@@ -252,20 +247,20 @@ public class DirectoriesContentParser extends HtmlParser {
 					// extract part up to next category
 					hasNextCategory = (getNextPos("<div class=\"functionbar\">") >= 0);
 					String part = extractTo("<div class=\"functionbar\">");
-					// replace splitters 
+					// replace splitters
 					part = part.replaceAll("</table>", "___ROWSPLITTER___");
-					part = part.replaceAll("</a>",     "___CELLSPLITTER___");
+					part = part.replaceAll("</a>", "___CELLSPLITTER___");
 					// strip html tags and blanks/returns
 					part = part.replaceAll("<[^>]+>", "");
 					part = part.replaceAll("[\\r\\n\\t]", "");
 					// split on </table> -> rows
 					String[] rows = part.split("___ROWSPLITTER___");
 					// start with second row because first row is the header
-					for (int rowNum = 1; rowNum < rows.length; rowNum++)	{
+					for (int rowNum = 1; rowNum < rows.length; rowNum++) {
 						String row = rows[rowNum];
 						// split on </a> -> cells
 						String[] cells = row.split("___CELLSPLITTER___");
-						if (cells.length > 2)	{
+						if (cells.length > 2) {
 							rowCount++;
 							String cell = cells[2].trim();
 							System.out.println("cell: " + cell);
@@ -277,20 +272,20 @@ public class DirectoriesContentParser extends HtmlParser {
 				}
 			}
 			System.out.println(tempResult);
-			String [][] cities  = new String[rowCount][2];
+			String[][] cities = new String[rowCount][2];
 			String[] splittedTemp = tempResult.split(";");
-			for (int i = 0; i < splittedTemp.length; i++)	{
+			for (int i = 0; i < splittedTemp.length; i++) {
 				String name = splittedTemp[i];
 				i++;
 				String selectable = splittedTemp[i];
-				cities[i/2][0] = name;
-				cities[i/2][1] = selectable;
+				cities[i / 2][0] = name;
+				cities[i / 2][1] = selectable;
 			}
 			return cities;
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Extrahiert Informationen aus dem retournierten Html. Anhand der <div class="xxx"> kann
 	 * entschieden werden, ob es sich um eine Liste oder einen Detaileintrag (mit Telefon handelt).
@@ -305,7 +300,7 @@ public class DirectoriesContentParser extends HtmlParser {
 		reset();
 		List<KontaktEntry> kontakte = new Vector<KontaktEntry>();
 		
-		if (country.equalsIgnoreCase("ch"))	{
+		if (country.equalsIgnoreCase("ch")) {
 			int listIndex = getNextPos(ADR_LIST_TAG);
 			int detailIndex = getNextPos(ADR_DETAIL_TAG);
 			while (listIndex > 0 || detailIndex > 0) {
@@ -323,10 +318,10 @@ public class DirectoriesContentParser extends HtmlParser {
 				listIndex = getNextPos(ADR_LIST_TAG);
 				detailIndex = getNextPos(ADR_DETAIL_TAG);
 			}
-		} else if (country.equalsIgnoreCase("de"))	{
+		} else if (country.equalsIgnoreCase("de")) {
 			// if there is a hits entry, then we found some data, else there are no entries
 			boolean foundit = moveTo("<div class=\"hits\">");
-			if (foundit)	{
+			if (foundit) {
 				// skip first <td class=\"col1\">
 				moveTo("folgendes MUSS in einer Zeile stehen, sonst macht IE Abstaende ");
 				int listIndex = getNextPos("<td class=\"col1\">", 0);
@@ -343,7 +338,7 @@ public class DirectoriesContentParser extends HtmlParser {
 		
 		return kontakte;
 	}
-
+	
 	/**
 	 * Extrahiert einen Kontakt aus einem Listeintrag Bsp: <div id="te_ojUHu3vXsUWJbXidz2_sRQ"
 	 * onmouseover="lcl.search.onEntryHover(this)" onclick="if (typeof(lcl.search) != 'undefined') { lcl.search.navigateTo(event, 'http://tel.local.ch/de/d/ILwo-yKRTlguXS4TFuVPuA?what=Meier&start=3'); }"
@@ -355,18 +350,23 @@ public class DirectoriesContentParser extends HtmlParser {
 	 * </div> <div class="entrybox"> <h4>
 	 * <span class="category" title="Garage"> Garage </span> <br>
 	 * <a class="fn" href="http://tel.local.ch/de/d/ILwo-yKRTlguXS4TFuVPuA?what=Meier&amp;start=3">
-	 * Autocenter <span class="highlight">Meier</span> AG </a> </br></h4> <p
-	 * class="bold phoneNumber"> <span class="label">Tel.</span> <span class="tel"> <a
-	 * class="phonenr" href="callto://+41627234359"> 062 723 43 59 </a> </span> </p> <p class="adr">
+	 * Autocenter <span class="highlight">Meier</span> AG </a> </br></h4>
+	 * <p * class="bold phoneNumber">
+	 * <span class="label">Tel.</span> <span class="tel"> <a class="phonenr"
+	 * href="callto://+41627234359"> 062 723 43 59 </a> </span>
+	 * </p>
+	 * <p class="adr">
 	 * <span class="street-address"> Hauptstrasse 158 </span> , <span
-	 * class="postal-code">5742</span> <span class="locality">Kölliken</span> </p> </div> <div
-	 * style="clear: both;"></div> </div>
+	 * class="postal-code">5742</span> <span class="locality">Kölliken</span>
+	 * </p>
+	 * </div> <div style="clear: both;"></div> </div>
 	 */
 	private KontaktEntry extractListKontakt() throws IOException, MalformedURLException{
 		
-		if (country.equalsIgnoreCase("de"))	{
+		if (country.equalsIgnoreCase("de")) {
 			// im deutschen Telefonbuch gibt es auch eine vCard - da steht aber nicht mehr drinnen
-			// und Name/Vorname ist auch nicht getrennt -> ergo einfach direkt alles aus der Homepage ziehen
+			// und Name/Vorname ist auch nicht getrennt -> ergo einfach direkt alles aus der
+			// Homepage ziehen
 			// das geht schneller...
 			// doch doch: in der vCard sind alle telnr aufgeführt
 			// und Geschäftlich ist unterscheidbar aufgrund Eintrag Telnr in Gesch.
@@ -390,9 +390,11 @@ public class DirectoriesContentParser extends HtmlParser {
 			String optionalPart = extractTo("<tr class=\"dtl-preview hide\">");
 			
 			String hiddenPart = "";
-			int nextPos = getNextPos("folgendes MUSS in einer Zeile stehen, sonst macht IE Abstaende");
-			if (nextPos >= 0)	{
-				hiddenPart = extractTo("folgendes MUSS in einer Zeile stehen, sonst macht IE Abstaende");
+			int nextPos =
+				getNextPos("folgendes MUSS in einer Zeile stehen, sonst macht IE Abstaende");
+			if (nextPos >= 0) {
+				hiddenPart =
+					extractTo("folgendes MUSS in einer Zeile stehen, sonst macht IE Abstaende");
 			} else {
 				hiddenPart = getTail();
 			}
@@ -409,7 +411,7 @@ public class DirectoriesContentParser extends HtmlParser {
 			fullName = fullName.replaceAll("[\\r\\n\\t]", "").trim();
 			String[] nachnameVorname = getVornameNachname(fullName);
 			String nachname = nachnameVorname[1];
-			String vorname  = nachnameVorname[0];
+			String vorname = nachnameVorname[0];
 			
 			// *** extract actual street
 			String street = streetPart.replaceAll("[\\r\\n\\t]", "").trim().replace("&nbsp;", " ");
@@ -417,27 +419,27 @@ public class DirectoriesContentParser extends HtmlParser {
 			// *** extract actual zip and city
 			String zipCity = zipCityPart.replaceAll("[\\r\\n\\t]", "").trim();
 			String[] zipCity_ = zipCity.split(" ");
-			String zip  = zipCity_[0];
+			String zip = zipCity_[0];
 			String city = "";
-			if (zipCity_.length > 1) city = zipCity_[1];
+			if (zipCity_.length > 1)
+				city = zipCity_[1];
 			
 			// *** extract actual phone/fax
 			String phone = "";
-			String fax   = "";
+			String fax = "";
 			// phone AND fax: part contains src="img/a12000_fonfax.gif"
-			if (phonePart.indexOf("src=\"img/a12000_fonfax.gif\"") >= 0)	{
+			if (phonePart.indexOf("src=\"img/a12000_fonfax.gif\"") >= 0) {
 				phonePart = phonePart.replaceAll("<[^>]+>", "");
 				phonePart = phonePart.replaceAll("[\\r\\n\\t]", "").trim();
 				phone = phonePart;
-				fax   = phonePart;
+				fax = phonePart;
 			}
 			// ONLY fax: part contains src="img/a12000_fax.gif"
-			else if (phonePart.indexOf("src=\"img/a12000_fax.gif\"") >= 0)	{
+			else if (phonePart.indexOf("src=\"img/a12000_fax.gif\"") >= 0) {
 				phonePart = phonePart.replaceAll("<[^>]+>", "");
 				phonePart = phonePart.replaceAll("[\\r\\n\\t]", "").trim();
-				fax   = phonePart;
-			}
-			else {
+				fax = phonePart;
+			} else {
 				phonePart = phonePart.replaceAll("<[^>]+>", "");
 				phonePart = phonePart.replaceAll("[\\r\\n\\t]", "").trim();
 				phone = phonePart;
@@ -446,7 +448,7 @@ public class DirectoriesContentParser extends HtmlParser {
 			// *** extract website
 			String website = "";
 			tmpPos = optionalPart.indexOf("alt=\"Web\"");
-			if (tmpPos > -1)	{
+			if (tmpPos > -1) {
 				tmpPos = tmpPos + "alt=\"Web\"".length();
 				tmpPos = optionalPart.indexOf("href=\"", tmpPos) + "href=\"".length();
 				website = optionalPart.substring(tmpPos);
@@ -458,7 +460,7 @@ public class DirectoriesContentParser extends HtmlParser {
 			// *** extract email
 			String email = "";
 			tmpPos = optionalPart.indexOf("href=\"mailto:");
-			if (tmpPos > -1)	{
+			if (tmpPos > -1) {
 				tmpPos = tmpPos + "href=\"mailto:".length();
 				email = optionalPart.substring(tmpPos);
 				String[] email_ = email.split("\"");
@@ -469,31 +471,33 @@ public class DirectoriesContentParser extends HtmlParser {
 			// *** extract vcard url
 			String vCard = "";
 			tmpPos = hiddenPart.indexOf("href=\"VCard");
-			if (tmpPos > -1)	{
+			if (tmpPos > -1) {
 				tmpPos = tmpPos + "href=\"VCard".length();
 				vCard = hiddenPart.substring(tmpPos);
 				String[] vCard_ = vCard.split("\" target=\"_blank\"");
 				vCard = vCard_[0];
-				if (!vCard.equalsIgnoreCase(""))	{
+				if (!vCard.equalsIgnoreCase("")) {
 					vCard = "http://www2.dastelefonbuch.de/VCard" + vCard;
 				}
 			}
 			
 			System.out.println("");
 			
-			String zusatz          = "";
-			String tel2            = "";
-			String mobile          = "";
-			String ledigname       = "";
-			String profession      = "";
-			String category        = "";
+			String zusatz = "";
+			String tel2 = "";
+			String mobile = "";
+			String ledigname = "";
+			String profession = "";
+			String category = "";
 			boolean isOrganisation = false;
-			String title           = "";
-			return new KontaktEntry(vorname, nachname, zusatz, //$NON-NLS-1$
-					street, zip, city, phone, fax, email, false, //$NON-NLS-1$
-					//+++++ new:
-					false, vCard, website, tel2, mobile,
-					ledigname, profession, category, isOrganisation, title, "DEU");
+			String title = "";
+			return new KontaktEntry(vorname, nachname,
+				zusatz, //$NON-NLS-1$
+				street, zip, city, phone, fax, email,
+				false, //$NON-NLS-1$
+				// +++++ new:
+				false, vCard, website, tel2, mobile, ledigname, profession, category,
+				isOrganisation, title, "DEU");
 		}
 		
 		if (!moveTo(ADR_LIST_TAG)) { // Kein neuer Eintrag
@@ -527,7 +531,7 @@ public class DirectoriesContentParser extends HtmlParser {
 		// Tel-Nr - Vorsicht - es gibt wirklich Einträge OHNE TelNr!
 		moveTo("<span class=\"tel\"");
 		String telNr = "";
-		if (moveTo("<a class=\"phonenr\""))	{
+		if (moveTo("<a class=\"phonenr\"")) {
 			telNr = extract(">", "</a>").replace("&nbsp;", "").replace("*", "").trim();
 		}
 		
@@ -549,79 +553,72 @@ public class DirectoriesContentParser extends HtmlParser {
 		// and strip "?what=<searchTerm>" from the end to get the vcard-url
 		vCard = vCard.split("\\?what=")[0];
 		
-		String website         = "";
-		String tel2            = "";
-		String mobile          = "";
-		String ledigname       = "";
-		String profession      = "";
-		String category        = "";
+		String website = "";
+		String tel2 = "";
+		String mobile = "";
+		String ledigname = "";
+		String profession = "";
+		String category = "";
 		boolean isOrganisation = false;
-		String title           = "";
-		return new KontaktEntry(vorname, nachname, zusatz, //$NON-NLS-1$
-				strasse, plz, ort, telNr, "", "", false, //$NON-NLS-1$
-				//+++++ new:
-				false, vCard, website, tel2, mobile,
-				ledigname, profession, category, isOrganisation, title, "CHE");
+		String title = "";
+		return new KontaktEntry(vorname, nachname,
+			zusatz, //$NON-NLS-1$
+			strasse, plz, ort, telNr, "", "", false, //$NON-NLS-1$
+			// +++++ new:
+			false, vCard, website, tel2, mobile, ledigname, profession, category, isOrganisation,
+			title, "CHE");
 	}
 	
-	public static String getDocReturnCharacter(final String contents)	{
+	public static String getDocReturnCharacter(final String contents){
 		// get the used newline/return for this content
 		String returnChar = "";
 		int crlfPos = contents.indexOf("\r\n");
-		if (crlfPos >= 0){
+		if (crlfPos >= 0) {
 			returnChar = "\r\n";
-		} else	{
+		} else {
 			int crPos = contents.indexOf("\r");
-			if (crPos >= 0){
+			if (crPos >= 0) {
 				returnChar = "\r";
-			} else	{
+			} else {
 				returnChar = "\n";
 			}
 		}
 		return returnChar;
 	}
 	
-	//+++++ START Extract vCard Contents
+	// +++++ START Extract vCard Contents
 	/*
-	 * For specification of vCard see
-	 *      - http://en.wikipedia.org/wiki/VCard
-	 *      - http://www.ietf.org/rfc/rfc2426.txt
+	 * For specification of vCard see - http://en.wikipedia.org/wiki/VCard -
+	 * http://www.ietf.org/rfc/rfc2426.txt
 	 * 
 	 * 
-	 *  Matching:
-	 *  N:          Name, strukturiert: <Nachname>;<Vorname>
-	 *  FN:         Formatted Name: Fullname, Vorname und Nachname oder OrgName oder andere Bezeichnung
-	 *  PHOTO:      ignorieren, falls tatsächlich vorhanden
-	 *  BDAY:       einlesen, falls wirklich dereinst vorhanden +++++ format?
-	 *  ADR:        als item1.ADR: strukturierte Adresse, Trenner ";" +++++
-	 *              <Postfach_uä_Nach_PLZ_ORT>;<>;<Address1_StrasseUndNr>;<Ort>;<Kanton>;<PLZ>;<>
-	 *              innerhalb eines Teils können Zeilenumbrüche mit Komma (!) eingefügt werden
-	 *  TEL:        Telefon, Fax, at Work/at Home
-	 *              TYPE=VOICE
-	 *              TYPE=FAX
-	 *  item1.ADR:  Adresse, Teile getrennt durch ";", at Work/at Home
-	 *  URL:        genau das ist es
-	 *  NOTE:       Verschiedenes
-	 *  TITLE:      zBsp Beruf, anderes
-	 *  ORG:        OrgName
-	 *  X-ABShowAs: "COMPANY": ist eine Organisation -> Checkbox setzen
-	 *   
+	 * Matching: N: Name, strukturiert: <Nachname>;<Vorname> FN: Formatted Name: Fullname, Vorname
+	 * und Nachname oder OrgName oder andere Bezeichnung PHOTO: ignorieren, falls tatsächlich
+	 * vorhanden BDAY: einlesen, falls wirklich dereinst vorhanden +++++ format? ADR: als item1.ADR:
+	 * strukturierte Adresse, Trenner ";" +++++
+	 * <Postfach_uä_Nach_PLZ_ORT>;<>;<Address1_StrasseUndNr>;<Ort>;<Kanton>;<PLZ>;<> innerhalb eines
+	 * Teils können Zeilenumbrüche mit Komma (!) eingefügt werden TEL: Telefon, Fax, at Work/at Home
+	 * TYPE=VOICE TYPE=FAX item1.ADR: Adresse, Teile getrennt durch ";", at Work/at Home URL: genau
+	 * das ist es NOTE: Verschiedenes TITLE: zBsp Beruf, anderes ORG: OrgName X-ABShowAs: "COMPANY":
+	 * ist eine Organisation -> Checkbox setzen
 	 */
-	
+
 	/**
-	 * @param firstnames input
-	 * @param delimiter used to separate the firstnames
+	 * @param firstnames
+	 *            input
+	 * @param delimiter
+	 *            used to separate the firstnames
 	 * @return the separated firstnames, delimited by &lt;delimiter&gt;
 	 */
-	public static String extractVornamen(final String firstnames, final String delimiter)	{
+	public static String extractVornamen(final String firstnames, final String delimiter){
 		String result = "";
 		String lFirstnames = firstnames;
-		for (int fn_sepIx = 0; fn_sepIx < ADR_VORNAMENSTRENNER.length; fn_sepIx++)	{
+		for (int fn_sepIx = 0; fn_sepIx < ADR_VORNAMENSTRENNER.length; fn_sepIx++) {
 			String fn_sep = ADR_VORNAMENSTRENNER[fn_sepIx];
 			String[] parts = lFirstnames.split(fn_sep);
 			String lDelimiter = "";
 			result = "";
-			for (int partsIx = 0; partsIx < parts.length; partsIx++)	{
+			for (int partsIx = 0; partsIx < parts.length; partsIx++) {
 				result = result + lDelimiter + parts[partsIx].trim();
 				lDelimiter = delimiter;
 			}
@@ -629,32 +626,17 @@ public class DirectoriesContentParser extends HtmlParser {
 		}
 		return result;
 	}
+	
 	/*
-		vorname;
-		name;
-		zusatz;
-		adresse;
-		plz;
-		ort;
-		tel;
-		fax;
-		email;
-		isDetail;
-		isVCardDetail;
-		detailLinkLink;
-		website;
-		tel2;
-		mobile;
-		ledigname;
-		profession;
-		category;
-	*/
-	public static KontaktEntry parseVCard(final String vCardURL, final String country)	{
+	 * vorname; name; zusatz; adresse; plz; ort; tel; fax; email; isDetail; isVCardDetail;
+	 * detailLinkLink; website; tel2; mobile; ledigname; profession; category;
+	 */
+	public static KontaktEntry parseVCard(final String vCardURL, final String country){
 		// read contents of vCard
 		String vCardContents = "";
 		try {
 			vCardContents = readContent(vCardURL);
-			//parseVCard(vCardContents);
+			// parseVCard(vCardContents);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			return null;
@@ -671,32 +653,33 @@ public class DirectoriesContentParser extends HtmlParser {
 		
 		// 
 		String MARKER_VCARD_BEGIN = MARKER_VCARD_BEGIN_ + MARKER_VCARD_NEWLINE;
-		String MARKER_VCARD_END   = MARKER_VCARD_END_;
+		String MARKER_VCARD_END = MARKER_VCARD_END_;
 		
 		// test if this really is a valid vCard: Start with BEGIN:VCARD, end with END:VCARD
-		if (!vCardContents.substring(0, MARKER_VCARD_BEGIN.length()).equalsIgnoreCase(MARKER_VCARD_BEGIN))	{
+		if (!vCardContents.substring(0, MARKER_VCARD_BEGIN.length()).equalsIgnoreCase(
+			MARKER_VCARD_BEGIN)) {
 			return null;
 		}
 		int endMarkerPos = vCardContents.indexOf(MARKER_VCARD_END);
-		if (endMarkerPos == -1)	{
+		if (endMarkerPos == -1) {
 			return null;
 		}
 		
 		Boolean isCompany = false;
-		if (country.toLowerCase().equalsIgnoreCase("ch"))	{
+		if (country.toLowerCase().equalsIgnoreCase("ch")) {
 			// test if this is company: X-ABShowAs:COMPANY entry
 			isCompany = false;
-			if (vCardContents.indexOf("X-ABShowAs:COMPANY") >= 0)	{
+			if (vCardContents.indexOf("X-ABShowAs:COMPANY") >= 0) {
 				isCompany = true;
 			}
 		}
-		if (country.toLowerCase().equalsIgnoreCase("de"))	{
+		if (country.toLowerCase().equalsIgnoreCase("de")) {
 			// test if this is company: X-ABShowAs:COMPANY entry
 			isCompany = false;
-			if (vCardContents.indexOf("TEL;WORK") >= 0)	{
-				if (vCardContents.indexOf("TEL;HOME") >= 0)	{
+			if (vCardContents.indexOf("TEL;WORK") >= 0) {
+				if (vCardContents.indexOf("TEL;HOME") >= 0) {
 					isCompany = false;
-				} else	{
+				} else {
 					isCompany = true;
 				}
 			}
@@ -708,11 +691,11 @@ public class DirectoriesContentParser extends HtmlParser {
 		vCardVorname = extractVornamen(formatString(vCardVorname), ";");
 		// for telefonbuch.de this contains firstname
 		String vCardName = formatString(getVCardValue(vCardContents, "Name", isCompany, country));
-		if (country.toLowerCase().equalsIgnoreCase("de"))	{
-			if (!isCompany)	{
+		if (country.toLowerCase().equalsIgnoreCase("de")) {
+			if (!isCompany) {
 				String[] firstNameLastName = getVornameNachname(vCardName);
 				vCardVorname = extractVornamen(firstNameLastName[0], ";");
-				vCardName    = firstNameLastName[1];
+				vCardName = firstNameLastName[1];
 			}
 		}
 		String vCardZusatz = getVCardValue(vCardContents, "Note", isCompany, country);
@@ -720,36 +703,43 @@ public class DirectoriesContentParser extends HtmlParser {
 		// strip copyright notice [Copyright (c) local.ch ag]
 		vCardZusatz = vCardZusatz.replaceAll(MARKER_VCARD_NEWLINE + LOCAL_COPYRIGHT, "");
 		vCardZusatz = vCardZusatz.replaceAll(LOCAL_COPYRIGHT, "");
-		String vCardStrasse = formatString(getVCardValue(vCardContents, "Strasse", isCompany, country));
+		String vCardStrasse =
+			formatString(getVCardValue(vCardContents, "Strasse", isCompany, country));
 		String vCardPlz = formatString(getVCardValue(vCardContents, "PLZ", isCompany, country));
 		String vCardOrt = formatString(getVCardValue(vCardContents, "Ort", isCompany, country));
-		String vCardTelefon1 = formatPhoneNumber(getVCardValue(vCardContents, "Telefon1", isCompany, country), country);
-		String vCardFax = formatPhoneNumber(getVCardValue(vCardContents, "Fax", isCompany, country), country);
+		String vCardTelefon1 =
+			formatPhoneNumber(getVCardValue(vCardContents, "Telefon1", isCompany, country), country);
+		String vCardFax =
+			formatPhoneNumber(getVCardValue(vCardContents, "Fax", isCompany, country), country);
 		String vCardEmail = formatString(getVCardValue(vCardContents, "Email", isCompany, country));
 		String vCardIsDetail = "1";
-		String vCardWebSite = formatString(getVCardValue(vCardContents, "Website", isCompany, country));
-		String vCardTelefon2 = formatPhoneNumber(getVCardValue(vCardContents, "Telefon2", isCompany, country), country);
-		String vCardMobile = formatPhoneNumber(getVCardValue(vCardContents, "Mobil", isCompany, country), country);
+		String vCardWebSite =
+			formatString(getVCardValue(vCardContents, "Website", isCompany, country));
+		String vCardTelefon2 =
+			formatPhoneNumber(getVCardValue(vCardContents, "Telefon2", isCompany, country), country);
+		String vCardMobile =
+			formatPhoneNumber(getVCardValue(vCardContents, "Mobil", isCompany, country), country);
 		String vCardBeruf = formatString(getVCardValue(vCardContents, "Beruf", isCompany, country));
-		String vCardCategory = formatString(getVCardValue(vCardContents, "BEMERKUNG", isCompany, country));
+		String vCardCategory =
+			formatString(getVCardValue(vCardContents, "BEMERKUNG", isCompany, country));
 		// part between () belongs to "role"/Beruf
 		String DIEKATEGORIE = vCardZusatz;
 		String ADDITIONALROLE = "";
 		int parPos = vCardZusatz.indexOf("(");
-		if (parPos >= 0)	{
-			DIEKATEGORIE   = vCardZusatz.substring(0, parPos).trim();
+		if (parPos >= 0) {
+			DIEKATEGORIE = vCardZusatz.substring(0, parPos).trim();
 			ADDITIONALROLE = vCardZusatz.substring(parPos + 1).trim();
 			ADDITIONALROLE = ADDITIONALROLE.substring(0, ADDITIONALROLE.length() - 1);
 		}
 		// title may be contained in vCardBeruf or in vCardName -> extract to vCardTitle
 		// search in vCardberuf
 		String vCardTitle = "";
-		for (int i = 1; i < ADR_TITLES.length; i++)	{
+		for (int i = 1; i < ADR_TITLES.length; i++) {
 			String currTitle = ADR_TITLES[i];
-			/*if (vCardBeruf.matches("^" + currTitle + "[.]*"))	{
-				System.out.println("");
-			}*/
-			if (vCardBeruf.indexOf(currTitle) >= 0)	{
+			/*
+			 * if (vCardBeruf.matches("^" + currTitle + "[.]*")) { System.out.println(""); }
+			 */
+			if (vCardBeruf.indexOf(currTitle) >= 0) {
 				vCardTitle = currTitle;
 				// strip title off vCardBeruf
 				vCardBeruf = vCardBeruf.replace(currTitle, "");
@@ -758,9 +748,9 @@ public class DirectoriesContentParser extends HtmlParser {
 		}
 		
 		// extract parts from html
-		String group     = "";
+		String group = "";
 		String ledigname = "";
-		String poBox     = "";
+		String poBox = "";
 		try {
 			// calc the url of the detail entry
 			String htmlUrl = vCardURL.replace("/vcard/", "/de/d/");
@@ -774,19 +764,22 @@ public class DirectoriesContentParser extends HtmlParser {
 					// extract ledigname from nameVornameText
 					String[] vornameLedigname = nameVornameText.split(ADR_LEDIGNAMENSTRENNER);
 					ledigname = "";
-					if (vornameLedigname.length > 1)	{
-						ledigname = cleanupUmlaute(vornameLedigname[1].split(ADR_LEDIGNAMENSSCHLUSS)[0].trim());
+					if (vornameLedigname.length > 1) {
+						ledigname =
+							cleanupUmlaute(vornameLedigname[1].split(ADR_LEDIGNAMENSSCHLUSS)[0]
+								.trim());
 					}
 					// address -> pobox if present
 					String adressTxt = subParser.extract("<div class=\"streetAddress\">", "</div>");
 					HtmlParser parser = new HtmlParser(adressTxt);
-					poBox = removeDirt(parser.extract("<span class=\"post-office-box\">", "</span>"));
+					poBox =
+						removeDirt(parser.extract("<span class=\"post-office-box\">", "</span>"));
 					poBox = poBox.replaceAll("^\\<br /\\>", "");
 					poBox = poBox.replaceAll("\\<br /\\>$", "");
 					poBox = poBox.replaceAll("\\<br /\\>", ", ");
 					poBox = cleanupUmlaute(poBox);
 				}
-			}		
+			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -794,10 +787,11 @@ public class DirectoriesContentParser extends HtmlParser {
 		}
 		
 		// beruf calculated
-		if (!vCardBeruf.isEmpty())	{
-			if (!ADDITIONALROLE.isEmpty()) ADDITIONALROLE = " " + ADDITIONALROLE;
+		if (!vCardBeruf.isEmpty()) {
+			if (!ADDITIONALROLE.isEmpty())
+				ADDITIONALROLE = " " + ADDITIONALROLE;
 			vCardBeruf = formatString(vCardBeruf) + ADDITIONALROLE;
-		} else	{
+		} else {
 			vCardBeruf = ADDITIONALROLE;
 		}
 		
@@ -805,110 +799,89 @@ public class DirectoriesContentParser extends HtmlParser {
 		boolean isDetail = true;
 		boolean isVCardDetail = true;
 		String detailLink = "";
-		return new KontaktEntry (
-				vCardVorname,
-				vCardName,
-				poBox,
-				vCardStrasse,
-				vCardPlz,
-				vCardOrt,
-				vCardTelefon1,
-				vCardFax,
-				vCardEmail,
-				isDetail,
-				isVCardDetail,
-				detailLink,
-				vCardWebSite,
-				vCardTelefon2,
-				vCardMobile,
-				ledigname,
-				vCardBeruf,
-				DIEKATEGORIE,
-				isCompany,
-				vCardTitle,
-				"CHE"
-				);
+		return new KontaktEntry(vCardVorname, vCardName, poBox, vCardStrasse, vCardPlz, vCardOrt,
+			vCardTelefon1, vCardFax, vCardEmail, isDetail, isVCardDetail, detailLink, vCardWebSite,
+			vCardTelefon2, vCardMobile, ledigname, vCardBeruf, DIEKATEGORIE, isCompany, vCardTitle,
+			"CHE");
 	}
-	private static String getVCardValue(final String vCardContents, final String key, final boolean isCompany, final String lang)	{
-		if (lang.equalsIgnoreCase("ch"))	{
+	
+	private static String getVCardValue(final String vCardContents, final String key,
+		final boolean isCompany, final String lang){
+		if (lang.equalsIgnoreCase("ch")) {
 			String[] extractionSpecs = {
-					"NAME:N:0",
-					"VORNAME:N:1",
-					"STRASSE:Item1.ADR;TYPE=HOME:2",   //home/work
-					"PLZ:Item1.ADR;TYPE=HOME:5",       //home/work
-					"ORT:Item1.ADR;TYPE=HOME:3",       //home/work
-					"Telefon1:TEL;TYPE=VOICE,HOME:0",  //home/work
-					"Telefon2:TEL;TYPE=VOICE,WORK:0",  //home/work
-					"FAX:TEL;TYPE=FAX,HOME:0",         //home/work
-					"MOBIL:TEL;TYPE=CELL,HOME:0",      //home/work
-					"EMAIL:EMAIL;TYPE=INTERNET:0",
-					"WEBSITE:URL;TYPE=HOME:0",         //home/work
-					"BERUF:TITLE:0",
-					"NOTE:NOTE:0"
-				};
+				"NAME:N:0", "VORNAME:N:1", "STRASSE:Item1.ADR;TYPE=HOME:2", // home/work
+				"PLZ:Item1.ADR;TYPE=HOME:5", // home/work
+				"ORT:Item1.ADR;TYPE=HOME:3", // home/work
+				"Telefon1:TEL;TYPE=VOICE,HOME:0", // home/work
+				"Telefon2:TEL;TYPE=VOICE,WORK:0", // home/work
+				"FAX:TEL;TYPE=FAX,HOME:0", // home/work
+				"MOBIL:TEL;TYPE=CELL,HOME:0", // home/work
+				"EMAIL:EMAIL;TYPE=INTERNET:0", "WEBSITE:URL;TYPE=HOME:0", // home/work
+				"BERUF:TITLE:0", "NOTE:NOTE:0"
+			};
 			return getVCardValue(vCardContents, key, isCompany, extractionSpecs);
 		}
-		if (lang.equalsIgnoreCase("de"))	{
+		if (lang.equalsIgnoreCase("de")) {
 			String[] extractionSpecs = {
-				"NAME:N:0",
-				"VORNAME:N:1",
-				"STRASSE:ADR:2",   //home/work
-				"PLZ:ADR:5",       //home/work
-				"ORT:ADR:3",       //home/work
-				"Telefon1:TEL;HOME:0",  //home/work
-				"Telefon2:TEL;WORK:0",  //home/work
-				"FAX:TEL;HOME;FAX:0",         //home/work
+				"NAME:N:0", "VORNAME:N:1", "STRASSE:ADR:2", // home/work
+				"PLZ:ADR:5", // home/work
+				"ORT:ADR:3", // home/work
+				"Telefon1:TEL;HOME:0", // home/work
+				"Telefon2:TEL;WORK:0", // home/work
+				"FAX:TEL;HOME;FAX:0", // home/work
 				
-				"MOBIL:TEL;HOME;CELL:0",    //home/work
+				"MOBIL:TEL;HOME;CELL:0", // home/work
 				
-				"EMAIL:EMAIL;INTERNET:0",
-				"WEBSITE:URL;HOME:0",         //home/work
-				"BERUF:TITLE:0",
-				"NOTE:NOTE:0"
+				"EMAIL:EMAIL;INTERNET:0", "WEBSITE:URL;HOME:0", // home/work
+				"BERUF:TITLE:0", "NOTE:NOTE:0"
 			};
 			return getVCardValue(vCardContents, key, isCompany, extractionSpecs);
 		}
 		return "";
 	}
+	
 	/**
 	 * read the value for a given key from a vCard
 	 * 
-	 * @param vCardContents: the full contents of a vCard
-	 * @param key: the key for which to search for
-	 * @param isCompany: is this a company-entry - returns different values
+	 * @param vCardContents
+	 *            : the full contents of a vCard
+	 * @param key
+	 *            : the key for which to search for
+	 * @param isCompany
+	 *            : is this a company-entry - returns different values
 	 * @return the found value or "" if not found
 	 */
-	private static String getVCardValue(final String vCardContents, final String key, final boolean isCompany, final String[] vCardExtractionSpecs)	{
-		/* not present in vCard but on html-page:
-		 *    - pobox
-		 *    - ledigname
-		 *    - group
+	private static String getVCardValue(final String vCardContents, final String key,
+		final boolean isCompany, final String[] vCardExtractionSpecs){
+		/*
+		 * not present in vCard but on html-page: - pobox - ledigname - group
 		 */
-		
+
 		// find extraction spec for key
 		String lKey = key.toLowerCase();
-		String extractionSpec         = "";
+		String extractionSpec = "";
 		String extractionSpecSelector = "";
-		for (int i = 0; i < vCardExtractionSpecs.length; i++){
+		for (int i = 0; i < vCardExtractionSpecs.length; i++) {
 			String currSpecKey = vCardExtractionSpecs[i].toLowerCase();
 			currSpecKey = currSpecKey.substring(0, currSpecKey.indexOf(":"));
-			if (currSpecKey.equalsIgnoreCase(lKey))	{
+			if (currSpecKey.equalsIgnoreCase(lKey)) {
 				extractionSpec = vCardExtractionSpecs[i];
 				extractionSpec = extractionSpec.substring(extractionSpec.indexOf(":") + 1);
 				extractionSpecSelector = extractionSpec.split(":")[1];
 				extractionSpec = extractionSpec.split(":")[0];
 				// switch HOME/WORK in specs if isCompany = true
-				if (isCompany){
-					if (extractionSpec.indexOf("HOME") >= 0){
+				if (isCompany) {
+					if (extractionSpec.indexOf("HOME") >= 0) {
 						extractionSpec = extractionSpec.replace("HOME", "WORK");
-					} else	{
+					} else {
 						extractionSpec = extractionSpec.replace("WORK", "HOME");
 					}
 				}
 				break;
 			}
 		}
-		if (extractionSpec == "") return "";
+		if (extractionSpec == "")
+			return "";
 		
 		// stripping ENCODING, CHARSET and PREF from vCard
 		String stripped = vCardContents.replaceAll(";CHARSET=[a-zA-Z1-9-_]+", "");
@@ -917,20 +890,22 @@ public class DirectoriesContentParser extends HtmlParser {
 		
 		String MARKER_VCARD_NEWLINE = getDocReturnCharacter(vCardContents);
 		// loop through lines of vcard, try to match the extractionSpec
-		int lineStartIx     = 0;
+		int lineStartIx = 0;
 		int nextLinestartIx = 0;
-		while ((nextLinestartIx = stripped.indexOf(MARKER_VCARD_NEWLINE, lineStartIx))>=0)	{
+		while ((nextLinestartIx = stripped.indexOf(MARKER_VCARD_NEWLINE, lineStartIx)) >= 0) {
 			String vCardLine = stripped.substring(lineStartIx, nextLinestartIx);
-			if ((vCardLine.length() >= extractionSpec.length()) && (vCardLine.substring(0, extractionSpec.length()).equalsIgnoreCase(extractionSpec)))	{
+			if ((vCardLine.length() >= extractionSpec.length())
+				&& (vCardLine.substring(0, extractionSpec.length())
+					.equalsIgnoreCase(extractionSpec))) {
 				// data is on the right side of first colon
 				String data = "";
 				int colonPos = vCardLine.indexOf(":");
-				if (colonPos >= 0)	{
+				if (colonPos >= 0) {
 					data = vCardLine.substring(colonPos + 1);
 				}
-				//String data = vCardLine.split(":")[1];
+				// String data = vCardLine.split(":")[1];
 				String[] dataParts = data.split(";");
-				if (dataParts.length > Long.parseLong(extractionSpecSelector))	{
+				if (dataParts.length > Long.parseLong(extractionSpecSelector)) {
 					data = data.split(";")[(int) Long.parseLong(extractionSpecSelector)];
 				} else {
 					data = "";
@@ -940,27 +915,26 @@ public class DirectoriesContentParser extends HtmlParser {
 			lineStartIx = nextLinestartIx + MARKER_VCARD_NEWLINE.length();
 		}
 		
-		
 		return "";
 	}
 	
-	private static String cleanupUmlaute(String text) {
+	private static String cleanupUmlaute(String text){
 		// this version is prepared for any characters
 		String tmp = text;
 		tmp = tmp.replaceAll("&#x([0-9A-Fa-f]{2,2});", "%$1");
 		try {
 			tmp = URLDecoder.decode(tmp, "ISO-8859-1");
-		} catch (UnsupportedEncodingException e) {
-		}
+		} catch (UnsupportedEncodingException e) {}
 		return tmp;
 	}
-
-		/**
+	
+	/**
 	 * reformat string correctly which came from vCard from tel.local.ch
+	 * 
 	 * @param sourceString
 	 * @return the correctly formatted string
 	 */
-	public static String formatString(final String sourceString)	{
+	public static String formatString(final String sourceString){
 		// unescape, first replace "=" by "%"...
 		String data = sourceString.replaceAll("=", "%");
 		try {
@@ -973,66 +947,72 @@ public class DirectoriesContentParser extends HtmlParser {
 	
 	/**
 	 * Format a phone number as swiss phone number, 0xx xxx xx xx
-	 * @param phoneNumber the phoneNumber as returned from vCard from tel.local.ch, 
-	 *                    eg. +41523439772
+	 * 
+	 * @param phoneNumber
+	 *            the phoneNumber as returned from vCard from tel.local.ch, eg. +41523439772
 	 * @return the reformatted phone number. if the input is not formatted correctly, then the
-	 * function returns an empty string
+	 *         function returns an empty string
 	 */
-	public static String formatPhoneNumber(final String phoneNumber, final String country)	{
+	public static String formatPhoneNumber(final String phoneNumber, final String country){
 		String result = phoneNumber;
 		// do some testing
-		if (country.toLowerCase().equalsIgnoreCase("ch"))	{
-			if (phoneNumber.length() == 0) return "";
+		if (country.toLowerCase().equalsIgnoreCase("ch")) {
+			if (phoneNumber.length() == 0)
+				return "";
 			String tmp = phoneNumber.replaceAll("\\+[0-9]{11}", "");
-			if (tmp.length() != 0) return "";
+			if (tmp.length() != 0)
+				return "";
 			
 			// now format the number
-			result = "0" + 
-							phoneNumber.substring( 3,  5) + " " +
-							phoneNumber.substring( 5,  8) + " " +
-							phoneNumber.substring( 8, 10) + " " +
-							phoneNumber.substring(10, 12);
+			result =
+				"0" + phoneNumber.substring(3, 5) + " " + phoneNumber.substring(5, 8) + " "
+					+ phoneNumber.substring(8, 10) + " " + phoneNumber.substring(10, 12);
 		}
 		return result;
 	}
 	
 	/**
 	 * Format a phone number according to your needs. NOT YET IMPLEMENTED
-	 * @param phoneNumber the phoneNumber as returned from vCard from tel.local.ch, 
-	 *                    eg. +41523439772
-	 * @param inFormat the format of the input
-	 * @param outFormat how to format the output
+	 * 
+	 * @param phoneNumber
+	 *            the phoneNumber as returned from vCard from tel.local.ch, eg. +41523439772
+	 * @param inFormat
+	 *            the format of the input
+	 * @param outFormat
+	 *            how to format the output
 	 * @return the reformatted phone number. if the input is not formatted correctly, then the
-	 * function returns an empty string
+	 *         function returns an empty string
 	 */
-	public static String formatPhoneNumber(final String phoneNumber, final String country, final String inFormat, final String outFormat)	{
+	public static String formatPhoneNumber(final String phoneNumber, final String country,
+		final String inFormat, final String outFormat){
 		
 		return "";
 	}
 	
 	/**
 	 * Converts a StringArray to a string, delimited by {delimiter}
+	 * 
 	 * @param strArray
 	 * @param delimiter
 	 * @return
 	 */
-	protected static String stringArrayToString(String[] strArray, String delimiter)	{
-	    StringBuffer result = new StringBuffer();
-	    if (strArray.length > 0) {
-	        result.append(strArray[0]);
-	        for (int i=1; i<strArray.length; i++) {
-	            result.append(delimiter);
-	            result.append(strArray[i]);
-	        }
-	    }
-	    return result.toString();
+	protected static String stringArrayToString(String[] strArray, String delimiter){
+		StringBuffer result = new StringBuffer();
+		if (strArray.length > 0) {
+			result.append(strArray[0]);
+			for (int i = 1; i < strArray.length; i++) {
+				result.append(delimiter);
+				result.append(strArray[i]);
+			}
+		}
+		return result.toString();
 	}
 	
-	//+++++ END   Extract vCard Contents
+	// +++++ END Extract vCard Contents
 	
-	//+++++ START HELP READ PAGE
-	private static String readContent(final String fullUrl)
-		throws IOException, MalformedURLException{
+	// +++++ START HELP READ PAGE
+	private static String readContent(final String fullUrl) throws IOException,
+		MalformedURLException{
 		
 		URL content = new URL(fullUrl);
 		InputStream input = content.openStream();
@@ -1052,17 +1032,20 @@ public class DirectoriesContentParser extends HtmlParser {
 		}
 		return sb.toString();
 	}
-
+	
 	/**
-	 *  read and return the contents of a html page
-	 *  
-	 * @param urlText = the url from where the page should be read
-	 * @param charSet = the character set to be used for page-encoding
+	 * read and return the contents of a html page
+	 * 
+	 * @param urlText
+	 *            = the url from where the page should be read
+	 * @param charSet
+	 *            = the character set to be used for page-encoding
 	 * 
 	 * @return String, the contents of the page
 	 */
 	
-	public static String readContent(final String urlText, final String charSet) throws IOException, MalformedURLException{
+	public static String readContent(final String urlText, final String charSet)
+		throws IOException, MalformedURLException{
 		URL url = new URL(urlText);
 		InputStream input = url.openStream();
 		
@@ -1082,14 +1065,19 @@ public class DirectoriesContentParser extends HtmlParser {
 		}
 		return sb.toString();
 	}
-//+++++ END   HELP READ PAGE
-
 	
+	// +++++ END HELP READ PAGE
 	
 	/**
 	 * Extrahiert einen Kontakt aus einem Detaileintrag Bsp: <div class="resrowclr_yellow"> </br>
-	 * <img class="imgbox" src="http://s.staticlocal.ch/images/pois/na/blue.png" alt="poi"/> <p
-	 * class="role">Garage</p> <h2 class="fn">Auto Meier AG</h2> <p class="role">Opel-Vertretung</p>
+	 * <img class="imgbox" src="http://s.staticlocal.ch/images/pois/na/blue.png" alt="poi"/>
+	 * <p * class="role">
+	 * Garage
+	 * </p>
+	 * <h2 class="fn">Auto Meier AG</h2>
+	 * <p class="role">
+	 * Opel-Vertretung
+	 * </p>
 	 * <div class="addressBlockMain"> <div class="streetAddress"> <span
 	 * class="street-address">Hauptstrasse 253</span> </br> <span class="post-office-box">Postfach<br>
 	 * </span> <span class="postal-code">5314</span> <span class="locality">Kleindöttingen</span>
@@ -1105,8 +1093,9 @@ public class DirectoriesContentParser extends HtmlParser {
 	 * </tr>
 	 * </tbody>
 	 * </table>
-	 * </div> <br class="bighr"/> <div id="moreAddresses"> <h3>Zusatzeintrag</h3> <div
-	 * class="additionalAddress" id="additionalAddress1"> <span class="role">Verkauf</span> </br>
+	 * </div> <br class="bighr"/>
+	 * <div id="moreAddresses"> <h3>Zusatzeintrag</h3> <div class="additionalAddress"
+	 * id="additionalAddress1"> <span class="role">Verkauf</span> </br>
 	 * <table>
 	 * <tbody>
 	 * <tr class="phoneNumber">
@@ -1152,14 +1141,14 @@ public class DirectoriesContentParser extends HtmlParser {
 		String vorname = vornameNachname[0];
 		String nachname = vornameNachname[1];
 		
-		//+++++ START extract vorname/ledigname from vorname
+		// +++++ START extract vorname/ledigname from vorname
 		String[] vornameLedigname = vorname.split(ADR_LEDIGNAMENSTRENNER);
 		vorname = vornameLedigname[0].trim();
 		String ledigname = "";
-		if (vornameLedigname.length > 1)	{
+		if (vornameLedigname.length > 1) {
 			ledigname = vornameLedigname[1].split(ADR_LEDIGNAMENSSCHLUSS)[0].trim();
 		}
-		//+++++ END   extract vorname/ledigname from vorname
+		// +++++ END extract vorname/ledigname from vorname
 		
 		// Zusatz
 		String zusatz = "";
@@ -1206,27 +1195,29 @@ public class DirectoriesContentParser extends HtmlParser {
 			email = reverseString(email);
 		}
 		
-		//+++++ new
+		// +++++ new
 		// read DetailPage-Link
 		String vCard = extract("<li class=\"exportvcard\"><a href=\"", "\">");
-		// prepend path 
+		// prepend path
 		vCard = "http://tel.local.ch" + vCard;
 		// and strip "?what=<searchTerm>" from the end to get the vcard-url
 		vCard = vCard.split("\\?what=")[0];
 		
-//		return new KontaktEntry(vorname, nachname, zusatz, streetAddress, plzCode, ort, tel, fax,
-//			email, true);
-		String website         = "";
-		String tel2            = "";
-		String mobile          = "";
-		String profession      = "";
-		String category        = "";
+		// return new KontaktEntry(vorname, nachname, zusatz, streetAddress, plzCode, ort, tel, fax,
+		// email, true);
+		String website = "";
+		String tel2 = "";
+		String mobile = "";
+		String profession = "";
+		String category = "";
 		boolean isOrganisation = false;
-		String title           = "";
-		return new KontaktEntry(vorname, nachname, zusatz, //$NON-NLS-1$
-				streetAddress, plzCode, ort, tel, fax, email, true, //$NON-NLS-1$
-				//+++++ new:
-				false, vCard, website, tel2, mobile,
-				ledigname, profession, category, isOrganisation, title, "CHE");
+		String title = "";
+		return new KontaktEntry(vorname, nachname,
+			zusatz, //$NON-NLS-1$
+			streetAddress, plzCode, ort, tel, fax, email,
+			true, //$NON-NLS-1$
+			// +++++ new:
+			false, vCard, website, tel2, mobile, ledigname, profession, category, isOrganisation,
+			title, "CHE");
 	}
 }

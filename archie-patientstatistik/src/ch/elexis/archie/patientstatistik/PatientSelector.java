@@ -10,8 +10,9 @@ public class PatientSelector extends AbstractWidget {
 	public Patient patSelected;
 	
 	public PatientSelector(Composite parent, int style, String labelText, RegexValidation regex){
-		super(parent,style,labelText,regex);
+		super(parent, style, labelText, regex);
 	}
+	
 	@Override
 	public Object getValue(){
 		return patSelected;
@@ -24,12 +25,12 @@ public class PatientSelector extends AbstractWidget {
 	
 	@Override
 	public void setDescription(String description){
-		
+
 	}
 	
 	@Override
 	public void setValue(Object value){
-		patSelected=(Patient)value;
+		patSelected = (Patient) value;
 	}
 	
 }

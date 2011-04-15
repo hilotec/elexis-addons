@@ -55,8 +55,8 @@ import ch.rgw.tools.ExHandler;
 
 public class PLZView extends ViewPart implements ISaveablePart2, IActivationListener {
 	
-	private static final String SRC_ENCODING				= "UTF-8";
-	public static final String ID							= "ch.marlovits.plz.PLZView";
+	private static final String SRC_ENCODING = "UTF-8";
+	public static final String ID = "ch.marlovits.plz.PLZView";
 	
 	/**
 	 * 
@@ -66,36 +66,43 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	 * 
 	 * Start der Tabelle mit den Land-Iso-Codes;
 	 * <table class="wikitable sortable" style="vertical-align:top; width:100%;">
-	 * Suche nach: <table class="wikitable sortable"
+	 * Suche nach:
+	 * <table
+	 * class="wikitable sortable"
 	 * 
 	 * Ende der Tabelle mit den Land-Iso-Codes:
 	 * </table>
 	 * 
-	 * dann folgen die Zeilen, jeweils mit Start-Marker <tr> und End-Marker </tr>
+	 * dann folgen die Zeilen, jeweils mit Start-Marker
+	 * <tr>
+	 * und End-Marker
+	 * </tr>
 	 * 
 	 * die erste Zeile ist die Titel-Zeile, wird ausgelassen
 	 * 
 	 * in jeder Zeile folgen dann jeweils 8 Daten-Zellen
 	 */
-	private static final String BASE_URL_DE					= "http://de.wikipedia.org";
-	private static final String URL_DE						= "http://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste";
-	private static final String WIKI_LAND_STARTINFO_MARKER	= "<table class=" + "\"" + "wikitable sortable" + "\"";
-	private static final String WIKI_LAND_STARTCELLS_MARKER	= "<td";
-	private static final String WIKI_LAND_ENDINFO_MARKER	= "</table>";
-	private static final String WIKI_LAND_SKIPDATA_MARKER	= "<td><span style";
+	private static final String BASE_URL_DE = "http://de.wikipedia.org";
+	private static final String URL_DE = "http://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste";
+	private static final String WIKI_LAND_STARTINFO_MARKER =
+		"<table class=" + "\"" + "wikitable sortable" + "\"";
+	private static final String WIKI_LAND_STARTCELLS_MARKER = "<td";
+	private static final String WIKI_LAND_ENDINFO_MARKER = "</table>";
+	private static final String WIKI_LAND_SKIPDATA_MARKER = "<td><span style";
 	
-	private static final String WIKI_LAND_SUBISO_STARTMARKER	= "<table class=\"prettytable sortable\"";
-	private static final String WIKI_LAND_SUBISO_ENDMARKER		= "</table>";
+	private static final String WIKI_LAND_SUBISO_STARTMARKER =
+		"<table class=\"prettytable sortable\"";
+	private static final String WIKI_LAND_SUBISO_ENDMARKER = "</table>";
 	
-	private static final String TABLEROW_STARTMARKER	= "<tr";
-	private static final String TABLEROW_ENDMARKER		= "</tr>";
-	private static final String TABLEDATA_STARTMARKER	= "<td>";
-	private static final String TABLEDATA_ENDMARKER		= "</td>";
+	private static final String TABLEROW_STARTMARKER = "<tr";
+	private static final String TABLEROW_ENDMARKER = "</tr>";
+	private static final String TABLEDATA_STARTMARKER = "<td>";
+	private static final String TABLEDATA_ENDMARKER = "</td>";
 	
 	private final List<LandEintrag> landIsoEntries = new Vector<LandEintrag>();
 	
 	// command from org.eclipse.ui
-	private static final String COMMAND_COPY   = "org.eclipse.ui.edit.copy";
+	private static final String COMMAND_COPY = "org.eclipse.ui.edit.copy";
 	private static final String COMMAND_DELETE = "org.eclipse.ui.edit.delete";
 	
 	private FormToolkit tk;
@@ -111,32 +118,20 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	private Action testingAction;
 	
 	// column indices
-	private static final int COL_LAND            = 0;
-	private static final int COL_LANDISO3        = 1;
-	private static final int COL_PLZ             = 2;
-	private static final int COL_ORT             = 3;
-	private static final int COL_STRASSE         = 4;
-	private static final int COL_KANTON          = 5;
-	private static final int COL_KANTONKUERZEL   = 6;
+	private static final int COL_LAND = 0;
+	private static final int COL_LANDISO3 = 1;
+	private static final int COL_PLZ = 2;
+	private static final int COL_ORT = 3;
+	private static final int COL_STRASSE = 4;
+	private static final int COL_KANTON = 5;
+	private static final int COL_KANTONKUERZEL = 6;
 	
 	private static final String[] COLUMN_TEXT = {
-		"Land",
-		"LandISO3",
-		"PLZ",
-		"Ort",
-		"Strasse",
-		"Kanton",
-		"Kantonkuerzel",
+		"Land", "LandISO3", "PLZ", "Ort", "Strasse", "Kanton", "Kantonkuerzel",
 	};
 	
 	private static final String[] DB_COLUMN_TEXT = {
-		"Land",
-		"LandISO3",
-		"Plz",
-		"Ort",
-		"Strasse",
-		"Kanton",
-		"Kantonkuerzel",
+		"Land", "LandISO3", "Plz", "Ort", "Strasse", "Kanton", "Kantonkuerzel",
 	};
 	
 	private static final int[] COLUMN_WIDTH = {
@@ -149,13 +144,13 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		80, // Kantonkürzel
 	};
 	
-	
 	List<ch.marlovits.plz.Plz> getPostleitzahlen(){
 		// Erstellen des Return-Arrays
 		List<ch.marlovits.plz.Plz> postleitzahlen = new ArrayList<ch.marlovits.plz.Plz>();
 		
 		// Erstellen einer Query auf Plz und alle Datensätze einlesen, sortieren nach ID
-		Query<ch.marlovits.plz.Plz> query = new Query<ch.marlovits.plz.Plz>(ch.marlovits.plz.Plz.class);
+		Query<ch.marlovits.plz.Plz> query =
+			new Query<ch.marlovits.plz.Plz>(ch.marlovits.plz.Plz.class);
 		query.insertTrue();
 		query.orderBy(false, "ID");
 		List<ch.marlovits.plz.Plz> plzList = query.execute();
@@ -182,8 +177,8 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 					return -1;
 				}
 				// beide nicht null
-				//String sNumber1 = plz1.get("ID");
-				//String sNumber2 = plz2.get("ID");
+				// String sNumber1 = plz1.get("ID");
+				// String sNumber2 = plz2.get("ID");
 				try {
 					Integer number1 = new Integer(plz1.get("ID"));
 					Integer number2 = new Integer(plz2.get("ID"));
@@ -240,24 +235,24 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 			}
 			
 			public void dispose(){
-				// nothing to do
+			// nothing to do
 			}
 			
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput){
-				// nothing to do
+			// nothing to do
 			}
 		});
 		plzViewer.setLabelProvider(new ITableLabelProvider() {
 			public void addListener(ILabelProviderListener listener){
-				// nothing to do
+			// nothing to do
 			}
 			
 			public void removeListener(ILabelProviderListener listener){
-				// nothing to do
+			// nothing to do
 			}
 			
 			public void dispose(){
-				// nothing to do
+			// nothing to do
 			}
 			
 			public String getColumnText(Object element, int columnIndex){
@@ -311,15 +306,18 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		
 		// Erstellen des ViewMenus
 		ViewMenus menu = new ViewMenus(getViewSite());
-		menu.createMenu(exportToClipboardAction, null, copyAction, null, importFromWiki, null, testingAction);
+		menu.createMenu(exportToClipboardAction, null, copyAction, null, importFromWiki, null,
+			testingAction);
 		
 		// Erstellen des KontextMenus
-		menu.createViewerContextMenu(plzViewer, newAction, null, copyAction, deleteAction, null, importAction);
+		menu.createViewerContextMenu(plzViewer, newAction, null, copyAction, deleteAction, null,
+			importAction);
 		
 		menu.createToolbar(newAction, deleteAction);
 		
 		GlobalEventDispatcher.addActivationListener(this, this);
-		plzViewer.addSelectionChangedListener(GlobalEventDispatcher.getInstance().getDefaultListener());
+		plzViewer.addSelectionChangedListener(GlobalEventDispatcher.getInstance()
+			.getDefaultListener());
 		
 		// Doppelclick öffnen Eingabe-Dialog
 		plzViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -345,45 +343,46 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	@Override
 	public void dispose(){
 		GlobalEventDispatcher.removeActivationListener(this, this);
-		plzViewer.removeSelectionChangedListener(GlobalEventDispatcher.getInstance().getDefaultListener());
+		plzViewer.removeSelectionChangedListener(GlobalEventDispatcher.getInstance()
+			.getDefaultListener());
 		super.dispose();
 	}
 	
 	/*
 	 * SelectionListener methods
 	 */
-	
+
 	public void selectionEvent(PersistentObject obj){
-		//Plz selectedPlz = (Plz) obj;
-		//	plzViewer.refresh();
-		//setPatient(selectedPatient);
+	// Plz selectedPlz = (Plz) obj;
+	// plzViewer.refresh();
+	// setPatient(selectedPatient);
 	}
 	
 	public void clearEvent(Class template){
 		plzViewer.refresh();
-		//if (template.equals(Patient.class)) {
-		//	setPatient(null);
-		//}
+		// if (template.equals(Patient.class)) {
+		// setPatient(null);
+		// }
 	}
 	
 	/*
 	 * ActivationListener
 	 */
-	
+
 	public void activation(boolean mode){
-		// nothing to do
+	// nothing to do
 	}
 	
 	public void visible(boolean mode){
 		if (mode == true) {
-			//ElexisEventDispatcher.addListeners(this); // do we need this?
+			// ElexisEventDispatcher.addListeners(this); // do we need this?
 			
-			//Patient patient = GlobalEvents.getSelectedPatient();
-			//setPatient(patient);
+			// Patient patient = GlobalEvents.getSelectedPatient();
+			// setPatient(patient);
 			plzViewer.refresh();
 		} else {
-			//ElexisEventDispatcher.emoveListeners(this); // do we need this?
-			//setPatient(null);
+			// ElexisEventDispatcher.emoveListeners(this); // do we need this?
+			// setPatient(null);
 			plzViewer.refresh();
 		}
 	};
@@ -421,6 +420,7 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_EXPORT));
 				setToolTipText("Alle Postleitzahlen in Zwischenablage kopieren");
 			}
+			
 			public void run(){
 				exportToClipboard();
 			}
@@ -434,8 +434,9 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_CLIPBOARD));
 				setToolTipText("Ausgewählten Datensatz in die Zwischenablage kopieren");
 			}
+			
 			public void run(){
-				//	exportToClipboard();
+			// exportToClipboard();
 			}
 		};
 		copyAction.setActionDefinitionId(COMMAND_COPY);
@@ -447,8 +448,9 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_DELETE));
 				setToolTipText("Ausgewählte Postleitzahl löschen");
 			}
+			
 			public void run(){
-				// TODO
+			// TODO
 			}
 		};
 		deleteAction.setActionDefinitionId(COMMAND_DELETE);
@@ -462,20 +464,22 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 			}
 			
 			public void run(){
-//				new PlzDialog(getSite().getShell(), true).open();
+				// new PlzDialog(getSite().getShell(), true).open();
 				if (new PlzDialog(getSite().getShell()).open() == Dialog.OK) {
-					plzViewer.refresh();}
+					plzViewer.refresh();
+				}
 			}
 		};
 		newAction.setActionDefinitionId("NEUE_POSTLEITZAHL");
 		GlobalActions.registerActionHandler(this, newAction);
 		
 		// Importieren von PLZ-Definitionen aus einer csv-Datei
-		importAction = new Action("Importieren...")	{
+		importAction = new Action("Importieren...") {
 			{
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_IMPORT));
 				setToolTipText("Importieren von Postleitzahlen aus Dateien");
 			}
+			
 			public void run(){
 				try {
 					doImport();
@@ -489,11 +493,12 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		GlobalActions.registerActionHandler(this, importAction);
 		
 		// Importieren von Ländern und Regionen aus Wikipedia
-		importFromWiki = new Action("Landdaten importieren aus Wiki...")	{
+		importFromWiki = new Action("Landdaten importieren aus Wiki...") {
 			{
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_IMPORT));
 				setToolTipText("Importieren der Land- und Regions-Daten aus Wikipedia");
 			}
+			
 			public void run(){
 				try {
 					extractLandData("de");
@@ -507,10 +512,11 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		GlobalActions.registerActionHandler(this, importFromWiki);
 		
 		// Importieren von Ländern und Regionen aus Wikipedia
-		testingAction = new Action("Testing...")	{
+		testingAction = new Action("Testing...") {
 			{
 				setToolTipText("Aufruf der Testroutine");
 			}
+			
 			public void run(){
 				try {
 					testingAction();
@@ -524,14 +530,15 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		GlobalActions.registerActionHandler(this, testingAction);
 	}
 	
-	public void testingAction()	{
+	public void testingAction(){
 		OpenGeoDB openGeoDB = new OpenGeoDB();
 		openGeoDB.createOpenGeoDBTables();
 	}
 	
 	/**
-	 * Exportiert alle Postleitzahlen in die Zwischenablage.
-	 * Format: tab-delimited, die erste Zeile enthält die Feldnamen
+	 * Exportiert alle Postleitzahlen in die Zwischenablage. Format: tab-delimited, die erste Zeile
+	 * enthält die Feldnamen
+	 * 
 	 * @param -
 	 * @return -
 	 */
@@ -580,10 +587,14 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		clipboard.dispose();
 	}
 	
-	public void doImport() 	{
-		FileDialog fd = new FileDialog(getSite().getShell(),SWT.OPEN);
-		fd.setFilterExtensions(new String[]{"*.csv", "*.xls", "*.*"});
-		fd.setFilterNames(new String[]{"Comma Separated Values", "Excel-Dateien", "Alle Dateien"});
+	public void doImport(){
+		FileDialog fd = new FileDialog(getSite().getShell(), SWT.OPEN);
+		fd.setFilterExtensions(new String[] {
+			"*.csv", "*.xls", "*.*"
+		});
+		fd.setFilterNames(new String[] {
+			"Comma Separated Values", "Excel-Dateien", "Alle Dateien"
+		});
 		String fileName = fd.open();
 		if (fileName == null) {
 			return;
@@ -596,27 +607,17 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 			// TODO
 		}
 	}
+	
 	/*
-		/////
-		FileDialog fd = new FileDialog(getSite().getShell(),SWT.OPEN);
-		fd.setFilterExtensions(new String[]{"*.csv", "*.xls", "*.*"});
-		fd.setFilterNames(new String[]{"Comma Separated Values", "Excel-Dateien", "Alle Dateien"});
-		String fileName = fd.open();
-		if (fileName == null) {
-			return;
-		}
-		InputStreamReader isr=new InputStreamReader(new FileInputStream(fileName),SRC_ENCODING);
-		CSVReader reader = new CSVReader(isr);
-	    String [] line;
-		//monitor.subTask("Postleitzahlen einlesen");
-	    while ((line = reader.readNext()) != null) {
-	    	// TODO hier könnte man noch ggf ; durch , ersetzen (Excel!)
-	    	//line = StringTool.convertEncoding(line, SRC_ENCODING);
-			new Plz(line[0], line[1], line[2], line[3], line[4], line[5], line[6]);
-			//monitor.worked(1);
-		}
-		//monitor.done();
-		}
+	 * ///// FileDialog fd = new FileDialog(getSite().getShell(),SWT.OPEN);
+	 * fd.setFilterExtensions(new String[]{"*.csv", "*.xls", "*.*"}); fd.setFilterNames(new
+	 * String[]{"Comma Separated Values", "Excel-Dateien", "Alle Dateien"}); String fileName =
+	 * fd.open(); if (fileName == null) { return; } InputStreamReader isr=new InputStreamReader(new
+	 * FileInputStream(fileName),SRC_ENCODING); CSVReader reader = new CSVReader(isr); String []
+	 * line; //monitor.subTask("Postleitzahlen einlesen"); while ((line = reader.readNext()) !=
+	 * null) { // TODO hier könnte man noch ggf ; durch , ersetzen (Excel!) //line =
+	 * StringTool.convertEncoding(line, SRC_ENCODING); new Plz(line[0], line[1], line[2], line[3],
+	 * line[4], line[5], line[6]); //monitor.worked(1); } //monitor.done(); }
 	 */
 	private void importExcel(final String file){
 		ExcelWrapper xl = new ExcelWrapper();
@@ -625,10 +626,10 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		}
 		for (int i = xl.getFirstRow(); i <= xl.getLastRow(); i++) {
 			List<String> row = xl.getRow(i);
-			//importLine(row.toArray(new String[0]));
+			// importLine(row.toArray(new String[0]));
 			String[] line;
 			line = row.toArray(new String[0]);
-			//line = StringTool.convertEncoding(line, SRC_ENCODING);
+			// line = StringTool.convertEncoding(line, SRC_ENCODING);
 			new Plz(line[0], line[1], line[2], line[3], line[4], line[5], line[6]);
 		}
 		return;
@@ -639,9 +640,9 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 			CSVReader cr = new CSVReader(new FileReader(file));
 			String[] line;
 			while ((line = cr.readNext()) != null) {
-				//importLine(line);
+				// importLine(line);
 				// TODO hier könnte man noch ggf ; durch , ersetzen (Excel -> csv !)
-				//line = StringTool.convertEncoding(line, SRC_ENCODING);
+				// line = StringTool.convertEncoding(line, SRC_ENCODING);
 				new Plz(line[0], line[1], line[2], line[3], line[4], line[5], line[6]);
 			}
 			return;
@@ -657,7 +658,9 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	/***************************************************************************/
 	/**
 	 * Liest Inhalt einer ganzen Seite einer übergebenen URL
-	 * @param url: die einzulesende URL
+	 * 
+	 * @param url
+	 *            : die einzulesende URL
 	 * @return die ganze HTML-Seite als String
 	 */
 	public static String readHTMLPage(final String url) throws IOException, MalformedURLException{
@@ -690,7 +693,7 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		return text;
 	}
 	
-	private static String cleanupUmlaute(String text) {
+	private static String cleanupUmlaute(String text){
 		text = text.replace("&#xE4;", "ä");//$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace("&#xC4;", "Ä");//$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace("&#xF6;", "ö");//$NON-NLS-1$ //$NON-NLS-2$
@@ -712,10 +715,12 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	
 	/**
 	 * Extrahieren der Iso-Länderdaten aus Wikipedia
-	 * @param language: die jeweilige Sprache, für welche die Daten extrahiert
-	 * werden sollen, die URL wird entsprechend gewählt
+	 * 
+	 * @param language
+	 *            : die jeweilige Sprache, für welche die Daten extrahiert werden sollen, die URL
+	 *            wird entsprechend gewählt
 	 */
-	private void extractLandData(final String language)	{
+	private void extractLandData(final String language){
 		// Einlesen der ganzen Seite in der gewünschten Sprache in die Variable wholeHTMLPage
 		String wholeHTMLPage = null;
 		try {
@@ -731,19 +736,21 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		}
 		
 		// Tabellen-Inhalt aus Text extrahieren
-		int tableStartPos			= wholeHTMLPage.indexOf(WIKI_LAND_STARTINFO_MARKER,	0);
-		int tableContentStartPos	= wholeHTMLPage.indexOf(TABLEROW_STARTMARKER,		tableStartPos);
-		int tableDataStartPos		= wholeHTMLPage.indexOf(TABLEROW_STARTMARKER,		tableStartPos);
-		int tableEndPos				= wholeHTMLPage.indexOf(WIKI_LAND_ENDINFO_MARKER,   tableDataStartPos);
-		String landTableContent 	= wholeHTMLPage.substring(tableContentStartPos,		tableEndPos);
+		int tableStartPos = wholeHTMLPage.indexOf(WIKI_LAND_STARTINFO_MARKER, 0);
+		int tableContentStartPos = wholeHTMLPage.indexOf(TABLEROW_STARTMARKER, tableStartPos);
+		int tableDataStartPos = wholeHTMLPage.indexOf(TABLEROW_STARTMARKER, tableStartPos);
+		int tableEndPos = wholeHTMLPage.indexOf(WIKI_LAND_ENDINFO_MARKER, tableDataStartPos);
+		String landTableContent = wholeHTMLPage.substring(tableContentStartPos, tableEndPos);
 		
 		// durch die Tabelle loopen und die einzelnen Datensätze einlesen
-		int currRowPos	= 0;
-		int nextRowPos	= 0;
+		int currRowPos = 0;
+		int nextRowPos = 0;
 		String rowData = "";
 		int i = 0;
-		while ((currRowPos != -1))	{
-			nextRowPos = landTableContent.indexOf(TABLEROW_STARTMARKER, currRowPos + TABLEROW_STARTMARKER.length());
+		while ((currRowPos != -1)) {
+			nextRowPos =
+				landTableContent.indexOf(TABLEROW_STARTMARKER, currRowPos
+					+ TABLEROW_STARTMARKER.length());
 			rowData = landTableContent.substring(currRowPos, nextRowPos);
 			currRowPos = nextRowPos;
 			extractLandRowData(rowData, language);
@@ -753,10 +760,15 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	
 	/**
 	 * Extrahieren der einzelnen Zeilen aus der Iso-Länder-HTML-Tabelle
-	 * @param rowData: HTML-Inhalt einer Zeile, ohne enclosing <tr></tr>
-	 * @param language: die Sprache dieses Eintrages
+	 * 
+	 * @param rowData
+	 *            : HTML-Inhalt einer Zeile, ohne enclosing
+	 *            <tr>
+	 *            </tr>
+	 * @param language
+	 *            : die Sprache dieses Eintrages
 	 */
-	private void extractLandRowData(final String rowData, final String language)	{
+	private void extractLandRowData(final String rowData, final String language){
 		String landName;
 		String landWikiLink;
 		String landIso2;
@@ -767,82 +779,91 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		String landIso3166_2;
 		
 		// initialisieren der Zähler, etc
-		int			currDataPos	= 0;
-		int			nextDataPos	= 0;
-		String		cellData;
-		String		subContentHTML = null;
-		String[]	linkAndText;
+		int currDataPos = 0;
+		int nextDataPos = 0;
+		String cellData;
+		String subContentHTML = null;
+		String[] linkAndText;
 		
 		// die erste Zelle enthält den Namen des Landes und dessen Wikipedia-Link
-		currDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
-		if (currDataPos == -1)	{
-			return;		// wenn kein <td vorhanden ist, dann ist es ein header - skip
+		currDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
+		if (currDataPos == -1) {
+			return; // wenn kein <td vorhanden ist, dann ist es ein header - skip
 		}
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = rowData.substring(currDataPos, nextDataPos);
 		String theString = cellData.substring(0, WIKI_LAND_SKIPDATA_MARKER.length());
-		if (theString.equals(WIKI_LAND_SKIPDATA_MARKER))	{
-			return;		// wenn die erste Zelle den WIKI_LAND_SKIPDATA_MARKER enthält, dann überspringen
+		if (theString.equals(WIKI_LAND_SKIPDATA_MARKER)) {
+			return; // wenn die erste Zelle den WIKI_LAND_SKIPDATA_MARKER enthält, dann überspringen
 		}
 		cellData = extractCellData(cellData);
 		linkAndText = splitHyperlinkCell(cellData);
-		landName     = linkAndText[1];
+		landName = linkAndText[1];
 		landWikiLink = BASE_URL_DE + linkAndText[0];
 		currDataPos = nextDataPos;
 		
 		// Alpha 2
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIso2 = left(cellData, 2);
 		
 		// Alpha 3
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIso3 = left(cellData, 3);
 		
 		// Numeric
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIsoNum = left(cellData, 3);
 		
 		// TopLevelDomain
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landTld = left(cellData, 3);
 		
 		// IOC
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIoc = left(cellData, 3);
 		
 		// ISO3166-2: enthält den Iso2 und dessen Wikipedia-Link zur Seite mit den Sub-Infos
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		linkAndText = splitHyperlinkCell(cellData);
-		//System.out.println(BASE_URL_DE + linkAndText[0]);	// link
+		// System.out.println(BASE_URL_DE + linkAndText[0]); // link
 		currDataPos = nextDataPos;
 		landIso3166_2 = left(linkAndText[1], 2);
 		
 		// Erstellen eines neuen Eintrages in der Tabelle CH_MARLOVITS_LAND
-		new LandEintrag(landName,
-			landIso2,
-			landIso3,
-			landIsoNum,
-			landTld,
-			landIoc,
-			landIso3166_2,
-			landWikiLink,
-			language);
+		new LandEintrag(landName, landIso2, landIso3, landIsoNum, landTld, landIoc, landIso3166_2,
+			landWikiLink, language);
 		
 		// Einlesen der Informationen aus den Unter-Seiten
 		subContentHTML = null;
 		
-		//if (landIso2.equals("éé"))	{
+		// if (landIso2.equals("éé")) {
 		
 		try {
 			String combinedURL = BASE_URL_DE + linkAndText[0];
@@ -853,27 +874,31 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//}
+		// }
 	}
 	
 	/**
-	 * Entfernt die enclosing <td>  / </td>
+	 * Entfernt die enclosing <td>/</td>
+	 * 
 	 * @param cellDataWithEnclosings
-	 * @return input ohne enclosing <td>  / </td>
+	 * @return input ohne enclosing <td>/</td>
 	 */
-	private String extractCellData(final String cellDataWithEnclosings)	{
+	private String extractCellData(final String cellDataWithEnclosings){
 		String cellContents = null;
 		
 		// fast exit, falls leer
-		if ((cellDataWithEnclosings == null) || (cellDataWithEnclosings == ""))	{
+		if ((cellDataWithEnclosings == null) || (cellDataWithEnclosings == "")) {
 			return cellContents;
 		}
 		int contentStart = cellDataWithEnclosings.indexOf(TABLEDATA_STARTMARKER, 0);
-		if (contentStart != -1)	{
+		if (contentStart != -1) {
 			// has <td>[Content]</td>
-			int contentEnd	= cellDataWithEnclosings.indexOf(TABLEDATA_ENDMARKER, TABLEDATA_STARTMARKER.length());
-			cellContents = cellDataWithEnclosings.substring(contentStart + TABLEDATA_STARTMARKER.length(), contentEnd);
-		} else	{
+			int contentEnd =
+				cellDataWithEnclosings.indexOf(TABLEDATA_ENDMARKER, TABLEDATA_STARTMARKER.length());
+			cellContents =
+				cellDataWithEnclosings.substring(contentStart + TABLEDATA_STARTMARKER.length(),
+					contentEnd);
+		} else {
 			// has <td [...]> [Content] </td>
 			// TO DO
 			Pattern pattern = Pattern.compile("<td.*>");
@@ -887,33 +912,38 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	}
 	
 	/**
-	 * Extrahiert aus einem HTML-String mit einem href den ersten Link
-	 * und den reinen Text-Teil
-	 * @param htmlString: html-String mit href-Teil
+	 * Extrahiert aus einem HTML-String mit einem href den ersten Link und den reinen Text-Teil
+	 * 
+	 * @param htmlString
+	 *            : html-String mit href-Teil
 	 * @return String[]: {linkPart, textPart}
 	 */
-	private String[] splitHyperlinkCell(final String htmlString)	{
+	private String[] splitHyperlinkCell(final String htmlString){
 		// Initialisieren
 		String linkPart = "";
 		String textPart = "";
-		final String hrefStartMarker	= "<a href=\"";
-		final String hrefEndMarker		= "\">";
+		final String hrefStartMarker = "<a href=\"";
+		final String hrefEndMarker = "\">";
 		
 		// leerer String - fast exit
-		if ((htmlString == null) || (htmlString.equals("")))	{
+		if ((htmlString == null) || (htmlString.equals(""))) {
 			linkPart = "";
 			textPart = htmlString;
-			return new String[] {linkPart, textPart};
+			return new String[] {
+				linkPart, textPart
+			};
 		}
 		
 		// es wird nur der erste Link extrahiert
 		int hrefStart = htmlString.indexOf(hrefStartMarker, 0);
 		
 		// es gibt keinen Link
-		if (hrefStart == -1){
+		if (hrefStart == -1) {
 			linkPart = "";
 			textPart = htmlString;
-			return new String[] {linkPart, textPart};
+			return new String[] {
+				linkPart, textPart
+			};
 		}
 		
 		// Teil links des href gehört zum Text-Teil
@@ -927,7 +957,8 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		linkPart = extractHrefLink(hrefPart);
 		
 		// Text rechts des hrefs gehört zum Text-Teil, es müssen alle </a> entfernt werden
-		textPart = textPart + htmlString.substring(hrefEnd, htmlString.length()).replace("</a>", "");
+		textPart =
+			textPart + htmlString.substring(hrefEnd, htmlString.length()).replace("</a>", "");
 		
 		// jetzt werden alle restlichen HTML-Tags <XXX> </XXX> entfernt
 		textPart = stripHTMLTags(textPart);
@@ -936,22 +967,25 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		textPart = replaceReturns(textPart, " ");
 		
 		// Rückgabe
-		return new String[] {linkPart, textPart};
+		return new String[] {
+			linkPart, textPart
+		};
 	}
 	
 	/**
 	 * 
-	 * @param href: voller href, aus welchem der Link extrahiert werden soll
+	 * @param href
+	 *            : voller href, aus welchem der Link extrahiert werden soll
 	 * @return der Link, der in href vorhanden ist
 	 */
-	private String extractHrefLink(final String href)	{
+	private String extractHrefLink(final String href){
 		// Initialisieren
 		final String hrefLinkStartMarker = "<a href=\"";
-		final String hrefLinkEndMarker   = "\"";
+		final String hrefLinkEndMarker = "\"";
 		
 		// Start des href suchen
-		int hrefLinkStart = href.indexOf(hrefLinkStartMarker,	0);
-		if (hrefLinkStart == -1)	{
+		int hrefLinkStart = href.indexOf(hrefLinkStartMarker, 0);
+		if (hrefLinkStart == -1) {
 			return "";
 		}
 		// Ende des href suchen
@@ -963,33 +997,35 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	}
 	
 	/**
-	 * Extrahieren der Daten aus den Info-Seiten für die Sub-Isos "ISO 3166-2".
-	 * Es können mehrere Tabellen mit den Infos vorhanden sein!
+	 * Extrahieren der Daten aus den Info-Seiten für die Sub-Isos "ISO 3166-2". Es können mehrere
+	 * Tabellen mit den Infos vorhanden sein!
+	 * 
 	 * @param pageHTML
 	 * @author Harald Marlovits
 	 */
-	private void extractSubIsos(final String pageHTML, final String language)	{
-		int startOfTable	= pageHTML.indexOf(WIKI_LAND_SUBISO_STARTMARKER, 0);
-		int endOfTable		= 0;
+	private void extractSubIsos(final String pageHTML, final String language){
+		int startOfTable = pageHTML.indexOf(WIKI_LAND_SUBISO_STARTMARKER, 0);
+		int endOfTable = 0;
 		String subTableContent = null;
 		// alle vorhandenen Tabellen durchlaufen
 		int subTableIndex = 0;
-		while (startOfTable != -1)	{
+		while (startOfTable != -1) {
 			endOfTable = pageHTML.indexOf(WIKI_LAND_SUBISO_ENDMARKER, startOfTable);
 			startOfTable = pageHTML.indexOf(TABLEROW_STARTMARKER, startOfTable);
 			subTableContent = pageHTML.substring(startOfTable, endOfTable);
 			startOfTable = pageHTML.indexOf(WIKI_LAND_SUBISO_STARTMARKER, startOfTable);
 			System.out.println("**************************************");
-			//System.out.print(subTableContent);
+			// System.out.print(subTableContent);
 			extractSubCellTableData(subTableContent, subTableIndex, language);
 			subTableIndex++;
 		}
 	}
 	
-	private void extractSubCellTableData(final String tableData, final int subTableIndex, final String language)	{
+	private void extractSubCellTableData(final String tableData, final int subTableIndex,
+		final String language){
 		// durch die Tabelle loopen und die einzelnen Datensätze einlesen
-		int currRowPos	= 0;
-		int nextRowPos	= 0;
+		int currRowPos = 0;
+		int nextRowPos = 0;
 		String rowData = "";
 		
 		int i = 0;
@@ -1003,21 +1039,24 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		String currName = "";
 		
 		int columnCount = 0;
-		while (currRowPos != -1)	{
-			nextRowPos = tableData.indexOf(TABLEROW_STARTMARKER, currRowPos + TABLEROW_STARTMARKER.length());
-			rowData = tableData.substring(currRowPos, (nextRowPos == -1) ? tableData.length() : nextRowPos);
+		while (currRowPos != -1) {
+			nextRowPos =
+				tableData.indexOf(TABLEROW_STARTMARKER, currRowPos + TABLEROW_STARTMARKER.length());
+			rowData =
+				tableData.substring(currRowPos, (nextRowPos == -1) ? tableData.length()
+						: nextRowPos);
 			currRowPos = nextRowPos;
 			System.out.println("********************");
 			// Anzahl Spalten ermitteln
-			if (columnCount == 0){
+			if (columnCount == 0) {
 				String regex = "<t[dh]>";
-				Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+				Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 				Matcher m = p.matcher(rowData);
 				while (m.find()) {
 					columnCount++;
 				}
 			}
-			// Inhalt extrahieren,  <tr> / </tr> entfernen
+			// Inhalt extrahieren, <tr> / </tr> entfernen
 			Pattern pattern = Pattern.compile("<tr.*>");
 			Matcher matcher = pattern.matcher(rowData);
 			rowData = matcher.replaceAll("");
@@ -1029,12 +1068,12 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 			
 			// wenn <th> dann enthält die Zelle den Namen von Kanton/District/Region, etc
 			int headerMarkerStart = rowData.indexOf(headerMarker, 0);
-			if (headerMarkerStart != -1){
+			if (headerMarkerStart != -1) {
 				headerMarkerStart = rowData.indexOf(">", headerMarkerStart) + 1;
 				int endMarker = rowData.indexOf("</t", headerMarkerStart);
 				currName = rowData.substring(headerMarkerStart, endMarker);
 				System.out.println(currName);
-			} else	{
+			} else {
 				exctractSubCellRowData(rowData, currName, subTableIndex, language, columnCount);
 			}
 			i++;
@@ -1043,8 +1082,11 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	
 	/**
 	 * Entfernt aus einem String alle tabs/returns/newlines/formsfeeds
-	 * @param inputString: zu bearbeitender String
-	 * @param replacement: damit werden die gefundenen Vorkommen ersetzt
+	 * 
+	 * @param inputString
+	 *            : zu bearbeitender String
+	 * @param replacement
+	 *            : damit werden die gefundenen Vorkommen ersetzt
 	 * @return inputString, von welchem alle whiteSpaces weggestrippt sind
 	 */
 	private String replaceReturns(final String inputString, final String replacement){
@@ -1058,10 +1100,11 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	
 	/**
 	 * Entfernt aus einem String alle HTML-Tags <XXX> und </XXX>
+	 * 
 	 * @param inputString
 	 * @return inputString, von welchem alle whiteSpaces weggestrippt sind
 	 */
-	private String stripHTMLTags(final String inputString)	{
+	private String stripHTMLTags(final String inputString){
 		String tmp = inputString;
 		tmp = tmp.replaceAll("</.*>", "");
 		tmp = tmp.replaceAll("<.*>", "");
@@ -1070,10 +1113,12 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 	
 	/**
 	 * entfernen von: leading spaces, trailing spaces und mehrfach-Spaces im String
-	 * @param source: zu bearbeitender String
+	 * 
+	 * @param source
+	 *            : zu bearbeitender String
 	 * @return gestrippter String
 	 */
-	public static String fullTrim(final String source) {
+	public static String fullTrim(final String source){
 		String tmp = source;
 		// leading Spaces strippen
 		tmp = tmp.replaceAll("^\\s+", "");
@@ -1084,8 +1129,9 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		return tmp;
 	}
 	
-	private void exctractSubCellRowData(final String rowData, final String kantonName, final int subTableIndex, final String language, final int columnCount)	{
-		// Die erste  Spalte enthält die zu benutzende Bezeichnung
+	private void exctractSubCellRowData(final String rowData, final String kantonName,
+		final int subTableIndex, final String language, final int columnCount){
+		// Die erste Spalte enthält die zu benutzende Bezeichnung
 		// die letzte Spalte enthält den ISO-Code
 		// falls zweite Spalte vorhanden, dann in Klammern an Spalte 1 anfügen
 		
@@ -1095,33 +1141,34 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		// erstelle String Array, split on <td>
 		String[] cellDataStringArray = localData.split("<td>");
 		
-		String nameRow  = replaceReturns(cellDataStringArray[1], " ");
-		String codeRow  = replaceReturns(cellDataStringArray[columnCount], " ");
+		String nameRow = replaceReturns(cellDataStringArray[1], " ");
+		String codeRow = replaceReturns(cellDataStringArray[columnCount], " ");
 		
 		// nameRow: enthält den Link zu Sub-Info und den Iso-Namen, splitten
 		String[] landLink_landName = splitHyperlinkCell(nameRow);
 		
 		// codeRow: nur Text links von Space ist gültig, Rest wegstrippen
-		codeRow  = codeRow.split(" ")[0];
+		codeRow = codeRow.split(" ")[0];
 		// codeRow: splitten auf "-", links ist Iso2 des Landes, rechts Iso des "Kantons"
-		String[] landIso_SubIso  = codeRow.split("-");
+		String[] landIso_SubIso = codeRow.split("-");
 		
 		// falls mehr als 2 Spalten, dann 2. Spalte in Klammern an den Namen anhängen
-		String kantonname		= landLink_landName[1];
+		String kantonname = landLink_landName[1];
 		kantonname = replaceReturns(kantonname, "");
-		if (columnCount > 2)	{
-			kantonname = kantonname + " (" + stripHTMLTags(replaceReturns(cellDataStringArray[2], "")) + ")";
+		if (columnCount > 2) {
+			kantonname =
+				kantonname + " (" + stripHTMLTags(replaceReturns(cellDataStringArray[2], "")) + ")";
 			kantonname = fullTrim(kantonname);
 		}
 		
 		// die Werte zusammentragen
-		String kantonfullcode	= codeRow;
-		String kantonsubcode	= landIso_SubIso[1];
-		String kantonland		= landIso_SubIso[0];
-		String kantonindex		= "" + subTableIndex;
-		String kantonkind		= kantonName;
-		String kantonwikilink	= BASE_URL_DE + landLink_landName[0];
-		String kantonlanguage	= language;
+		String kantonfullcode = codeRow;
+		String kantonsubcode = landIso_SubIso[1];
+		String kantonland = landIso_SubIso[0];
+		String kantonindex = "" + subTableIndex;
+		String kantonkind = kantonName;
+		String kantonwikilink = BASE_URL_DE + landLink_landName[0];
+		String kantonlanguage = language;
 		
 		// debug
 		System.out.println("kantonname:     " + kantonname);
@@ -1134,26 +1181,23 @@ public class PLZView extends ViewPart implements ISaveablePart2, IActivationList
 		System.out.println("kantonlanguage: " + kantonlanguage);
 		
 		// den Eintrag erstellen
-		new KantonEintrag(kantonname,
-			kantonfullcode,
-			kantonsubcode,
-			kantonland,
-			kantonindex,
-			kantonkind,
-			kantonwikilink,
-			kantonlanguage);
+		new KantonEintrag(kantonname, kantonfullcode, kantonsubcode, kantonland, kantonindex,
+			kantonkind, kantonwikilink, kantonlanguage);
 	}
 	
 	/**
 	 * Rückgabe des linken Anteils des Eingabe-Strings
-	 * @param input: String, dessen linker Teil zurückgegeben werden soll
-	 * @param count: Anzahl Zeichen, die zurückgegeben werden sollen
+	 * 
+	 * @param input
+	 *            : String, dessen linker Teil zurückgegeben werden soll
+	 * @param count
+	 *            : Anzahl Zeichen, die zurückgegeben werden sollen
 	 * @return gestrippter String oder "", wenn input null oder leer
 	 */
-	private String left(final String input, final int count)	{
-		if ((input == null) || (input.equals("")))	{
+	private String left(final String input, final int count){
+		if ((input == null) || (input.equals(""))) {
 			return "";
-		} else	{
+		} else {
 			return input.substring(0, count);
 		}
 	}

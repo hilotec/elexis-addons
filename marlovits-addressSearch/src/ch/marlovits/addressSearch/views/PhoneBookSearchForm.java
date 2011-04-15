@@ -51,12 +51,12 @@ import ch.elexis.util.SWTHelper;
 import ch.marlovits.addressSearch.directories.PhoneBookContentParser;
 
 public class PhoneBookSearchForm extends Composite {
-
+	
 	private final ListenerList listeners = new ListenerList();
-
+	
 	private List<HashMap<String, String>> kontakte;
-	//private List<HashMap<String, String>> kontakte = new Vector<KontaktEntry>();
-
+	// private List<HashMap<String, String>> kontakte = new Vector<KontaktEntry>();
+	
 	private String searchInfoText = "";
 	private Composite parentComposite;
 	private Shell hitListComposite = null;
@@ -74,52 +74,58 @@ public class PhoneBookSearchForm extends Composite {
 	private int numOfEntries = 1;
 	private String country = "ch";
 	private PhoneBookContentParser parser = null;
-	private String[][] citySuggestions = {{""}, {""}};
+	private String[][] citySuggestions = {
+		{
+			""
+		}, {
+			""
+		}
+	};
 	
-	int			leftMarginOffset = 4;   // +++++ for WindowsXP
+	int leftMarginOffset = 4; // +++++ for WindowsXP
 	
 	int listSelectionIndex = -1;
-
-	public PhoneBookContentParser getPhoneBookContentParser()	{
+	
+	public PhoneBookContentParser getPhoneBookContentParser(){
 		return parser;
 	}
 	
-	public PhoneBookSearchForm(Composite parent, int style) {
+	public PhoneBookSearchForm(Composite parent, int style){
 		super(parent, style);
 		createPartControl(parent);
 	}
-
-	private void createPartControl(final Composite parent) {
+	
+	private void createPartControl(final Composite parent){
 		parentComposite = parent;
 		
 		createParser();
 		
 		setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
-		parent.getParent().addControlListener(new ControlListener(){
+		parent.getParent().addControlListener(new ControlListener() {
 			@Override
-			public void controlMoved(ControlEvent e) {
-				if (hitListComposite != null)	{
+			public void controlMoved(ControlEvent e){
+				if (hitListComposite != null) {
 					hitListComposite.dispose();
 					hitListComposite = null;
 				}
-				if (hitListComposite == null)	{
+				if (hitListComposite == null) {
 					createHitListComposite(parent);
 				}
 				repositionHitList();
 			}
+			
 			@Override
-			public void controlResized(ControlEvent e) {
-				if (hitListComposite != null)	{
+			public void controlResized(ControlEvent e){
+				if (hitListComposite != null) {
 					hitListComposite.dispose();
 					hitListComposite = null;
 				}
-				if (hitListComposite == null)	{
+				if (hitListComposite == null) {
 					createHitListComposite(parent);
 				}
 				repositionHitList();
 			}
-		}
-		);
+		});
 		
 		setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		setLayout(new GridLayout(1, false));
@@ -144,27 +150,27 @@ public class PhoneBookSearchForm extends Composite {
 		
 		geoText = new Combo(comp1, SWT.BORDER);
 		geoText.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
-		geoText.addKeyListener(new KeyListener()	{
+		geoText.addKeyListener(new KeyListener() {
 			@Override
-			public void keyPressed(KeyEvent e) {
-			}
+			public void keyPressed(KeyEvent e){}
+			
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void keyReleased(KeyEvent e){
 				recalcHitList(false);
 				boolean handleIt = true;
-				switch (e.keyCode)	{
+				switch (e.keyCode) {
 				case SWT.ARROW_DOWN:
 					System.out.println("ARROW_DOWN: get into menu items");
-					// if no item selected    -> select first selectable item in list
-					// if an item is selected -> select next  selectable item in list
-					// if the last selectable item is selected -> remain there 
-					if (citySuggestions != null)	{
+					// if no item selected -> select first selectable item in list
+					// if an item is selected -> select next selectable item in list
+					// if the last selectable item is selected -> remain there
+					if (citySuggestions != null) {
 						if (citySuggestions.length > 0) {
-							if (listSelectionIndex < (citySuggestions.length - 1))	{
+							if (listSelectionIndex < (citySuggestions.length - 1)) {
 								int resultCounter = 0;
 								String resultString = "";
-								for (int i = listSelectionIndex + 1; i < citySuggestions.length; i++)	{
-									if (citySuggestions[i][1].equalsIgnoreCase("1"))	{
+								for (int i = listSelectionIndex + 1; i < citySuggestions.length; i++) {
+									if (citySuggestions[i][1].equalsIgnoreCase("1")) {
 										listSelectionIndex = i;
 										hitList.setSelection(listSelectionIndex);
 										break;
@@ -179,34 +185,34 @@ public class PhoneBookSearchForm extends Composite {
 					System.out.println("ARROW_DOWN: get into menu items");
 					handleIt = false;
 					break;
-				case SWT.ARROW_LEFT:	// move caret inside text
-				case SWT.ARROW_RIGHT:	// move caret inside text
-				case SWT.DEL:			// delete selection, delete to the right of the caret
-				case SWT.BS:			// delete selection, delete to the left of the caret
-				case SWT.ESC:			// yepp...
+				case SWT.ARROW_LEFT: // move caret inside text
+				case SWT.ARROW_RIGHT: // move caret inside text
+				case SWT.DEL: // delete selection, delete to the right of the caret
+				case SWT.BS: // delete selection, delete to the left of the caret
+				case SWT.ESC: // yepp...
 					handleIt = false;
 					break;
 				}
-				if (handleIt)	{
-				// if there is just a single result, then directly select this one
-				String singleHitListResult = getSingleHitListResult();
-				if (!singleHitListResult.isEmpty() && handleIt)	{
-					int oldLen = geoText.getText().length();
-					geoText.setText(singleHitListResult);
-					geoText.setSelection(new Point(oldLen, 32000));
-				}
-				repositionHitList();
+				if (handleIt) {
+					// if there is just a single result, then directly select this one
+					String singleHitListResult = getSingleHitListResult();
+					if (!singleHitListResult.isEmpty() && handleIt) {
+						int oldLen = geoText.getText().length();
+						geoText.setText(singleHitListResult);
+						geoText.setSelection(new Point(oldLen, 32000));
+					}
+					repositionHitList();
 				}
 			}
 		});
-		geoText.addSelectionListener(new SelectionListener()	{
+		geoText.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				String currText = geoText.getText();
-				if (currText.startsWith(" ***"))	{
+				if (currText.startsWith(" ***")) {
 					SWTHelper.showInfo("", "Dieser Punkt kann nicht ausgewählt werden!");
 					geoText.setText("");
 				}
@@ -217,12 +223,12 @@ public class PhoneBookSearchForm extends Composite {
 		searchBtn.setText(Messages.getString("WeisseSeitenSearchForm.btn.Suchen")); //$NON-NLS-1$
 		
 		infoComposite = new Composite(comp1, SWT.NONE);
-		infoComposite.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));		
+		infoComposite.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		GridLayout gl1 = new GridLayout(6, false);
-		gl1.marginWidth     =  0;
-		gl1.verticalSpacing =  0;
-		gl1.marginTop       = -5;    // strange...
-		gl1.marginBottom    = -5;    // strange...
+		gl1.marginWidth = 0;
+		gl1.verticalSpacing = 0;
+		gl1.marginTop = -5; // strange...
+		gl1.marginBottom = -5; // strange...
 		infoComposite.setLayout(gl1);
 		
 		searchInfoTextField = new Text(infoComposite, SWT.NONE);
@@ -233,22 +239,22 @@ public class PhoneBookSearchForm extends Composite {
 		previousBtn.setText("<");
 		previousBtn.setEnabled(true);
 		previousBtn.setVisible(false);
-		previousBtn.addSelectionListener(new SelectionListener(){
+		previousBtn.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				System.out.println("numOfPages: " + numOfPages);
 				System.out.println("startEntryIndex: " + startEntryIndex);
-				if (startEntryIndex >= 0)	{
+				if (startEntryIndex >= 0) {
 					startEntryIndex = (startEntryIndex == 0) ? 0 : startEntryIndex - 1;
 					System.out.println("startEntryIndex: " + startEntryIndex);
 					searchAction(nameText.getText(), geoText.getText());
 				}
-				if (startEntryIndex == 0)	{
+				if (startEntryIndex == 0) {
 					previousBtn.setEnabled(false);
-				} else	{
+				} else {
 					previousBtn.setEnabled(true);
 				}
 			}
@@ -258,31 +264,31 @@ public class PhoneBookSearchForm extends Composite {
 		nextBtn.setText(">");
 		nextBtn.setEnabled(true);
 		nextBtn.setVisible(false);
-		nextBtn.addSelectionListener(new SelectionListener(){
+		nextBtn.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				System.out.println("numOfPages: " + numOfPages);
 				System.out.println("startEntryIndex: " + startEntryIndex);
-				if (startEntryIndex < numOfPages+1)	{
+				if (startEntryIndex < numOfPages + 1) {
 					startEntryIndex = startEntryIndex + 1;
 					startEntryIndex = (startEntryIndex > numOfPages) ? numOfPages : startEntryIndex;
 					System.out.println("startEntryIndex: " + startEntryIndex);
 					searchAction(nameText.getText(), geoText.getText());
 					previousBtn.setEnabled(true);
 				}
-				if (startEntryIndex >= numOfPages)	{
+				if (startEntryIndex >= numOfPages) {
 					nextBtn.setEnabled(false);
-				} else	{
+				} else {
 					nextBtn.setEnabled(true);
 				}
-		}
+			}
 		});
 		
 		nameText.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e){
 				if (e.character == SWT.CR) {
 					startEntryIndex = 0;
 					searchAction(nameText.getText(), geoText.getText());
@@ -291,7 +297,7 @@ public class PhoneBookSearchForm extends Composite {
 		});
 		
 		geoText.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e){
 				if (e.character == SWT.CR) {
 					startEntryIndex = 0;
 					searchAction(nameText.getText(), geoText.getText());
@@ -301,33 +307,31 @@ public class PhoneBookSearchForm extends Composite {
 		
 		geoText.addFocusListener(new FocusListener() {
 			@Override
-			public void focusGained(FocusEvent e) {
-				if (hitListComposite == null) return;
-				//hitListComposite.setVisible(true);
-				//repositionHitList();
+			public void focusGained(FocusEvent e){
+				if (hitListComposite == null)
+					return;
+				// hitListComposite.setVisible(true);
+				// repositionHitList();
 			}
+			
 			@Override
-			public void focusLost(FocusEvent e) {
-				if (hitListComposite == null) return;
-				//hitListComposite.setVisible(false);
-				//System.out.println("focus lost on Text");
+			public void focusLost(FocusEvent e){
+				if (hitListComposite == null)
+					return;
+				// hitListComposite.setVisible(false);
+				// System.out.println("focus lost on Text");
 			}
 		});
 		/*
-		// make sure menu is correctly positioned after moving or resizing
-		geoText.getParent().getParent().addControlListener(new ControlListener() {
-			@Override
-			public void controlMoved(ControlEvent e) {
-				repositionHitList();
-			}
-			@Override
-			public void controlResized(ControlEvent e) {
-				repositionHitList();
-			}
-		});
-		*/
+		 * // make sure menu is correctly positioned after moving or resizing
+		 * geoText.getParent().getParent().addControlListener(new ControlListener() {
+		 * 
+		 * @Override public void controlMoved(ControlEvent e) { repositionHitList(); }
+		 * 
+		 * @Override public void controlResized(ControlEvent e) { repositionHitList(); } });
+		 */
 		searchBtn.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				startEntryIndex = 0;
 				String tmp1 = nameText.getText();
 				String tmp2 = geoText.getText();
@@ -335,24 +339,22 @@ public class PhoneBookSearchForm extends Composite {
 			}
 		});
 		/*
-		getShell().addListener(SWT.Activate, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				hitListComposite.setVisible(false);
-			}
-		});
-		*/
-		
+		 * getShell().addListener(SWT.Activate, new Listener() {
+		 * 
+		 * @Override public void handleEvent(Event event) { hitListComposite.setVisible(false); }
+		 * });
+		 */
+
 		geoText.addListener(SWT.Deactivate, new Listener() {
 			@Override
-			public void handleEvent(Event event) {
+			public void handleEvent(Event event){
 				hitListComposite.setVisible(false);
 				System.out.println("Deactivate on " + event.widget);
 			}
 		});
 		geoText.addListener(SWT.Activate, new Listener() {
 			@Override
-			public void handleEvent(Event event) {
+			public void handleEvent(Event event){
 				hitListComposite.setVisible(true);
 				System.out.println("Activate on " + event.widget);
 			}
@@ -360,12 +362,12 @@ public class PhoneBookSearchForm extends Composite {
 		
 	}
 	
-	private void recalcHitList(final boolean doChangeVisibilityOrPosition)	{
-		if (parser != null)	{
+	private void recalcHitList(final boolean doChangeVisibilityOrPosition){
+		if (parser != null) {
 			int currLen = geoText.getText().length();
-			//citySuggestions. = {{""}, {""}};
+			// citySuggestions. = {{""}, {""}};
 			String getSingleHitListResult = "";
-			if (currLen > 0)	{
+			if (currLen > 0) {
 				citySuggestions = parser.getCitySuggestions(geoText.getText());
 				getSingleHitListResult = getSingleHitListResult();
 			} else {
@@ -373,16 +375,16 @@ public class PhoneBookSearchForm extends Composite {
 				listSelectionIndex = -1;
 				return;
 			}
-			if (!getSingleHitListResult.isEmpty())	{
-				//citySuggestions = new String[][] {{""}, {""}};
-				//fillCitiesCombo(citySuggestions);
+			if (!getSingleHitListResult.isEmpty()) {
+				// citySuggestions = new String[][] {{""}, {""}};
+				// fillCitiesCombo(citySuggestions);
 				hitListComposite.setVisible(false);
 			} else {
-				if (hitListComposite != null)	{
+				if (hitListComposite != null) {
 					hitListComposite.dispose();
 					hitListComposite = null;
 				}
-				if (hitListComposite == null)	{
+				if (hitListComposite == null) {
 					createHitListComposite(parentComposite);
 				}
 				if ((citySuggestions.length > 0) && (hitListComposite != null)) {
@@ -397,20 +399,22 @@ public class PhoneBookSearchForm extends Composite {
 	}
 	
 	/**
-	 * if the list contains a SINGLE result entry then return this string. 
-	 * if it contains more than one matching entry then just return an empty string
+	 * if the list contains a SINGLE result entry then return this string. if it contains more than
+	 * one matching entry then just return an empty string
+	 * 
 	 * @return
 	 */
-	private String getSingleHitListResult()	{
-		if ((citySuggestions == null) || (citySuggestions.length == 0))	{
+	private String getSingleHitListResult(){
+		if ((citySuggestions == null) || (citySuggestions.length == 0)) {
 			return "";
 		}
 		int resultCounter = 0;
 		String resultString = "";
-		for (int i = 0; i < citySuggestions.length; i++)	{
-			if (citySuggestions[i][1].equalsIgnoreCase("1"))	{
+		for (int i = 0; i < citySuggestions.length; i++) {
+			if (citySuggestions[i][1].equalsIgnoreCase("1")) {
 				// this is the second result found -> return ""
-				if (resultCounter >= 1) return "";
+				if (resultCounter >= 1)
+					return "";
 				// set result string
 				resultString = citySuggestions[i][0];
 				resultCounter = resultCounter + 1;
@@ -419,41 +423,42 @@ public class PhoneBookSearchForm extends Composite {
 		return resultString;
 	}
 	
-	private void repositionHitList()	{
-		if (hitListComposite == null) return;
-		if (hitList.getItemCount() > 0)	{
+	private void repositionHitList(){
+		if (hitListComposite == null)
+			return;
+		if (hitList.getItemCount() > 0) {
 			Display desktop = getDisplay();
-			if (desktop == null) return;
+			if (desktop == null)
+				return;
 			Rectangle rect = desktop.map(getParent(), null, geoText.getBounds());
 			Point bestSize = hitList.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			hitListComposite.setBounds(	rect.x + getBounds().x + leftMarginOffset + 1,
-										rect.y + getBounds().y + leftMarginOffset + geoText.getBounds().height,
-										bestSize.x,
-										bestSize.y);
+			hitListComposite.setBounds(rect.x + getBounds().x + leftMarginOffset + 1, rect.y
+				+ getBounds().y + leftMarginOffset + geoText.getBounds().height, bestSize.x,
+				bestSize.y);
 			hitList.setBounds(-1, -1, bestSize.x, bestSize.y);
 			hitListComposite.setVisible(true);
-		} else	{
+		} else {
 			hitListComposite.setBounds(0, 0, 0, 0);
 			hitListComposite.setVisible(false);
 		}
 	}
 	
-	private void createHitListComposite(Composite parent)	{
+	private void createHitListComposite(Composite parent){
 		// hitsList composite
-		hitListComposite = new Shell (getShell (), SWT.ON_TOP | SWT.TOOL);
+		hitListComposite = new Shell(getShell(), SWT.ON_TOP | SWT.TOOL);
 		hitList = new org.eclipse.swt.widgets.List(hitListComposite, SWT.BORDER | SWT.V_SCROLL);
 		hitListComposite.moveAbove(null);
 		repositionHitList();
 		hitListComposite.addListener(SWT.Deactivate, new Listener() {
 			@Override
-			public void handleEvent(Event event) {
+			public void handleEvent(Event event){
 				hitListComposite.setVisible(false);
 				System.out.println("SWT.Deactivate " + event.widget);
 			}
 		});
 		hitListComposite.addListener(SWT.Activate, new Listener() {
 			@Override
-			public void handleEvent(Event event) {
+			public void handleEvent(Event event){
 				hitListComposite.setVisible(true);
 				System.out.println("SWT.Activate on " + event.widget);
 			}
@@ -461,13 +466,13 @@ public class PhoneBookSearchForm extends Composite {
 		
 		hitList.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				int newSelection = hitList.getSelectionIndex();
 				String newSelectionText = hitList.getItem(hitList.getSelectionIndex());
-				if (newSelectionText.startsWith(" ***"))	{
+				if (newSelectionText.startsWith(" ***")) {
 					// this is a divider - cannot select -> deselect all, do NOT close the list
 					hitList.setSelection(-1);
 					geoText.getParent().setFocus();
@@ -475,29 +480,29 @@ public class PhoneBookSearchForm extends Composite {
 				} else {
 					geoText.setText(newSelectionText);
 					listSelectionIndex = newSelection;
-					// first set focus to avoid focusGained event on geoText and making it visibile again
+					// first set focus to avoid focusGained event on geoText and making it visibile
+					// again
 					geoText.setFocus();
 					recalcHitList(true);
 					hitListComposite.setVisible(false);
 				}
 			}
 		});
-		/*hitListComposite.addFocusListener(new FocusListener() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				System.out.println("focus gained on List");
-			}
-			@Override
-			public void focusLost(FocusEvent e) {
-			}
-		});*/
-		//hitListComposite.add
+		/*
+		 * hitListComposite.addFocusListener(new FocusListener() {
+		 * 
+		 * @Override public void focusGained(FocusEvent e) {
+		 * System.out.println("focus gained on List"); }
+		 * 
+		 * @Override public void focusLost(FocusEvent e) { } });
+		 */
+		// hitListComposite.add
 	}
 	
-	private void setSearchText()	{
-	//private void setSearchText(PhoneBookContentParser parser)	{
+	private void setSearchText(){
+		// private void setSearchText(PhoneBookContentParser parser) {
 		boolean visible = true;
-		if (parser != null)	{
+		if (parser != null) {
 			int numOfEntries = parser.getNumOfEntries();
 			searchInfoText = parser.getSearchInfo();
 			searchInfoTextField.setText(searchInfoText);
@@ -505,10 +510,10 @@ public class PhoneBookSearchForm extends Composite {
 			visible = true;
 			numOfPages = (numOfEntries - 1) / entriesToRead;
 			previousBtn.setEnabled(false);
-			if (numOfPages > 0)	{
+			if (numOfPages > 0) {
 				nextBtn.setEnabled(true);
 			}
-		} else	{
+		} else {
 			visible = false;
 			numOfPages = 0;
 		}
@@ -517,7 +522,7 @@ public class PhoneBookSearchForm extends Composite {
 		nextBtn.setVisible(visible);
 	}
 	
-	public void setCountry(final String countryIso2)	{
+	public void setCountry(final String countryIso2){
 		country = countryIso2;
 		createParser();
 		citySuggestions = parser.getCitySuggestions(geoText.getText());
@@ -525,21 +530,24 @@ public class PhoneBookSearchForm extends Composite {
 		repositionHitList();
 	}
 	
-	public String getCountry()	{
+	public String getCountry(){
 		return country;
 	}
-	private void createParser()	{
+	
+	private void createParser(){
 		createParser("", "", 0);
 	}
 	
 	/**
 	 * create the content parser for the currently selected country
 	 */
-	private void createParser(final String name, final String geo, final int pageNum)	{
+	private void createParser(final String name, final String geo, final int pageNum){
 		// *** call constructor for parser for currently selected country
 		try {
 			Class<?> cls;
-			cls = Class.forName("ch.marlovits.addressSearch.directories.PhoneBookContentParser_" + country);
+			cls =
+				Class.forName("ch.marlovits.addressSearch.directories.PhoneBookContentParser_"
+					+ country);
 			Class<?> partypes[] = new Class[3];
 			partypes[0] = String.class;
 			partypes[1] = String.class;
@@ -551,7 +559,8 @@ public class PhoneBookSearchForm extends Composite {
 			arglist[2] = new Integer(pageNum);
 			parser = (PhoneBookContentParser) ct.newInstance(arglist);
 		} catch (ClassNotFoundException e) {
-			SWTHelper.alert("Implementierungsfehler", "Für das ausgewählte Land (" + country.toUpperCase() + ") ist die Suchroutine nicht implementiert.");
+			SWTHelper.alert("Implementierungsfehler", "Für das ausgewählte Land ("
+				+ country.toUpperCase() + ") ist die Suchroutine nicht implementiert.");
 			e.printStackTrace();
 		} catch (SecurityException e) {
 			e.printStackTrace();
@@ -569,21 +578,20 @@ public class PhoneBookSearchForm extends Composite {
 	}
 	
 	/**
-	 * Liest Kontaktinformationen anhand der Kriterien name & geo.
-	 * Bei der Suche wird die Kontakteliste und der InfoText abgefüllt.
+	 * Liest Kontaktinformationen anhand der Kriterien name & geo. Bei der Suche wird die
+	 * Kontakteliste und der InfoText abgefüllt.
 	 */
-	private void readKontakte(final String name, final String geo, final int startPageNum) {
+	private void readKontakte(final String name, final String geo, final int startPageNum){
 		final Cursor backupCursor = getShell().getCursor();
-		final Cursor waitCursor = new Cursor(getShell().getDisplay(),
-				SWT.CURSOR_WAIT);
-
+		final Cursor waitCursor = new Cursor(getShell().getDisplay(), SWT.CURSOR_WAIT);
+		
 		getShell().setCursor(waitCursor);
-
+		
 		try {
 			createParser(name, geo, startPageNum);
 			kontakte = parser.extractKontakte();
 			searchInfoText = parser.getSearchInfo();
-			setSearchText(/*parser*/);
+			setSearchText(/* parser */);
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} finally {
@@ -594,51 +602,47 @@ public class PhoneBookSearchForm extends Composite {
 	/**
 	 * Aktion wenn Such-Button klicked oder Default-Action (Return).
 	 */
-	private void searchAction(String name, String geo) {
+	private void searchAction(String name, String geo){
 		String savedText = geoText.getText();
 		geoText.setRedraw(false);
-		geoText.setItems(new String[] {""});
+		geoText.setItems(new String[] {
+			""
+		});
 		geoText.setText(savedText);
 		geoText.setRedraw(true);
 		readKontakte(name, geo, startEntryIndex);
 		resultChanged();
-		if (parser.hasCitiesList())	{
+		if (parser.hasCitiesList()) {
 			SWTHelper.showInfo("", parser.getCitiesListMessage());
 			String[][] citiesList = parser.getCitiesList();
 			fillCitiesCombo(citiesList);
 		}
-		if (parser.noCityFound())	{
+		if (parser.noCityFound()) {
 			SWTHelper.showInfo("", parser.getCitiesListMessage());
 			citySuggestions = parser.getCitySuggestions("Sing");
 			fillCitiesCombo(citySuggestions);
-			}
+		}
 	}
 	
-	private void fillCitiesCombo(final String[][] citiesList)	{
+	private void fillCitiesCombo(final String[][] citiesList){
 		hitList.removeAll();
-		if ((citiesList != null) && (citiesList.length > 0))	{
-			for (int i = 0; i < citiesList.length; i++)	{
+		if ((citiesList != null) && (citiesList.length > 0)) {
+			for (int i = 0; i < citiesList.length; i++) {
 				String marker = (citiesList[i][1].equalsIgnoreCase("0") ? " *** " : "");
 				hitList.add(marker + citiesList[i][0] + marker);
 			}
 		}
-/*		if ((citiesList != null) && (citiesList.length > 0))	{
-			String itemsString = "";
-			String itemsDelim = "";
-			for (int i = 0; i < citiesList.length; i++)	{
-				String marker = (citiesList[i][1].equalsIgnoreCase("0") ? " *** " : "");
-				itemsString = itemsString + itemsDelim + marker + citiesList[i][0] + marker;
-				itemsDelim = ";";
-			}
-			String savedText = geoText.getText();
-			geoText.setItems(itemsString.split(";"));
-			geoText.setVisibleItemCount(itemsString.length());
-			geoText.setFocus();
-			geoText.setText(savedText);
-		}
-*/	}
+		/*
+		 * if ((citiesList != null) && (citiesList.length > 0)) { String itemsString = ""; String
+		 * itemsDelim = ""; for (int i = 0; i < citiesList.length; i++) { String marker =
+		 * (citiesList[i][1].equalsIgnoreCase("0") ? " *** " : ""); itemsString = itemsString +
+		 * itemsDelim + marker + citiesList[i][0] + marker; itemsDelim = ";"; } String savedText =
+		 * geoText.getText(); geoText.setItems(itemsString.split(";"));
+		 * geoText.setVisibleItemCount(itemsString.length()); geoText.setFocus();
+		 * geoText.setText(savedText); }
+		 */}
 	
-	private void resultChanged() {
+	private void resultChanged(){
 		for (Object listener : listeners.getListeners()) {
 			if (listener != null) {
 				((Listener) listener).handleEvent(null);
@@ -649,7 +653,7 @@ public class PhoneBookSearchForm extends Composite {
 	/**
 	 * Öffnet Dialog zum Erfassen eines Patienten
 	 */
-	public void openPatientenDialog(HashMap<String, String> kontaktHash) {
+	public void openPatientenDialog(HashMap<String, String> kontaktHash){
 		if (kontaktHash != null) {
 			final PatientErfassenDialog dialog = new PatientErfassenDialog(getShell(), kontaktHash);
 			dialog.open();
@@ -659,33 +663,33 @@ public class PhoneBookSearchForm extends Composite {
 	/**
 	 * Öffnet Dialog zum Erfassen eines Kontaktes
 	 */
-	public void openKontaktDialog(HashMap<String, String> kontaktHash) {
+	public void openKontaktDialog(HashMap<String, String> kontaktHash){
 		if (kontaktHash != null) {
 			final KontaktErfassenDialog dialog = new KontaktErfassenDialog(getShell(), kontaktHash);
 			dialog.open();
 		}
 	}
-
+	
 	/**
 	 * Kontakt Liste
 	 */
-	public List<HashMap<String, String>> getKontakte() {
+	public List<HashMap<String, String>> getKontakte(){
 		return this.kontakte;
 	}
-
+	
 	/**
 	 * Infotext zum Suchresultat: z.B. "123 Treffer"
 	 */
-	public String getSearchInfoText() {
+	public String getSearchInfoText(){
 		return this.searchInfoText;
 	}
-
-	public void addResultChangeListener(Listener listener) {
+	
+	public void addResultChangeListener(Listener listener){
 		listeners.add(listener);
 	}
-
-	public void removeResultChangeListener(Listener listener) {
+	
+	public void removeResultChangeListener(Listener listener){
 		listeners.add(listener);
 	}
-
+	
 }

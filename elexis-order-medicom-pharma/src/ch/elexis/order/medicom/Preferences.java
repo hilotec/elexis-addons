@@ -8,32 +8,32 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import ch.elexis.Hub;
 import ch.elexis.preferences.SettingsPreferenceStore;
 
-public class Preferences extends FieldEditorPreferencePage implements
-		IWorkbenchPreferencePage {
-
-	public static final String CUSTOMER="orders/medicom/customer";
-	public static final String MAIL="orders/medicom/mail";
+public class Preferences extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+	
+	public static final String CUSTOMER = "orders/medicom/customer";
+	public static final String MAIL = "orders/medicom/mail";
 	
 	public Preferences(){
 		super(GRID);
 		setPreferenceStore(new SettingsPreferenceStore(Hub.globalCfg));
 	}
+	
 	@Override
-	protected void createFieldEditors() {
+	protected void createFieldEditors(){
 		addField(new StringFieldEditor(CUSTOMER, "Kundenidentifikation", getFieldEditorParent()));
 		addField(new StringFieldEditor(MAIL, "Mailadresse", getFieldEditorParent()));
 	}
-
+	
 	@Override
-	public void init(IWorkbench workbench) {
-		// TODO Auto-generated method stub
-
+	public void init(IWorkbench workbench){
+	// TODO Auto-generated method stub
+	
 	}
+	
 	@Override
-	protected void performApply() {
+	protected void performApply(){
 		Hub.globalCfg.flush();
 		super.performApply();
 	}
-
 	
 }

@@ -35,14 +35,14 @@ public class DirectoriesHelper {
 		text = text.replace("<b class=\"searchWords\">", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace("</b>", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace((char) 160, ' '); // Spezielles Blank Zeichen wird
-												// ersetzt
+		// ersetzt
 		return text;
 	}
 	
-	private static String cleanupUmlaute(String text) {
+	private static String cleanupUmlaute(String text){
 		boolean useNewVersion = false;
 		
-		if (useNewVersion){
+		if (useNewVersion) {
 			text = text.replaceAll("&#x([0-9A-Fa-f]{2,2});", "%$1");
 			try {
 				text = URLDecoder.decode(text, "ISO-8859-1");
@@ -50,7 +50,7 @@ public class DirectoriesHelper {
 				e.printStackTrace();
 			}
 			return text;
-		} else	{
+		} else {
 			// this version is NOT prepared for any characters
 			text = text.replace("&#xE4;", "ä");//$NON-NLS-1$ //$NON-NLS-2$
 			text = text.replace("&#xC4;", "Ä");//$NON-NLS-1$ //$NON-NLS-2$
@@ -74,17 +74,21 @@ public class DirectoriesHelper {
 			
 			return text;
 		}
-    }
+	}
 	
 	/**
 	 * creates and returns a url for reading data from an online-address-query page
-	 * @param  name    search for this name
-	 * @param  geo     search in this city/location
-	 * @param  country search in this country - must be iso2 name of the country
-	 * @param  pageNum
+	 * 
+	 * @param name
+	 *            search for this name
+	 * @param geo
+	 *            search in this city/location
+	 * @param country
+	 *            search in this country - must be iso2 name of the country
+	 * @param pageNum
 	 * @return the url which returns the results, null if any error occurs
 	 */
-	private static URL getURL(String name, String geo, String country, int pageNum)	{
+	private static URL getURL(String name, String geo, String country, int pageNum){
 		name = name.replace(' ', '+');
 		geo = geo.replace(' ', '+');
 		country = country.toLowerCase();
@@ -93,21 +97,22 @@ public class DirectoriesHelper {
 		int recCount = 10;
 		String urlPattern = "";
 		// *** create the url string for different countries
-		if (country.equalsIgnoreCase("ch"))	{
+		if (country.equalsIgnoreCase("ch")) {
 			// *** switzerland
 			urlPattern = "http://tel.local.ch/{0}/q/?what={1}&where={2}&cid=directories&start={3}"; //$NON-NLS-1$
-		} else if (country.equalsIgnoreCase("de"))	{
+		} else if (country.equalsIgnoreCase("de")) {
 			// *** germany
 			try {
 				name = URLEncoder.encode(name, "ISO-8859-1");
-				geo  = URLEncoder.encode(geo,  "ISO-8859-1");
+				geo = URLEncoder.encode(geo, "ISO-8859-1");
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 			recCount = 20;
 			lPageNum = lPageNum * 20 + 1;
 			System.out.println("lPageNum: " + lPageNum);
-			urlPattern = "http://www.dastelefonbuch.de/?la={0}&kw={1}&ci={2}&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom={3}&reccount={4}"; //$NON-NLS-1$
+			urlPattern =
+				"http://www.dastelefonbuch.de/?la={0}&kw={1}&ci={2}&ciid=&cmd=search&cifav=0&mdest=sec1.www1&vert_ok=1&recfrom={3}&reccount={4}"; //$NON-NLS-1$
 		}
 		
 		// *** actually create the URL
@@ -122,15 +127,20 @@ public class DirectoriesHelper {
 	
 	/**
 	 * reads and returns page contents from an online-address-query page
-	 * @param  name    search for this name
-	 * @param  geo     search in this city/location
-	 * @param  country search in this country - must be iso2 name of the country
-	 * @param  pageNum
+	 * 
+	 * @param name
+	 *            search for this name
+	 * @param geo
+	 *            search in this city/location
+	 * @param country
+	 *            search in this country - must be iso2 name of the country
+	 * @param pageNum
 	 * @return the contents of the requested page or "" if any error occurs
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public static String readContent(final String name, final String geo, final String country, int pageNum)	{
+	public static String readContent(final String name, final String geo, final String country,
+		int pageNum){
 		URL content = getURL(name, geo, country, pageNum);
 		InputStream input;
 		StringBuffer sb = new StringBuffer();
@@ -149,20 +159,21 @@ public class DirectoriesHelper {
 					input.close();
 				}
 			}
-		} catch (IOException e) {
-		}
+		} catch (IOException e) {}
 		
 		return cleanupUmlaute(cleanupText(sb.toString()));
 	}
 	
 	/**
 	 * write binary file
-	 * @param filenamePath the path of the file
-	 * @param text the text to be written
+	 * 
+	 * @param filenamePath
+	 *            the path of the file
+	 * @param text
+	 *            the text to be written
 	 * @throws IOException
 	 */
-	public static void writeFile(String filenamePath, final String text)
-		throws IOException{
+	public static void writeFile(String filenamePath, final String text) throws IOException{
 		FileOutputStream output = null;
 		try {
 			output = new FileOutputStream(filenamePath);

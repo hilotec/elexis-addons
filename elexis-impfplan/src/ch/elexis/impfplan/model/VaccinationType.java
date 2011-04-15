@@ -38,84 +38,85 @@ public class VaccinationType extends PersistentObject {
 	private static final String TABLENAME = "CH_ELEXIS_IMPFPLAN_VACCINATION_TYPES"; //$NON-NLS-1$
 	private static final String VERSION = "0.1.0"; //$NON-NLS-1$
 	private static final String createDB = "CREATE TABLE " //$NON-NLS-1$
-			+ TABLENAME
-			+ " (" //$NON-NLS-1$
-			+ "ID	VARCHAR(25) primary key, deleted CHAR(1) default '0', lastupdate BIGINT," //$NON-NLS-1$
-			+ "name VARCHAR(80), " //$NON-NLS-1$
-			+ // Name of the Vaccination, e.g. FSME
-			"product VARCHAR(80), " //$NON-NLS-1$
-			+ // administered product, e.g. Encepur 0.5ml i.m.
-			"delay_1to2 VARCHAR(10), " //$NON-NLS-1$
-			+ // delay from 1st to 2nd shot in days, e.g. 14-48 or 0 if single
-			// shot
-			"delay_2to3 VARCHAR(10)," //$NON-NLS-1$
-			+ // delay from 2nd to 3rd shot in days or 0 if no 3rd required
-			"delay_3to4 VARCHAR(10), " //$NON-NLS-1$
-			+ // delay from 3rd to 4th or 0 if no 4th required
-			"delay_4to5 VARCHAR(10), " //$NON-NLS-1$
-			+ // delay from 4th to 5th or 0 if no 5th required
-			"delay_rep VARCHAR(10), " //$NON-NLS-1$
-			+ // delay until rappel ot 0 if no rappel required
-			"recommendedAge VARCHAR(10)," //$NON-NLS-1$
-			+ // recommended age in months for 1st, e.g. 8-12 or 48- or -24
-			"remarks TEXT);" // general remarks, warnings, limitations etc. //$NON-NLS-1$
-			+ "INSERT INTO " + TABLENAME + " (ID,name) VALUES('VERSION','" //$NON-NLS-1$ //$NON-NLS-2$
-			+ VERSION + "');"; //$NON-NLS-1$
-
+		+ TABLENAME + " (" //$NON-NLS-1$
+		+ "ID	VARCHAR(25) primary key, deleted CHAR(1) default '0', lastupdate BIGINT," //$NON-NLS-1$
+		+ "name VARCHAR(80), " //$NON-NLS-1$
+		+ // Name of the Vaccination, e.g. FSME
+		"product VARCHAR(80), " //$NON-NLS-1$
+		+ // administered product, e.g. Encepur 0.5ml i.m.
+		"delay_1to2 VARCHAR(10), " //$NON-NLS-1$
+		+ // delay from 1st to 2nd shot in days, e.g. 14-48 or 0 if single
+		// shot
+		"delay_2to3 VARCHAR(10)," //$NON-NLS-1$
+		+ // delay from 2nd to 3rd shot in days or 0 if no 3rd required
+		"delay_3to4 VARCHAR(10), " //$NON-NLS-1$
+		+ // delay from 3rd to 4th or 0 if no 4th required
+		"delay_4to5 VARCHAR(10), " //$NON-NLS-1$
+		+ // delay from 4th to 5th or 0 if no 5th required
+		"delay_rep VARCHAR(10), " //$NON-NLS-1$
+		+ // delay until rappel ot 0 if no rappel required
+		"recommendedAge VARCHAR(10)," //$NON-NLS-1$
+		+ // recommended age in months for 1st, e.g. 8-12 or 48- or -24
+		"remarks TEXT);" // general remarks, warnings, limitations etc. //$NON-NLS-1$
+		+ "INSERT INTO " + TABLENAME + " (ID,name) VALUES('VERSION','" //$NON-NLS-1$ //$NON-NLS-2$
+		+ VERSION + "');"; //$NON-NLS-1$
+	
 	static {
-		addMapping(TABLENAME, NAME, PRODUCT, DELAY1TO2, DELAY2TO3, DELAY3TO4,
-				DELAY_REP, REMARKS, RECOMMENDED_AGE);
+		addMapping(TABLENAME, NAME, PRODUCT, DELAY1TO2, DELAY2TO3, DELAY3TO4, DELAY_REP, REMARKS,
+			RECOMMENDED_AGE);
 		VaccinationType ver = load("VERSION"); //$NON-NLS-1$
 		if (!ver.exists()) {
 			createOrModifyTable(createDB);
 		}
 	}
-
-	public VaccinationType(String name, String subst) {
+	
+	public VaccinationType(String name, String subst){
 		create(null);
-		set(new String[] { NAME, PRODUCT }, name, subst);
+		set(new String[] {
+			NAME, PRODUCT
+		}, name, subst);
 	}
-
-	public static VaccinationType load(String id) {
+	
+	public static VaccinationType load(String id){
 		return new VaccinationType(id);
 	}
-
+	
 	@Override
-	public String getLabel() {
+	public String getLabel(){
 		return new StringBuilder().append(get(NAME)).append(": ").append( //$NON-NLS-1$
-				get(PRODUCT)).toString();
+			get(PRODUCT)).toString();
 	}
-
+	
 	/**
-	 * An input definition can be such as 12y- or 3m-2y or -20y and so on
-	 * possible suffixes are: y,a,j: years, m: months, w,s: weeks. If suffix
-	 * is omitted, y is assumed
-	 * -x will be interpreted as 0-x, x- will be interpreted as x-150y
+	 * An input definition can be such as 12y- or 3m-2y or -20y and so on possible suffixes are:
+	 * y,a,j: years, m: months, w,s: weeks. If suffix is omitted, y is assumed -x will be
+	 * interpreted as 0-x, x- will be interpreted as x-150y
+	 * 
 	 * @param inputDef
 	 * @return
 	 * @throws ElexisException
 	 */
-	public static Tuple calcDays(String inputDef) throws ElexisException {
-		inputDef=inputDef.trim().toLowerCase();
+	public static Tuple calcDays(String inputDef) throws ElexisException{
+		inputDef = inputDef.trim().toLowerCase();
 		String[] in = inputDef.split("\\s*-\\s*"); //$NON-NLS-1$
 		if (in.length == 1) {
-			int m=doInterpret(in[0]);
-			if(inputDef.startsWith("-")){ //$NON-NLS-1$
-				return new Tuple(0,m);
-			}else if(inputDef.endsWith("-")){ //$NON-NLS-1$
-				return new Tuple(m,36500);
-			}else{
-				return new Tuple(m,m);
+			int m = doInterpret(in[0]);
+			if (inputDef.startsWith("-")) { //$NON-NLS-1$
+				return new Tuple(0, m);
+			} else if (inputDef.endsWith("-")) { //$NON-NLS-1$
+				return new Tuple(m, 36500);
+			} else {
+				return new Tuple(m, m);
 			}
 		} else if (in.length == 2) {
 			return new Tuple(doInterpret(in[0]), doInterpret(in[1]));
 		} else {
 			throw new ElexisException(VaccinationType.class, "Too many dashes in " //$NON-NLS-1$
-					+ inputDef, 2);
+				+ inputDef, 2);
 		}
 	}
-
-	private static int doInterpret(String input) throws ElexisException {
+	
+	private static int doInterpret(String input) throws ElexisException{
 		String s = input.trim();
 		int len = s.length();
 		if (len == 0) {
@@ -124,13 +125,13 @@ public class VaccinationType extends PersistentObject {
 		try {
 			String number = s;
 			int mul = 1;
-			if(s.matches("[0-9]+")){ //$NON-NLS-1$
-				s+="y"; //$NON-NLS-1$
+			if (s.matches("[0-9]+")) { //$NON-NLS-1$
+				s += "y"; //$NON-NLS-1$
 				len++;
 			}
 			if (s.matches("[0-9]+[wmyjad]")) { //$NON-NLS-1$
-				number = s.substring(0,len-1);
-				CharSequence mdef = s.subSequence(len-1, len);
+				number = s.substring(0, len - 1);
+				CharSequence mdef = s.subSequence(len - 1, len);
 				switch (mdef.charAt(0)) {
 				case 'w':
 				case 's':
@@ -145,24 +146,24 @@ public class VaccinationType extends PersistentObject {
 					mul = 365;
 					break;
 				case 'd':
-					mul=1;
+					mul = 1;
 					break;
 				}
 			}
 			return Integer.parseInt(number) * mul;
 		} catch (NumberFormatException nex) {
 			throw new ElexisException(VaccinationType.class, "Can not interpret " + input, //$NON-NLS-1$
-					1);
+				1);
 		}
 	}
-
-	public static List<VaccinationType> findDueFor(Patient pat) throws ElexisException {
+	
+	public static List<VaccinationType> findDueFor(Patient pat) throws ElexisException{
 		LinkedList<VaccinationType> ret = new LinkedList<VaccinationType>();
-		Collection<VaccinationType> vaccinationsDefined = JavaConversions
-				.asCollection(ImpfplanController.allVaccs());
-		HashMap<VaccinationType, List<TimeTool>> vaccs = new HashMap<VaccinationType, List<TimeTool>>();
-		for (Vaccination v : JavaConversions.asCollection(ImpfplanController
-				.getVaccinations(pat))) {
+		Collection<VaccinationType> vaccinationsDefined =
+			JavaConversions.asCollection(ImpfplanController.allVaccs());
+		HashMap<VaccinationType, List<TimeTool>> vaccs =
+			new HashMap<VaccinationType, List<TimeTool>>();
+		for (Vaccination v : JavaConversions.asCollection(ImpfplanController.getVaccinations(pat))) {
 			List<TimeTool> l = vaccs.get(v.getVaccinationType());
 			if (l == null) {
 				l = new LinkedList<TimeTool>();
@@ -170,7 +171,7 @@ public class VaccinationType extends PersistentObject {
 			l.add(new TimeTool(v.get(Vaccination.DATE)));
 			vaccs.put(v.getVaccinationType(), l);
 		}
-
+		
 		for (VaccinationType vt : vaccinationsDefined) {
 			List<TimeTool> vDone = vaccs.get(vt);
 			if (vDone == null) {
@@ -199,11 +200,11 @@ public class VaccinationType extends PersistentObject {
 							} else {
 								String v4 = vt.get(VaccinationType.DELAY3TO4);
 								if (v4 != null && (!v4.equals("0")) //$NON-NLS-1$
-										&& v4.length() > 0) {
+									&& v4.length() > 0) {
 									Tuple d3tod4 = calcDays(v4);
-									if(vDone.size()<4){
-										TimeTool ttThird=new TimeTool(vDone.get(2));
-										if(isInRange(pat, ttThird, d3tod4)){
+									if (vDone.size() < 4) {
+										TimeTool ttThird = new TimeTool(vDone.get(2));
+										if (isInRange(pat, ttThird, d3tod4)) {
 											ret.add(vt);
 										}
 									}
@@ -212,14 +213,14 @@ public class VaccinationType extends PersistentObject {
 						}
 					}
 				}
-
+				
 			}
-
+			
 		}
 		return ret;
 	}
-
-	public static boolean isInRange(Patient p, TimeTool base, Tuple t) {
+	
+	public static boolean isInRange(Patient p, TimeTool base, Tuple t){
 		TimeTool now = new TimeTool();
 		TimeTool bd = new TimeTool(p.getGeburtsdatum());
 		int days = bd.daysTo(now);
@@ -238,16 +239,15 @@ public class VaccinationType extends PersistentObject {
 		}
 		return false;
 	}
-
+	
 	@Override
-	protected String getTableName() {
+	protected String getTableName(){
 		return TABLENAME;
 	}
-
-	protected VaccinationType() {
-	}
-
-	protected VaccinationType(String id) {
+	
+	protected VaccinationType(){}
+	
+	protected VaccinationType(String id){
 		super(id);
 	}
 }

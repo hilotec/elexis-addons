@@ -10,19 +10,19 @@ import java.util.Vector;
 
 public class PhoneBookContentParser_at extends PhoneBookContentParser {
 	
-	public PhoneBookContentParser_at(String name, String geo, int pageNum) {
+	public PhoneBookContentParser_at(String name, String geo, int pageNum){
 		super(name, geo, pageNum, "UTF-8");
 	}
 	
 	@Override
-	public HashMap<String, String> extractKontaktFromDetail() {
+	public HashMap<String, String> extractKontaktFromDetail(){
 		// in herold.at there is no distinct detail page when searching
 		// -> just call the list-version
 		return extractKontaktFromList();
 	}
 	
 	@Override
-	public HashMap<String, String> extractKontaktFromList() {
+	public HashMap<String, String> extractKontaktFromList(){
 		// create an empty HashMap
 		HashMap<String, String> result = new HashMap<String, String>();
 		initHashMap(result);
@@ -35,11 +35,11 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		String lastnameFirstname = extractTo("</a>");
 		String[] firstnameLastname = getFirstnameLastname(lastnameFirstname);
 		String firstname = firstnameLastname[0].trim();
-		String lastname  = firstnameLastname[1].trim();
+		String lastname = firstnameLastname[1].trim();
 		String[] firstnameTitle = firstname.split(",");
 		firstname = firstnameTitle[0].trim();
 		String title = "";
-		if (firstnameTitle.length > 1)	{
+		if (firstnameTitle.length > 1) {
 			int commaPos = lastnameFirstname.indexOf(",");
 			title = lastnameFirstname.substring(commaPos + 1).trim();
 		}
@@ -48,7 +48,7 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		int groupPos = getNextPos("<div class=\"group\">");
 		int addrPos = getNextPos("class=\"addrF\"><p");
 		String group = "";
-		if ((groupPos >= 0) && (groupPos < addrPos))	{
+		if ((groupPos >= 0) && (groupPos < addrPos)) {
 			moveTo("<div class=\"group\">");
 			group = extractTo("</div>").trim();
 		}
@@ -61,13 +61,13 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		moveTo("class=\"addr");
 		moveTo("\"><p");
 		moveTo(">");
-		String dataLines= extractTo("<br /></p>");
+		String dataLines = extractTo("<br /></p>");
 		// split lines
 		String[] linesArr = dataLines.split("<br />");
 		String lastLine = linesArr[linesArr.length - 1].trim();
 		String otherLines = "";
 		String delim = "";
-		for (int i = 0; i < linesArr.length - 1; i++)	{
+		for (int i = 0; i < linesArr.length - 1; i++) {
 			otherLines = otherLines + delim + linesArr[i].trim();
 			delim = ", ";
 		}
@@ -75,50 +75,51 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		String zipCity = zipCityStreetNum[0].trim();
 		String zip = zipCity.split(" ")[0];
 		String city = "";
-		if ((zip.length() != 4) || (!zip.replaceAll("[0-9]", "").equalsIgnoreCase("")))	{
+		if ((zip.length() != 4) || (!zip.replaceAll("[0-9]", "").equalsIgnoreCase(""))) {
 			// no zip specified
-			zip  = "";
+			zip = "";
 			city = zipCity;
-		} else	{
+		} else {
 			// data to the right of " " is the city
 			city = zipCity.substring(5).trim();
 		}
 		
 		String street = "";
-		if (zipCityStreetNum.length > 1)	{
+		if (zipCityStreetNum.length > 1) {
 			street = zipCityStreetNum[1].trim();
-			if (zipCityStreetNum.length > 2)	{
+			if (zipCityStreetNum.length > 2) {
 				street = street + ", " + zipCityStreetNum[2].trim();
 			}
 		}
 		
 		// populate the hashMap
 		result.put(PhoneBookEntry.FLD_DETAILINFOLINK, detailInfoLink);
-		result.put(PhoneBookEntry.FLD_DISPLAYNAME,    lastnameFirstname);
-		result.put(PhoneBookEntry.FLD_NAME,           lastname);
-		result.put(PhoneBookEntry.FLD_FIRSTNAME,      firstname);
-		result.put(PhoneBookEntry.FLD_TITLE,          title);
-		result.put(PhoneBookEntry.FLD_ZUSATZ,         otherLines);
+		result.put(PhoneBookEntry.FLD_DISPLAYNAME, lastnameFirstname);
+		result.put(PhoneBookEntry.FLD_NAME, lastname);
+		result.put(PhoneBookEntry.FLD_FIRSTNAME, firstname);
+		result.put(PhoneBookEntry.FLD_TITLE, title);
+		result.put(PhoneBookEntry.FLD_ZUSATZ, otherLines);
 		
-		result.put(PhoneBookEntry.FLD_ZIP,            zip);
-		result.put(PhoneBookEntry.FLD_PLACE,          city);
-		result.put(PhoneBookEntry.FLD_STREET,         street);
-		result.put(PhoneBookEntry.FLD_LAND,           "AT");
-		result.put(PhoneBookEntry.FLD_CATEGORY,       group);
+		result.put(PhoneBookEntry.FLD_ZIP, zip);
+		result.put(PhoneBookEntry.FLD_PLACE, city);
+		result.put(PhoneBookEntry.FLD_STREET, street);
+		result.put(PhoneBookEntry.FLD_LAND, "AT");
+		result.put(PhoneBookEntry.FLD_CATEGORY, group);
 		
 		// return hashMap
 		return result;
 	}
 	
 	@Override
-	public List<HashMap<String, String>> extractKontakte() {
+	public List<HashMap<String, String>> extractKontakte(){
 		reset();
 		List<HashMap<String, String>> kontakte = new Vector<HashMap<String, String>>();
 		// if class="noresults" can be found, then there are no results found...
 		boolean foundit = (this.getNextPos("class=\"noresults\"") >= 0);
-		if (foundit) return kontakte;
+		if (foundit)
+			return kontakte;
 		foundit = moveTo("<!--begin: results-->");
-		if (foundit)	{
+		if (foundit) {
 			int listIndex = getNextPos("<h3><a href=\"http://www.herold.at/telefonbuch/");
 			while (listIndex >= 0) {
 				HashMap<String, String> entry = null;
@@ -129,22 +130,22 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 				listIndex = getNextPos("<h3><a href=\"http://www.herold.at/telefonbuch/");
 				// as long as there still is an end marker, there is more data - else break
 				int endMarkerPos = getNextPos("<!--end: results-->", listIndex);
-				if (endMarkerPos < 0) break;
+				if (endMarkerPos < 0)
+					break;
 			}
 		}
 		return kontakte;
 	}
 	
 	@Override
-	public HashMap<String, String> extractMaxInfo(
-			HashMap<String, String> kontaktHashMap) {
+	public HashMap<String, String> extractMaxInfo(HashMap<String, String> kontaktHashMap){
 		// TODO Auto-generated method stub
-		//SWTHelper.alert("Error", "extractMaxInfo() not yet implemented!");
+		// SWTHelper.alert("Error", "extractMaxInfo() not yet implemented!");
 		return kontaktHashMap;
 	}
 	
 	@Override
-	public int getNumOfEntries() {
+	public int getNumOfEntries(){
 		reset();
 		moveTo("<!--begin: pagegrid-->");
 		moveTo("</strong>");
@@ -154,7 +155,7 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 	}
 	
 	@Override
-	public String getSearchInfo() {
+	public String getSearchInfo(){
 		reset();
 		moveTo("<!--begin: pagegrid-->");
 		moveTo("<strong>");
@@ -165,8 +166,8 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 	}
 	
 	@Override
-	public URL getURL(String name, String geo, int pageNum) {
-//		http://www.herold.at/servlet/at.herold.sp.servlet.SPWPSearchServlet?searchregion=Ratten&searchterm=Marlovits
+	public URL getURL(String name, String geo, int pageNum){
+		// http://www.herold.at/servlet/at.herold.sp.servlet.SPWPSearchServlet?searchregion=Ratten&searchterm=Marlovits
 		name = name.replace(' ', '+');
 		geo = geo.replace(' ', '+');
 		country = country.toLowerCase();
@@ -174,21 +175,22 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 		int lPageNum = pageNum;
 		int recCount = 10;
 		String urlPattern = "";
-		//try {
-			//name = URLEncoder.encode(name, "ISO-8859-1");
-			//geo  = URLEncoder.encode(geo,  "ISO-8859-1");
-		//} catch (UnsupportedEncodingException e) {
-		//	e.printStackTrace();
-		//}
+		// try {
+		// name = URLEncoder.encode(name, "ISO-8859-1");
+		// geo = URLEncoder.encode(geo, "ISO-8859-1");
+		// } catch (UnsupportedEncodingException e) {
+		// e.printStackTrace();
+		// }
 		recCount = 20;
 		lPageNum = lPageNum * 20 + 1;
 		// language not supported in herold.at ???
-		// lang     = {0}
-		// name     = {1}
-		// geo      = {2}
+		// lang = {0}
+		// name = {1}
+		// geo = {2}
 		// lPageNum = {3}
 		// recCount = {4}
-		urlPattern = "http://www.herold.at/servlet/at.herold.sp.servlet.SPWPSearchServlet?searchregion={2}&searchterm={1}&fmExact=1";
+		urlPattern =
+			"http://www.herold.at/servlet/at.herold.sp.servlet.SPWPSearchServlet?searchregion={2}&searchterm={1}&fmExact=1";
 		
 		// *** actually create the URL
 		try {
@@ -203,29 +205,29 @@ public class PhoneBookContentParser_at extends PhoneBookContentParser {
 			return null;
 		}
 	}
-
+	
 	@Override
-	public String[][] getCitiesList() {
+	public String[][] getCitiesList(){
 		return null;
 	}
-
+	
 	@Override
-	public String getCitiesListMessage() {
+	public String getCitiesListMessage(){
 		return "";
 	}
-
+	
 	@Override
-	public boolean hasCitiesList() {
+	public boolean hasCitiesList(){
 		return false;
 	}
-
+	
 	@Override
-	public boolean noCityFound() {
+	public boolean noCityFound(){
 		return false;
 	}
-
+	
 	@Override
-	public String[][] getCitySuggestions(String part) {
+	public String[][] getCitySuggestions(String part){
 		// TODO Auto-generated method stub
 		return null;
 	}

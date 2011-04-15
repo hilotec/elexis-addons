@@ -41,33 +41,33 @@ import ch.elexis.impfplan.model.VaccinationType;
 import ch.elexis.util.SWTHelper;
 import ch.elexis.util.ViewMenus;
 
-public class ImpfplanPreferences extends PreferencePage implements
-		IWorkbenchPreferencePage {
+public class ImpfplanPreferences extends PreferencePage implements IWorkbenchPreferencePage {
 	private IAction removeAction, editAction;
 	private TableViewer tv;
 	
-	public ImpfplanPreferences() {
+	public ImpfplanPreferences(){
 		makeActions();
 	}
+	
 	@Override
-	protected Control createContents(Composite parent) {
-		Composite ret=new Composite(parent,SWT.NONE);
+	protected Control createContents(Composite parent){
+		Composite ret = new Composite(parent, SWT.NONE);
 		ret.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		ret.setLayout(new GridLayout());
-		tv=new TableViewer(ret);
+		tv = new TableViewer(ret);
 		tv.getControl().setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		tv.setContentProvider(new ContentProviderAdapter() {
 			@Override
-			public Object[] getElements(Object arg0) {
+			public Object[] getElements(Object arg0){
 				return JavaConversions.asCollection(ImpfplanController.allVaccs()).toArray();
 			}
 		});
-		tv.setLabelProvider(new LabelProvider(){
-
+		tv.setLabelProvider(new LabelProvider() {
+			
 			@Override
-			public String getText(Object element) {
-				if(element instanceof VaccinationType){
-					return ((VaccinationType)element).getLabel();
+			public String getText(Object element){
+				if (element instanceof VaccinationType) {
+					return ((VaccinationType) element).getLabel();
 				}
 				return "?"; //$NON-NLS-1$
 			}
@@ -76,67 +76,71 @@ public class ImpfplanPreferences extends PreferencePage implements
 		tv.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
-			public void doubleClick(DoubleClickEvent event) {
+			public void doubleClick(DoubleClickEvent event){
 				edit();
 				
 			}
 		});
-		Composite cButtons=new Composite(ret,SWT.NONE);
+		Composite cButtons = new Composite(ret, SWT.NONE);
 		cButtons.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		cButtons.setLayout(new RowLayout(SWT.HORIZONTAL));
-		Button bAdd=new Button(cButtons,SWT.PUSH);
+		Button bAdd = new Button(cButtons, SWT.PUSH);
 		bAdd.setText(Messages.ImpfplanPreferences_addCaption);
 		bAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				EditVaccinationDialog dlg=new EditVaccinationDialog(getShell(), new VaccinationType(Messages.ImpfplanPreferences_nameDummy, Messages.ImpfplanPreferences_vaccDummy));
-				if(dlg.open()==Dialog.OK){
+			public void widgetSelected(SelectionEvent e){
+				EditVaccinationDialog dlg =
+					new EditVaccinationDialog(getShell(), new VaccinationType(
+						Messages.ImpfplanPreferences_nameDummy,
+						Messages.ImpfplanPreferences_vaccDummy));
+				if (dlg.open() == Dialog.OK) {
 					tv.refresh();
 				}
 			}
 			
 		});
-		MenuManager menu=new MenuManager();
+		MenuManager menu = new MenuManager();
 		menu.add(removeAction);
 		tv.getControl().setMenu(menu.createContextMenu(tv.getControl()));
 		tv.setInput(this);
 		return ret;
 	}
-
+	
 	@Override
-	public void init(IWorkbench workbench) {
-		// TODO Auto-generated method stub
-
+	public void init(IWorkbench workbench){
+	// TODO Auto-generated method stub
+	
 	}
-
+	
 	private void edit(){
-		IStructuredSelection sel=(IStructuredSelection) tv.getSelection();
-		if(!sel.isEmpty()){
-			VaccinationType t=(VaccinationType) sel.getFirstElement();
-			if(new EditVaccinationDialog(getShell(), t).open()==Dialog.OK){
+		IStructuredSelection sel = (IStructuredSelection) tv.getSelection();
+		if (!sel.isEmpty()) {
+			VaccinationType t = (VaccinationType) sel.getFirstElement();
+			if (new EditVaccinationDialog(getShell(), t).open() == Dialog.OK) {
 				tv.refresh(true);
 			}
 			
 		}
-
+		
 	}
+	
 	private void makeActions(){
-		removeAction=new Action(Messages.ImpfplanPreferences_removeVaccination) {
+		removeAction = new Action(Messages.ImpfplanPreferences_removeVaccination) {
 			{
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_DELETE));
 				setToolTipText(Messages.ImpfplanPreferences_removeVaccWarning);
 			}
-
+			
 			@Override
-			public void run() {
-				IStructuredSelection sel=(IStructuredSelection) tv.getSelection();
-				if(!sel.isEmpty()){
-					VaccinationType t=(VaccinationType) sel.getFirstElement();
-					if(t.delete()){
+			public void run(){
+				IStructuredSelection sel = (IStructuredSelection) tv.getSelection();
+				if (!sel.isEmpty()) {
+					VaccinationType t = (VaccinationType) sel.getFirstElement();
+					if (t.delete()) {
 						tv.remove(sel.getFirstElement());
 					}
 				}
-
+				
 			}
 			
 		};

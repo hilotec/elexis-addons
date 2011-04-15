@@ -29,48 +29,49 @@ public class AddVaccinationDialog extends TitleAreaDialog {
 	public AddVaccinationDialog(Shell shell){
 		super(shell);
 	}
-
+	
 	@Override
-	protected Control createDialogArea(Composite parent) {
-		Composite ret=(Composite)super.createDialogArea(parent);
+	protected Control createDialogArea(Composite parent){
+		Composite ret = (Composite) super.createDialogArea(parent);
 		ret.setLayout(new GridLayout());
-		tv=new TableViewer(ret);
+		tv = new TableViewer(ret);
 		tv.getControl().setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
-		Composite lower=new Composite(ret,SWT.NONE);
+		Composite lower = new Composite(ret, SWT.NONE);
 		lower.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		lower.setLayout(new FillLayout());
-		di=new DateInput(lower);
-		//di.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
+		di = new DateInput(lower);
+		// di.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		di.setDate(new TimeTool());
-		bCa=new Button(lower,SWT.CHECK);
+		bCa = new Button(lower, SWT.CHECK);
 		bCa.setText(Messages.AddVaccinationDialog_dateOnlyAbout);
-		tv.setContentProvider(new ContentProviderAdapter(){
+		tv.setContentProvider(new ContentProviderAdapter() {
 			@Override
-			public Object[] getElements(Object arg0) {
+			public Object[] getElements(Object arg0){
 				return JavaConversions.asCollection(ImpfplanController.allVaccs()).toArray();
-			}});
+			}
+		});
 		tv.setLabelProvider(new VaccinationLabelProvider());
-		//dlg.setTitle("Impfung eintragen");
+		// dlg.setTitle("Impfung eintragen");
 		tv.setInput(this);
 		return ret;
 	}
-
+	
 	@Override
-	public void create() {
+	public void create(){
 		super.create();
 		getShell().setText(Messages.AddVaccinationDialog_enterVaccinationTitle);
 		setMessage(Messages.AddVaccinationDialog_enterVaccinationText);
 	}
-
+	
 	@Override
-	protected void okPressed() {
-		IStructuredSelection sel=(IStructuredSelection)tv.getSelection();
-		if(sel.isEmpty()){
-			result=null;
+	protected void okPressed(){
+		IStructuredSelection sel = (IStructuredSelection) tv.getSelection();
+		if (sel.isEmpty()) {
+			result = null;
 		}
-		result=(VaccinationType) sel.getFirstElement();
-		date=new TimeTool(di.getDate());
-		bUnexact=bCa.getSelection();
+		result = (VaccinationType) sel.getFirstElement();
+		date = new TimeTool(di.getDate());
+		bUnexact = bCa.getSelection();
 		super.okPressed();
 	}
 	

@@ -23,30 +23,28 @@ import ch.elexis.Hub;
 import ch.elexis.preferences.SettingsPreferenceStore;
 import ch.rgw.io.Settings;
 
-public class Preferences extends FieldEditorPreferencePage implements
-		IWorkbenchPreferencePage {
-	final static String PREFBRANCH="sticky_notes/"; //$NON-NLS-1$
-	final static String COLBACKGROUND=PREFBRANCH+"col_background"; //$NON-NLS-1$
-	final static String COLFOREGROUND=PREFBRANCH+"col_foreground"; //$NON-NLS-1$
+public class Preferences extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+	final static String PREFBRANCH = "sticky_notes/"; //$NON-NLS-1$
+	final static String COLBACKGROUND = PREFBRANCH + "col_background"; //$NON-NLS-1$
+	final static String COLFOREGROUND = PREFBRANCH + "col_foreground"; //$NON-NLS-1$
 	
-
-	public Preferences() {
+	public Preferences(){
 		super(GRID);
-		Settings cfg=Hub.userCfg;
+		Settings cfg = Hub.userCfg;
 		setPreferenceStore(new SettingsPreferenceStore(cfg));
 	}
-
-
-	public void init(IWorkbench workbench) {
-		// TODO Auto-generated method stub
-
+	
+	public void init(IWorkbench workbench){
+	// TODO Auto-generated method stub
+	
 	}
-
+	
 	@Override
-	protected void createFieldEditors() {
-		addField(new ColorFieldEditor(COLBACKGROUND,Messages.Preferences_BackgroundColor,getFieldEditorParent()));
-		addField(new ColorFieldEditor(COLFOREGROUND,Messages.Preferences_ForegroundColor,getFieldEditorParent()));
+	protected void createFieldEditors(){
+		addField(new ColorFieldEditor(COLBACKGROUND, Messages.Preferences_BackgroundColor,
+			getFieldEditorParent()));
+		addField(new ColorFieldEditor(COLFOREGROUND, Messages.Preferences_ForegroundColor,
+			getFieldEditorParent()));
 	}
-
 	
 }

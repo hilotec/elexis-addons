@@ -16,38 +16,36 @@ package ch.marlovits.addressSearch.directories;
 public class HtmlParser {
 	protected StringBuffer htmlText;
 	private int currentPos = 0;
-
-	public HtmlParser(String htmlText) {
+	
+	public HtmlParser(String htmlText){
 		super();
 		this.htmlText = new StringBuffer(htmlText);
 	}
 	
-	public HtmlParser() {
+	public HtmlParser(){
 		super();
 		this.htmlText = new StringBuffer("");
 	}
 	
-	public void setHtmlText(String htmlText)	{
+	public void setHtmlText(String htmlText){
 		this.htmlText = new StringBuffer(htmlText);
 	}
 	
-	public void reset() {
+	public void reset(){
 		this.currentPos = 0;
 	}
-
-	public boolean startsWith(String prefix) {
+	
+	public boolean startsWith(String prefix){
 		if (prefix == null) {
 			return false;
 		}
-		return htmlText.substring(currentPos, currentPos + prefix.length())
-				.startsWith(prefix);
+		return htmlText.substring(currentPos, currentPos + prefix.length()).startsWith(prefix);
 	}
-
-	/** 
-	 * Verschiebt Cursor bis zur Position
-	 * nach dem gefundenen String
+	
+	/**
+	 * Verschiebt Cursor bis zur Position nach dem gefundenen String
 	 */
-	public boolean moveTo(String keyString) {
+	public boolean moveTo(String keyString){
 		int newPos = getNextPos(keyString);
 		if (newPos >= 0) {
 			currentPos = newPos + keyString.length();
@@ -57,11 +55,11 @@ public class HtmlParser {
 		return false;
 	}
 	
-	public String getTail() {
+	public String getTail(){
 		return htmlText.substring(currentPos, htmlText.length());
 	}
-
-	public String extractTo(String endKeyString) {
+	
+	public String extractTo(String endKeyString){
 		int newPos = getNextPos(endKeyString);
 		String text = "";
 		if (newPos >= 0) {
@@ -72,8 +70,8 @@ public class HtmlParser {
 		
 		return text;
 	}
-
-	private void display(int pos) {
+	
+	private void display(int pos){
 		if (true) {
 			return;
 		}
@@ -85,19 +83,19 @@ public class HtmlParser {
 			System.out.println("Current: " + htmlText.substring(pos, theEnd));
 		}
 	}
-
-	public String extract(String startKeyString, String endKeyString) {
+	
+	public String extract(String startKeyString, String endKeyString){
 		if (moveTo(startKeyString)) {
 			return extractTo(endKeyString);
 		}
 		return "";
 	}
-
-	public int getNextPos(String keyString, int pos) {
+	
+	public int getNextPos(String keyString, int pos){
 		return htmlText.indexOf(keyString, pos);
 	}
-
-	public int getNextPos(String keyString) {
+	
+	public int getNextPos(String keyString){
 		return getNextPos(keyString, currentPos);
 	}
 }

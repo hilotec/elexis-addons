@@ -38,15 +38,17 @@ import ch.rgw.tools.TimeTool;
 public class InboxView extends ViewPart {
 	private TableViewer tv;
 	private IAction addAction, deleteAction, execAction, reloadAction;
-	String[] columnHeaders = new String[] { Messages.InboxView_category, Messages.InboxView_title };
+	String[] columnHeaders = new String[] {
+		Messages.InboxView_category, Messages.InboxView_title
+	};
 	TableColumn[] tc;
-
-	public InboxView() {
-		// TODO Auto-generated constructor stub
+	
+	public InboxView(){
+	// TODO Auto-generated constructor stub
 	}
-
+	
 	@Override
-	public void createPartControl(Composite parent) {
+	public void createPartControl(Composite parent){
 		Table table = new Table(parent, SWT.FULL_SELECTION);
 		tv = new TableViewer(table);
 		tc = new TableColumn[columnHeaders.length];
@@ -63,18 +65,17 @@ public class InboxView extends ViewPart {
 		tv.setLabelProvider(new InboxLabelProvider());
 		tv.setSorter(new ViewerSorter() {
 			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
+			public int compare(Viewer viewer, Object e1, Object e2){
 				File f1 = (File) e1;
 				File f2 = (File) e2;
 				return f1.getAbsolutePath().compareTo(f2.getAbsolutePath());
 			}
 		});
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
-
+			
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection sel = (IStructuredSelection) tv
-						.getSelection();
+			public void selectionChanged(SelectionChangedEvent event){
+				IStructuredSelection sel = (IStructuredSelection) tv.getSelection();
 				addAction.setEnabled(!sel.isEmpty());
 				deleteAction.setEnabled(!sel.isEmpty());
 				execAction.setEnabled(!sel.isEmpty());
@@ -84,9 +85,9 @@ public class InboxView extends ViewPart {
 		tv.setInput(this);
 		final MenuManager mgr = new MenuManager();
 		mgr.addMenuListener(new IMenuListener() {
-
+			
 			@Override
-			public void menuAboutToShow(IMenuManager manager) {
+			public void menuAboutToShow(IMenuManager manager){
 				mgr.add(addAction);
 				mgr.add(execAction);
 				mgr.add(new Separator());
@@ -96,67 +97,71 @@ public class InboxView extends ViewPart {
 		mgr.setRemoveAllWhenShown(true);
 		table.setMenu(mgr.createContextMenu(table));
 		ViewMenus menus = new ViewMenus(getViewSite());
-		menus.createToolbar(addAction, execAction, reloadAction,null,deleteAction);
+		menus.createToolbar(addAction, execAction, reloadAction, null, deleteAction);
 		addAction.setEnabled(false);
 		deleteAction.setEnabled(false);
 		execAction.setEnabled(false);
 	}
-
+	
 	@Override
-	public void dispose() {
+	public void dispose(){
 		Activator.getDefault().getContentProvider().setView(null);
 		super.dispose();
 	}
-
+	
 	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
-
+	public void setFocus(){
+	// TODO Auto-generated method stub
+	
 	}
-
-	public void reload() {
+	
+	public void reload(){
 		Desk.asyncExec(new Runnable() {
 			@Override
-			public void run() {
+			public void run(){
 				tv.refresh();
 			}
 		});
 	}
-
-	public File getSelection() {
+	
+	public File getSelection(){
 		IStructuredSelection sel = (IStructuredSelection) tv.getSelection();
 		if (sel.isEmpty()) {
 			return null;
 		}
 		return (File) sel.getFirstElement();
 	}
-
-	private void makeActions() {
+	
+	private void makeActions(){
 		addAction = new Action(Messages.InboxView_assign) {
 			{
 				setToolTipText(Messages.InboxView_assignThisDocument);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_OK));
 			}
-
+			
 			@Override
-			public void run() {
+			public void run(){
 				File sel = getSelection();
 				Patient pat = ElexisEventDispatcher.getSelectedPatient();
 				if (sel != null && pat != null) {
-					if (SWTHelper.askYesNo(Messages.InboxView_inbox, MessageFormat.format(Messages.InboxView_assignxtoy,sel.getName(), pat.getLabel()))) {
-						IDocumentManager dm = (IDocumentManager) Extensions
+					if (SWTHelper.askYesNo(Messages.InboxView_inbox, MessageFormat.format(
+						Messages.InboxView_assignxtoy, sel.getName(), pat.getLabel()))) {
+						IDocumentManager dm =
+							(IDocumentManager) Extensions
 								.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 						try {
-							String cat=Activator.getDefault().getCategory(sel);
-							if(cat.equals("-")){
-								cat="";
+							String cat = Activator.getDefault().getCategory(sel);
+							if (cat.equals("-")) {
+								cat = "";
 							}
 							tv.remove(sel);
-							GenericDocument fd=new GenericDocument(pat, sel.getName(), cat, sel, new TimeTool().toString(TimeTool.DATE_GER), "", null);
-							boolean bSucc=sel.delete();
-							sel=null;
+							GenericDocument fd =
+								new GenericDocument(pat, sel.getName(), cat, sel, new TimeTool()
+									.toString(TimeTool.DATE_GER), "", null);
+							boolean bSucc = sel.delete();
+							sel = null;
 							dm.addDocument(fd);
-							fd=null;
+							fd = null;
 							Activator.getDefault().getContentProvider().reload();
 						} catch (Exception ex) {
 							ExHandler.handle(ex);
@@ -171,51 +176,52 @@ public class InboxView extends ViewPart {
 				setToolTipText(Messages.InboxView_reallydelete);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_DELETE));
 			}
-
+			
 			@Override
-			public void run() {
+			public void run(){
 				File sel = getSelection();
-				if (SWTHelper.askYesNo(Messages.InboxView_inbox, MessageFormat.format(Messages.InboxView_thisreallydelete,sel.getName()))) {
+				if (SWTHelper.askYesNo(Messages.InboxView_inbox, MessageFormat.format(
+					Messages.InboxView_thisreallydelete, sel.getName()))) {
 					sel.delete();
 					Activator.getDefault().getContentProvider().reload();
 				}
 			}
 		};
-
+		
 		execAction = new Action(Messages.InboxView_view) {
 			{
 				setToolTipText(Messages.InboxView_viewThisDocument);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_EDIT));
 			}
-
+			
 			@Override
-			public void run() {
+			public void run(){
 				try {
 					File sel = getSelection();
 					String ext = FileTool.getExtension(sel.getName());
 					Program proggie = Program.findProgram(ext);
-					String arg=sel.getAbsolutePath();
+					String arg = sel.getAbsolutePath();
 					if (proggie != null) {
 						proggie.execute(arg);
 					} else {
 						if (Program.launch(sel.getAbsolutePath()) == false) {
 							Runtime.getRuntime().exec(arg);
 						}
-
+						
 					}
-
+					
 				} catch (Exception ex) {
 					ExHandler.handle(ex);
-					SWTHelper.showError(Messages.InboxView_couldNotStart, ex
-							.getMessage());
+					SWTHelper.showError(Messages.InboxView_couldNotStart, ex.getMessage());
 				}
 			}
 		};
-		reloadAction=new Action(Messages.InboxView_reload){
+		reloadAction = new Action(Messages.InboxView_reload) {
 			{
 				setToolTipText(Messages.InboxView_reloadNow);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_REFRESH));
 			}
+			
 			@Override
 			public void run(){
 				Activator.getDefault().getContentProvider().reload();

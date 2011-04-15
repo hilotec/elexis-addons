@@ -50,35 +50,38 @@ public class ImpfplanView extends ViewPart {
 	private IAction addVacination, printVaccinations, removeVaccination;
 	TableViewer tvVaccsDone;
 	TableViewer tvVaccsRecommended;
-	int[] columnWidths = new int[] { 300, 100 };
-	String[] columnTitles = new String[] { Messages.ImpfplanView_vaccinationColumn, Messages.ImpfplanView_dateColumn };
+	int[] columnWidths = new int[] {
+		300, 100
+	};
+	String[] columnTitles = new String[] {
+		Messages.ImpfplanView_vaccinationColumn, Messages.ImpfplanView_dateColumn
+	};
 	ScrolledForm form;
-	VaccinationSorter sorter=new VaccinationSorter();
-
-	ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(
-			Patient.class) {
-
+	VaccinationSorter sorter = new VaccinationSorter();
+	
+	ElexisEventListenerImpl eeli_pat = new ElexisEventListenerImpl(Patient.class) {
+		
 		@Override
-		public void runInUi(ElexisEvent ev) {
+		public void runInUi(ElexisEvent ev){
 			tvVaccsDone.refresh();
 			tvVaccsRecommended.refresh();
-			if(ElexisEventDispatcher.getSelectedPatient()!=null){
+			if (ElexisEventDispatcher.getSelectedPatient() != null) {
 				addVacination.setEnabled(true);
 				printVaccinations.setEnabled(true);
 			}
 		}
-
+		
 	};
-
+	
 	@Override
-	public void createPartControl(Composite parent) {
+	public void createPartControl(Composite parent){
 		form = Desk.getToolkit().createScrolledForm(parent);
 		form.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		Composite body = form.getBody();
 		body.setLayout(new GridLayout());
 		makeActions();
-		ViewMenus menu=new ViewMenus(getViewSite());
-		menu.createToolbar(addVacination,printVaccinations);
+		ViewMenus menu = new ViewMenus(getViewSite());
+		menu.createToolbar(addVacination, printVaccinations);
 		Label lblVaccsDone = new Label(body, SWT.NONE);
 		lblVaccsDone.setText(Messages.ImpfplanView_vaccinationsDOne);
 		Table tVaccsDone = new Table(body, SWT.FULL_SELECTION);
@@ -90,28 +93,29 @@ public class ImpfplanView extends ViewPart {
 		}
 		tVaccsDone.setHeaderVisible(true);
 		tVaccsDone.setLinesVisible(true);
-		tvVaccsDone=new TableViewer(tVaccsDone);
+		tvVaccsDone = new TableViewer(tVaccsDone);
 		tvVaccsDone.setContentProvider(new ContentProviderAdapter() {
 			
 			@Override
-			public Object[] getElements(Object inputElement) {
-				Patient actPatient=ElexisEventDispatcher.getSelectedPatient();
-				if(actPatient!=null) {
-					Collection<Vaccination> r=JavaConversions.asCollection(ImpfplanController.getVaccinations(actPatient));
+			public Object[] getElements(Object inputElement){
+				Patient actPatient = ElexisEventDispatcher.getSelectedPatient();
+				if (actPatient != null) {
+					Collection<Vaccination> r =
+						JavaConversions
+							.asCollection(ImpfplanController.getVaccinations(actPatient));
 					return r.toArray();
 					
 				}
 				return new Object[0];
 			}
 		});
-		MenuManager contextMenu=new MenuManager();
+		MenuManager contextMenu = new MenuManager();
 		contextMenu.add(removeVaccination);
 		tvVaccsDone.getControl().setMenu(contextMenu.createContextMenu(tvVaccsDone.getControl()));
 		tvVaccsDone.setSorter(sorter);
 		tvVaccsDone.setLabelProvider(new VaccinationLabelProvider());
 		
-	
-		Label lblVaccsReccomended=new Label(body,SWT.NONE);
+		Label lblVaccsReccomended = new Label(body, SWT.NONE);
 		lblVaccsReccomended.setText(Messages.ImpfplanView_vaccinationsRecommended);
 		Table tVaccsRecommended = new Table(body, SWT.FULL_SELECTION);
 		tVaccsRecommended.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
@@ -122,14 +126,14 @@ public class ImpfplanView extends ViewPart {
 		}
 		tVaccsRecommended.setHeaderVisible(true);
 		tVaccsRecommended.setLinesVisible(true);
-		tvVaccsRecommended=new TableViewer(tVaccsRecommended);
+		tvVaccsRecommended = new TableViewer(tVaccsRecommended);
 		
 		tvVaccsRecommended.setContentProvider(new ContentProviderAdapter() {
 			
 			@Override
-			public Object[] getElements(Object inputElement) {
-				Patient actPatient=ElexisEventDispatcher.getSelectedPatient();
-				if(actPatient!=null) {
+			public Object[] getElements(Object inputElement){
+				Patient actPatient = ElexisEventDispatcher.getSelectedPatient();
+				if (actPatient != null) {
 					try {
 						List<VaccinationType> r = VaccinationType.findDueFor(actPatient);
 						return r.toArray();
@@ -146,36 +150,39 @@ public class ImpfplanView extends ViewPart {
 		tvVaccsRecommended.setSorter(sorter);
 		tvVaccsRecommended.setLabelProvider(new VaccinationLabelProvider());
 		tvVaccsRecommended.setInput(this);
-	
+		
 		tvVaccsDone.setInput(this);
 		
-		boolean enable=ElexisEventDispatcher.getSelectedPatient()!=null;
+		boolean enable = ElexisEventDispatcher.getSelectedPatient() != null;
 		addVacination.setEnabled(enable);
 		printVaccinations.setEnabled(enable);
 		ElexisEventDispatcher.getInstance().addListeners(eeli_pat);
 	}
-
+	
 	@Override
 	public void dispose(){
 		ElexisEventDispatcher.getInstance().removeListeners(eeli_pat);
 	}
+	
 	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
-
+	public void setFocus(){
+	// TODO Auto-generated method stub
+	
 	}
-
+	
 	private void makeActions(){
-		addVacination=new Action(Messages.ImpfplanView_vaccinateActionTitle) {
+		addVacination = new Action(Messages.ImpfplanView_vaccinateActionTitle) {
 			{
 				setToolTipText(Messages.ImpfplanView_vaccinateActionTooltip);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_ADDITEM));
 			}
+			
 			@Override
-			public void run() {
-				AddVaccinationDialog dlg=new AddVaccinationDialog(getViewSite().getShell());
-				if(dlg.open()==Dialog.OK){
-					new Vaccination(dlg.result,ElexisEventDispatcher.getSelectedPatient(),new TimeTool(dlg.date),dlg.bUnexact);
+			public void run(){
+				AddVaccinationDialog dlg = new AddVaccinationDialog(getViewSite().getShell());
+				if (dlg.open() == Dialog.OK) {
+					new Vaccination(dlg.result, ElexisEventDispatcher.getSelectedPatient(),
+						new TimeTool(dlg.date), dlg.bUnexact);
 					tvVaccsDone.refresh();
 					tvVaccsRecommended.refresh();
 				}
@@ -183,29 +190,31 @@ public class ImpfplanView extends ViewPart {
 			
 		};
 		
-		printVaccinations=new Action(Messages.ImpfplanView_printActionTitle){
+		printVaccinations = new Action(Messages.ImpfplanView_printActionTitle) {
 			{
 				setToolTipText(Messages.ImpfplanView_printActionTooltip);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_PRINTER));
 			}
+			
 			@Override
-			public void run() {
-				ImpfplanPrinter ipr=new ImpfplanPrinter(getSite().getShell());
+			public void run(){
+				ImpfplanPrinter ipr = new ImpfplanPrinter(getSite().getShell());
 				ipr.open();
 			}
 		};
 		
-		removeVaccination=new Action(Messages.ImpfplanView_removeActionTitle){
+		removeVaccination = new Action(Messages.ImpfplanView_removeActionTitle) {
 			{
 				setToolTipText(Messages.ImpfplanView_removeActionTooltip);
 				setImageDescriptor(Desk.getImageDescriptor(Desk.IMG_DELETE));
 			}
+			
 			@Override
-			public void run() {
-				IStructuredSelection sel=(IStructuredSelection) tvVaccsDone.getSelection();
-				if(!sel.isEmpty()){
-					Vaccination v=(Vaccination)sel.getFirstElement();
-					if(v.delete()){
+			public void run(){
+				IStructuredSelection sel = (IStructuredSelection) tvVaccsDone.getSelection();
+				if (!sel.isEmpty()) {
+					Vaccination v = (Vaccination) sel.getFirstElement();
+					if (v.delete()) {
 						tvVaccsDone.remove(v);
 					}
 				}

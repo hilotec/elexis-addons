@@ -33,31 +33,35 @@ import ch.rgw.tools.ExHandler;
 
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
-public class importingData 	{
-	private static final String SRC_ENCODING				= "UTF-8";
-	public  static final String ID							= "ch.marlovits.plz.PLZView";
-
-	private static final String BASE_URL_DE					= "http://de.wikipedia.org";
-	private static final String URL_DE						= "http://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste";
-	private static final String WIKI_LAND_STARTINFO_MARKER	= "<table class=" + "\"" + "wikitable sortable" + "\"";
-	private static final String WIKI_LAND_STARTCELLS_MARKER	= "<td";
-	private static final String WIKI_LAND_ENDINFO_MARKER	= "</table>";
-	private static final String WIKI_LAND_SKIPDATA_MARKER	= "<td><span style";
+public class importingData {
+	private static final String SRC_ENCODING = "UTF-8";
+	public static final String ID = "ch.marlovits.plz.PLZView";
 	
-	private static final String WIKI_LAND_SUBISO_STARTMARKER	= "<table class=\"prettytable sortable\"";
-	private static final String WIKI_LAND_SUBISO_ENDMARKER		= "</table>";
-
-	private static final String TABLEROW_STARTMARKER	= "<tr";
-	private static final String TABLEROW_ENDMARKER		= "</tr>";
-	private static final String TABLEDATA_STARTMARKER	= "<td>";
-	private static final String TABLEDATA_ENDMARKER		= "</td>";
-
+	private static final String BASE_URL_DE = "http://de.wikipedia.org";
+	private static final String URL_DE = "http://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste";
+	private static final String WIKI_LAND_STARTINFO_MARKER =
+		"<table class=" + "\"" + "wikitable sortable" + "\"";
+	private static final String WIKI_LAND_STARTCELLS_MARKER = "<td";
+	private static final String WIKI_LAND_ENDINFO_MARKER = "</table>";
+	private static final String WIKI_LAND_SKIPDATA_MARKER = "<td><span style";
+	
+	private static final String WIKI_LAND_SUBISO_STARTMARKER =
+		"<table class=\"prettytable sortable\"";
+	private static final String WIKI_LAND_SUBISO_ENDMARKER = "</table>";
+	
+	private static final String TABLEROW_STARTMARKER = "<tr";
+	private static final String TABLEROW_ENDMARKER = "</tr>";
+	private static final String TABLEDATA_STARTMARKER = "<td>";
+	private static final String TABLEDATA_ENDMARKER = "</td>";
+	
 	/***************************************************************************/
 	/***************************************************************************/
 	/***************************************************************************/
 	/**
 	 * Liest Inhalt einer ganzen Seite einer übergebenen URL
-	 * @param url: die einzulesende URL
+	 * 
+	 * @param url
+	 *            : die einzulesende URL
 	 * @return die ganze HTML-Seite als String
 	 */
 	public static String readHTMLPage(final String url) throws IOException, MalformedURLException{
@@ -86,11 +90,11 @@ public class importingData 	{
 		text = text.replace("<b class=\"searchWords\">", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace("</b>", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace((char) 160, ' '); // Spezielles Blank Zeichen wird
-												// ersetzt
+		// ersetzt
 		return text;
 	}
 	
-	private static String cleanupUmlaute(String text) {
+	private static String cleanupUmlaute(String text){
 		text = text.replace("&#xE4;", "ä");//$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace("&#xC4;", "Ä");//$NON-NLS-1$ //$NON-NLS-2$
 		text = text.replace("&#xF6;", "ö");//$NON-NLS-1$ //$NON-NLS-2$
@@ -108,14 +112,16 @@ public class importingData 	{
 		text = text.replace("%C3%9F", "ss");//$NON-NLS-1$ //$NON-NLS-2$
 		
 		return text;
-    }
-		
+	}
+	
 	/**
 	 * Extrahieren der Iso-Länderdaten aus Wikipedia
-	 * @param language: die jeweilige Sprache, für welche die Daten extrahiert 
-	 * werden sollen, die URL wird entsprechend gewählt
+	 * 
+	 * @param language
+	 *            : die jeweilige Sprache, für welche die Daten extrahiert werden sollen, die URL
+	 *            wird entsprechend gewählt
 	 */
-	private void extractLandData(final String language)	{
+	private void extractLandData(final String language){
 		// Einlesen der ganzen Seite in der gewünschten Sprache in die Variable wholeHTMLPage
 		String wholeHTMLPage = null;
 		try {
@@ -131,19 +137,21 @@ public class importingData 	{
 		}
 		
 		// Tabellen-Inhalt aus Text extrahieren
-		int tableStartPos			= wholeHTMLPage.indexOf(WIKI_LAND_STARTINFO_MARKER,	0);
-		int tableContentStartPos	= wholeHTMLPage.indexOf(TABLEROW_STARTMARKER,		tableStartPos);
-		int tableDataStartPos		= wholeHTMLPage.indexOf(TABLEROW_STARTMARKER,		tableStartPos);
-		int tableEndPos				= wholeHTMLPage.indexOf(WIKI_LAND_ENDINFO_MARKER,   tableDataStartPos);
-		String landTableContent 	= wholeHTMLPage.substring(tableContentStartPos,		tableEndPos);
+		int tableStartPos = wholeHTMLPage.indexOf(WIKI_LAND_STARTINFO_MARKER, 0);
+		int tableContentStartPos = wholeHTMLPage.indexOf(TABLEROW_STARTMARKER, tableStartPos);
+		int tableDataStartPos = wholeHTMLPage.indexOf(TABLEROW_STARTMARKER, tableStartPos);
+		int tableEndPos = wholeHTMLPage.indexOf(WIKI_LAND_ENDINFO_MARKER, tableDataStartPos);
+		String landTableContent = wholeHTMLPage.substring(tableContentStartPos, tableEndPos);
 		
 		// durch die Tabelle loopen und die einzelnen Datensätze einlesen
-		int currRowPos	= 0;
-		int nextRowPos	= 0;
+		int currRowPos = 0;
+		int nextRowPos = 0;
 		String rowData = "";
 		int i = 0;
-		while ((currRowPos != -1))	{
-			nextRowPos = landTableContent.indexOf(TABLEROW_STARTMARKER, currRowPos + TABLEROW_STARTMARKER.length());
+		while ((currRowPos != -1)) {
+			nextRowPos =
+				landTableContent.indexOf(TABLEROW_STARTMARKER, currRowPos
+					+ TABLEROW_STARTMARKER.length());
 			rowData = landTableContent.substring(currRowPos, nextRowPos);
 			currRowPos = nextRowPos;
 			extractLandRowData(rowData, language);
@@ -153,10 +161,15 @@ public class importingData 	{
 	
 	/**
 	 * Extrahieren der einzelnen Zeilen aus der Iso-Länder-HTML-Tabelle
-	 * @param rowData: HTML-Inhalt einer Zeile, ohne enclosing <tr></tr>
-	 * @param language: die Sprache dieses Eintrages
+	 * 
+	 * @param rowData
+	 *            : HTML-Inhalt einer Zeile, ohne enclosing
+	 *            <tr>
+	 *            </tr>
+	 * @param language
+	 *            : die Sprache dieses Eintrages
 	 */
-	private void extractLandRowData(final String rowData, final String language)	{
+	private void extractLandRowData(final String rowData, final String language){
 		String landName;
 		String landWikiLink;
 		String landIso2;
@@ -167,82 +180,91 @@ public class importingData 	{
 		String landIso3166_2;
 		
 		// initialisieren der Zähler, etc
-		int			currDataPos	= 0;
-		int			nextDataPos	= 0;
-		String		cellData;
-		String		subContentHTML = null;
-		String[]	linkAndText;
+		int currDataPos = 0;
+		int nextDataPos = 0;
+		String cellData;
+		String subContentHTML = null;
+		String[] linkAndText;
 		
 		// die erste Zelle enthält den Namen des Landes und dessen Wikipedia-Link
-		currDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
-		if (currDataPos == -1)	{
-			return;		// wenn kein <td vorhanden ist, dann ist es ein header - skip
+		currDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
+		if (currDataPos == -1) {
+			return; // wenn kein <td vorhanden ist, dann ist es ein header - skip
 		}
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = rowData.substring(currDataPos, nextDataPos);
 		String theString = cellData.substring(0, WIKI_LAND_SKIPDATA_MARKER.length());
-		if (theString.equals(WIKI_LAND_SKIPDATA_MARKER))	{
-			return;		// wenn die erste Zelle den WIKI_LAND_SKIPDATA_MARKER enthält, dann überspringen
+		if (theString.equals(WIKI_LAND_SKIPDATA_MARKER)) {
+			return; // wenn die erste Zelle den WIKI_LAND_SKIPDATA_MARKER enthält, dann überspringen
 		}
 		cellData = extractCellData(cellData);
 		linkAndText = splitHyperlinkCell(cellData);
-		landName     = linkAndText[1];
+		landName = linkAndText[1];
 		landWikiLink = BASE_URL_DE + linkAndText[0];
 		currDataPos = nextDataPos;
 		
 		// Alpha 2
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIso2 = left(cellData, 2);
 		
 		// Alpha 3
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIso3 = left(cellData, 3);
 		
 		// Numeric
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIsoNum = left(cellData, 3);
 		
 		// TopLevelDomain
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landTld = left(cellData, 3);
 		
 		// IOC
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		currDataPos = nextDataPos;
 		landIoc = left(cellData, 3);
 		
 		// ISO3166-2: enthält den Iso2 und dessen Wikipedia-Link zur Seite mit den Sub-Infos
-		nextDataPos = rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos + WIKI_LAND_STARTCELLS_MARKER.length());
+		nextDataPos =
+			rowData.indexOf(WIKI_LAND_STARTCELLS_MARKER, currDataPos
+				+ WIKI_LAND_STARTCELLS_MARKER.length());
 		cellData = extractCellData(rowData.substring(currDataPos, nextDataPos));
 		linkAndText = splitHyperlinkCell(cellData);
-		//System.out.println(BASE_URL_DE + linkAndText[0]);	// link
+		// System.out.println(BASE_URL_DE + linkAndText[0]); // link
 		currDataPos = nextDataPos;
 		landIso3166_2 = left(linkAndText[1], 2);
 		
 		// Erstellen eines neuen Eintrages in der Tabelle CH_MARLOVITS_LAND
-		new LandEintrag(landName,
-						landIso2,
-						landIso3,
-						landIsoNum,
-						landTld,
-						landIoc,
-						landIso3166_2,
-						landWikiLink,
-						language);
+		new LandEintrag(landName, landIso2, landIso3, landIsoNum, landTld, landIoc, landIso3166_2,
+			landWikiLink, language);
 		
 		// Einlesen der Informationen aus den Unter-Seiten
 		subContentHTML = null;
 		
-		//if (landIso2.equals("éé"))	{
+		// if (landIso2.equals("éé")) {
 		
 		try {
 			String combinedURL = BASE_URL_DE + linkAndText[0];
@@ -253,67 +275,76 @@ public class importingData 	{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//}
+		// }
 	}
 	
 	/**
-	 * Entfernt die enclosing <td>  / </td>
+	 * Entfernt die enclosing <td>/</td>
+	 * 
 	 * @param cellDataWithEnclosings
-	 * @return input ohne enclosing <td>  / </td>
+	 * @return input ohne enclosing <td>/</td>
 	 */
-	private String extractCellData(final String cellDataWithEnclosings)	{
+	private String extractCellData(final String cellDataWithEnclosings){
 		String cellContents = null;
 		
 		// fast exit, falls leer
-		if ((cellDataWithEnclosings == null) || (cellDataWithEnclosings == ""))	{
+		if ((cellDataWithEnclosings == null) || (cellDataWithEnclosings == "")) {
 			return cellContents;
 		}
 		int contentStart = cellDataWithEnclosings.indexOf(TABLEDATA_STARTMARKER, 0);
-		if (contentStart != -1)	{
+		if (contentStart != -1) {
 			// has <td>[Content]</td>
-			int contentEnd	= cellDataWithEnclosings.indexOf(TABLEDATA_ENDMARKER, TABLEDATA_STARTMARKER.length());
-			cellContents = cellDataWithEnclosings.substring(contentStart + TABLEDATA_STARTMARKER.length(), contentEnd);
-		} else	{
+			int contentEnd =
+				cellDataWithEnclosings.indexOf(TABLEDATA_ENDMARKER, TABLEDATA_STARTMARKER.length());
+			cellContents =
+				cellDataWithEnclosings.substring(contentStart + TABLEDATA_STARTMARKER.length(),
+					contentEnd);
+		} else {
 			// has <td [...]> [Content] </td>
 			// TO DO
-	        Pattern pattern = Pattern.compile("<td.*>");
-	        Matcher matcher = pattern.matcher(cellDataWithEnclosings);
-	        cellContents = matcher.replaceAll("");
-	        pattern = Pattern.compile("</td>");
-	        matcher = pattern.matcher(cellContents);
-	        cellContents = matcher.replaceAll("");
+			Pattern pattern = Pattern.compile("<td.*>");
+			Matcher matcher = pattern.matcher(cellDataWithEnclosings);
+			cellContents = matcher.replaceAll("");
+			pattern = Pattern.compile("</td>");
+			matcher = pattern.matcher(cellContents);
+			cellContents = matcher.replaceAll("");
 		}
 		return cellContents;
 	}
 	
 	/**
-	 * Extrahiert aus einem HTML-String mit einem href den ersten Link 
-	 * und den reinen Text-Teil
-	 * @param htmlString: html-String mit href-Teil
+	 * Extrahiert aus einem HTML-String mit einem href den ersten Link und den reinen Text-Teil
+	 * 
+	 * @param htmlString
+	 *            : html-String mit href-Teil
 	 * @return String[]: {linkPart, textPart}
 	 */
-	private String[] splitHyperlinkCell(final String htmlString)	{
+	private String[] splitHyperlinkCell(final String htmlString){
 		// Initialisieren
 		String linkPart = "";
 		String textPart = "";
-		final String hrefStartMarker	= "<a href=\"";
-		final String hrefEndMarker		= "\">";
+		final String hrefStartMarker = "<a href=\"";
+		final String hrefEndMarker = "\">";
 		
 		// leerer String - fast exit
-		if ((htmlString == null) || (htmlString.equals("")))	{
+		if ((htmlString == null) || (htmlString.equals(""))) {
 			linkPart = "";
 			textPart = htmlString;
-			return new String[] {linkPart, textPart};
+			return new String[] {
+				linkPart, textPart
+			};
 		}
 		
-		// es wird nur der erste Link extrahiert		
+		// es wird nur der erste Link extrahiert
 		int hrefStart = htmlString.indexOf(hrefStartMarker, 0);
 		
 		// es gibt keinen Link
-		if (hrefStart == -1){
+		if (hrefStart == -1) {
 			linkPart = "";
 			textPart = htmlString;
-			return new String[] {linkPart, textPart};
+			return new String[] {
+				linkPart, textPart
+			};
 		}
 		
 		// Teil links des href gehört zum Text-Teil
@@ -327,31 +358,35 @@ public class importingData 	{
 		linkPart = extractHrefLink(hrefPart);
 		
 		// Text rechts des hrefs gehört zum Text-Teil, es müssen alle </a> entfernt werden
-		textPart = textPart + htmlString.substring(hrefEnd, htmlString.length()).replace("</a>", "");
+		textPart =
+			textPart + htmlString.substring(hrefEnd, htmlString.length()).replace("</a>", "");
 		
 		// jetzt werden alle restlichen HTML-Tags <XXX> </XXX> entfernt
 		textPart = stripHTMLTags(textPart);
-        
-        // returns, etc, entfernen
-        textPart = replaceReturns(textPart, " ");
-        
+		
+		// returns, etc, entfernen
+		textPart = replaceReturns(textPart, " ");
+		
 		// Rückgabe
-		return new String[] {linkPart, textPart};
+		return new String[] {
+			linkPart, textPart
+		};
 	}
 	
 	/**
 	 * 
-	 * @param href: voller href, aus welchem der Link extrahiert werden soll
+	 * @param href
+	 *            : voller href, aus welchem der Link extrahiert werden soll
 	 * @return der Link, der in href vorhanden ist
 	 */
-	private String extractHrefLink(final String href)	{
+	private String extractHrefLink(final String href){
 		// Initialisieren
 		final String hrefLinkStartMarker = "<a href=\"";
-		final String hrefLinkEndMarker   = "\"";
+		final String hrefLinkEndMarker = "\"";
 		
 		// Start des href suchen
-		int hrefLinkStart = href.indexOf(hrefLinkStartMarker,	0);
-		if (hrefLinkStart == -1)	{
+		int hrefLinkStart = href.indexOf(hrefLinkStartMarker, 0);
+		if (hrefLinkStart == -1) {
 			return "";
 		}
 		// Ende des href suchen
@@ -363,33 +398,35 @@ public class importingData 	{
 	}
 	
 	/**
-	 * Extrahieren der Daten aus den Info-Seiten für die Sub-Isos "ISO 3166-2".
-	 * Es können mehrere Tabellen mit den Infos vorhanden sein!
+	 * Extrahieren der Daten aus den Info-Seiten für die Sub-Isos "ISO 3166-2". Es können mehrere
+	 * Tabellen mit den Infos vorhanden sein!
+	 * 
 	 * @param pageHTML
 	 * @author Harald Marlovits
 	 */
-	private void extractSubIsos(final String pageHTML, final String language)	{
-		int startOfTable	= pageHTML.indexOf(WIKI_LAND_SUBISO_STARTMARKER, 0);
-		int endOfTable		= 0;
+	private void extractSubIsos(final String pageHTML, final String language){
+		int startOfTable = pageHTML.indexOf(WIKI_LAND_SUBISO_STARTMARKER, 0);
+		int endOfTable = 0;
 		String subTableContent = null;
 		// alle vorhandenen Tabellen durchlaufen
 		int subTableIndex = 0;
-		while (startOfTable != -1)	{
+		while (startOfTable != -1) {
 			endOfTable = pageHTML.indexOf(WIKI_LAND_SUBISO_ENDMARKER, startOfTable);
 			startOfTable = pageHTML.indexOf(TABLEROW_STARTMARKER, startOfTable);
 			subTableContent = pageHTML.substring(startOfTable, endOfTable);
 			startOfTable = pageHTML.indexOf(WIKI_LAND_SUBISO_STARTMARKER, startOfTable);
 			System.out.println("**************************************");
-			//System.out.print(subTableContent);
+			// System.out.print(subTableContent);
 			extractSubCellTableData(subTableContent, subTableIndex, language);
 			subTableIndex++;
 		}
 	}
-		
-	private void extractSubCellTableData(final String tableData, final int subTableIndex, final String language)	{
+	
+	private void extractSubCellTableData(final String tableData, final int subTableIndex,
+		final String language){
 		// durch die Tabelle loopen und die einzelnen Datensätze einlesen
-		int currRowPos	= 0;
-		int nextRowPos	= 0;
+		int currRowPos = 0;
+		int nextRowPos = 0;
 		String rowData = "";
 		
 		int i = 0;
@@ -403,48 +440,54 @@ public class importingData 	{
 		String currName = "";
 		
 		int columnCount = 0;
-		while (currRowPos != -1)	{
-			nextRowPos = tableData.indexOf(TABLEROW_STARTMARKER, currRowPos + TABLEROW_STARTMARKER.length());
-			rowData = tableData.substring(currRowPos, (nextRowPos == -1) ? tableData.length() : nextRowPos);
+		while (currRowPos != -1) {
+			nextRowPos =
+				tableData.indexOf(TABLEROW_STARTMARKER, currRowPos + TABLEROW_STARTMARKER.length());
+			rowData =
+				tableData.substring(currRowPos, (nextRowPos == -1) ? tableData.length()
+						: nextRowPos);
 			currRowPos = nextRowPos;
 			System.out.println("********************");
 			// Anzahl Spalten ermitteln
-			if (columnCount == 0){
+			if (columnCount == 0) {
 				String regex = "<t[dh]>";
-				Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+				Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 				Matcher m = p.matcher(rowData);
 				while (m.find()) {
 					columnCount++;
 				}
 			}
-			// Inhalt extrahieren,  <tr> / </tr> entfernen
-	        Pattern pattern = Pattern.compile("<tr.*>");
-	        Matcher matcher = pattern.matcher(rowData);
-	        rowData = matcher.replaceAll("");
-	        pattern = Pattern.compile("</tr>");
-	        matcher = pattern.matcher(rowData);
-	        rowData = matcher.replaceAll("");
-	        int startOfContent = rowData.indexOf("<t");
-	        rowData = rowData.substring(startOfContent);
-	        
+			// Inhalt extrahieren, <tr> / </tr> entfernen
+			Pattern pattern = Pattern.compile("<tr.*>");
+			Matcher matcher = pattern.matcher(rowData);
+			rowData = matcher.replaceAll("");
+			pattern = Pattern.compile("</tr>");
+			matcher = pattern.matcher(rowData);
+			rowData = matcher.replaceAll("");
+			int startOfContent = rowData.indexOf("<t");
+			rowData = rowData.substring(startOfContent);
+			
 			// wenn <th> dann enthält die Zelle den Namen von Kanton/District/Region, etc
 			int headerMarkerStart = rowData.indexOf(headerMarker, 0);
-			if (headerMarkerStart != -1){
+			if (headerMarkerStart != -1) {
 				headerMarkerStart = rowData.indexOf(">", headerMarkerStart) + 1;
 				int endMarker = rowData.indexOf("</t", headerMarkerStart);
 				currName = rowData.substring(headerMarkerStart, endMarker);
 				System.out.println(currName);
-			} else	{
+			} else {
 				exctractSubCellRowData(rowData, currName, subTableIndex, language, columnCount);
 			}
 			i++;
-		}	
+		}
 	}
 	
-	/** 
+	/**
 	 * Entfernt aus einem String alle tabs/returns/newlines/formsfeeds
-	 * @param inputString: zu bearbeitender String
-	 * @param replacement: damit werden die gefundenen Vorkommen ersetzt
+	 * 
+	 * @param inputString
+	 *            : zu bearbeitender String
+	 * @param replacement
+	 *            : damit werden die gefundenen Vorkommen ersetzt
 	 * @return inputString, von welchem alle whiteSpaces weggestrippt sind
 	 */
 	private String replaceReturns(final String inputString, final String replacement){
@@ -458,34 +501,38 @@ public class importingData 	{
 	
 	/**
 	 * Entfernt aus einem String alle HTML-Tags <XXX> und </XXX>
+	 * 
 	 * @param inputString
 	 * @return inputString, von welchem alle whiteSpaces weggestrippt sind
 	 */
-	private String stripHTMLTags(final String inputString)	{
+	private String stripHTMLTags(final String inputString){
 		String tmp = inputString;
 		tmp = tmp.replaceAll("</.*>", "");
 		tmp = tmp.replaceAll("<.*>", "");
-		return tmp; 
+		return tmp;
 	}
 	
 	/**
 	 * entfernen von: leading spaces, trailing spaces und mehrfach-Spaces im String
-	 * @param source: zu bearbeitender String
+	 * 
+	 * @param source
+	 *            : zu bearbeitender String
 	 * @return gestrippter String
 	 */
-    public static String fullTrim(final String source) {
-    	String tmp = source;
-    	// leading Spaces strippen
-    	tmp = tmp.replaceAll("^\\s+", "");
-    	// trailing Spaces strippen
-    	tmp = tmp.replaceAll("\\s+$", "");
-    	// mehrfach-Spaces durch einfachen Space ersetzen
-    	tmp = tmp.replaceAll("\\s+", " ");
-    	return tmp;
+	public static String fullTrim(final String source){
+		String tmp = source;
+		// leading Spaces strippen
+		tmp = tmp.replaceAll("^\\s+", "");
+		// trailing Spaces strippen
+		tmp = tmp.replaceAll("\\s+$", "");
+		// mehrfach-Spaces durch einfachen Space ersetzen
+		tmp = tmp.replaceAll("\\s+", " ");
+		return tmp;
 	}
-    
-	private void exctractSubCellRowData(final String rowData, final String kantonName, final int subTableIndex, final String language, final int columnCount)	{
-		// Die erste  Spalte enthält die zu benutzende Bezeichnung
+	
+	private void exctractSubCellRowData(final String rowData, final String kantonName,
+		final int subTableIndex, final String language, final int columnCount){
+		// Die erste Spalte enthält die zu benutzende Bezeichnung
 		// die letzte Spalte enthält den ISO-Code
 		// falls zweite Spalte vorhanden, dann in Klammern an Spalte 1 anfügen
 		
@@ -495,33 +542,34 @@ public class importingData 	{
 		// erstelle String Array, split on <td>
 		String[] cellDataStringArray = localData.split("<td>");
 		
-		String nameRow  = replaceReturns(cellDataStringArray[1], " ");
-		String codeRow  = replaceReturns(cellDataStringArray[columnCount], " ");
+		String nameRow = replaceReturns(cellDataStringArray[1], " ");
+		String codeRow = replaceReturns(cellDataStringArray[columnCount], " ");
 		
 		// nameRow: enthält den Link zu Sub-Info und den Iso-Namen, splitten
 		String[] landLink_landName = splitHyperlinkCell(nameRow);
 		
 		// codeRow: nur Text links von Space ist gültig, Rest wegstrippen
-		codeRow  = codeRow.split(" ")[0];
+		codeRow = codeRow.split(" ")[0];
 		// codeRow: splitten auf "-", links ist Iso2 des Landes, rechts Iso des "Kantons"
-		String[] landIso_SubIso  = codeRow.split("-");
+		String[] landIso_SubIso = codeRow.split("-");
 		
 		// falls mehr als 2 Spalten, dann 2. Spalte in Klammern an den Namen anhängen
-		String kantonname		= landLink_landName[1];
+		String kantonname = landLink_landName[1];
 		kantonname = replaceReturns(kantonname, "");
-		if (columnCount > 2)	{
-			kantonname = kantonname + " (" + stripHTMLTags(replaceReturns(cellDataStringArray[2], "")) + ")";
+		if (columnCount > 2) {
+			kantonname =
+				kantonname + " (" + stripHTMLTags(replaceReturns(cellDataStringArray[2], "")) + ")";
 			kantonname = fullTrim(kantonname);
 		}
 		
 		// die Werte zusammentragen
-		String kantonfullcode	= codeRow;
-		String kantonsubcode	= landIso_SubIso[1];
-		String kantonland		= landIso_SubIso[0];
-		String kantonindex		= "" + subTableIndex;
-		String kantonkind		= kantonName;
-		String kantonwikilink	= BASE_URL_DE + landLink_landName[0];
-		String kantonlanguage	= language;
+		String kantonfullcode = codeRow;
+		String kantonsubcode = landIso_SubIso[1];
+		String kantonland = landIso_SubIso[0];
+		String kantonindex = "" + subTableIndex;
+		String kantonkind = kantonName;
+		String kantonwikilink = BASE_URL_DE + landLink_landName[0];
+		String kantonlanguage = language;
 		
 		// debug
 		System.out.println("kantonname:     " + kantonname);
@@ -534,68 +582,68 @@ public class importingData 	{
 		System.out.println("kantonlanguage: " + kantonlanguage);
 		
 		// den Eintrag erstellen
-	 	new KantonEintrag(kantonname,
-				 		  kantonfullcode,
-				 		  kantonsubcode,
-				 		  kantonland,
-				 		  kantonindex,
-				 		  kantonkind,
-				 		  kantonwikilink,
-				 		  kantonlanguage);
-}
+		new KantonEintrag(kantonname, kantonfullcode, kantonsubcode, kantonland, kantonindex,
+			kantonkind, kantonwikilink, kantonlanguage);
+	}
 	
 	/**
 	 * Rückgabe des linken Anteils des Eingabe-Strings
-	 * @param input: String, dessen linker Teil zurückgegeben werden soll
-	 * @param count: Anzahl Zeichen, die zurückgegeben werden sollen
+	 * 
+	 * @param input
+	 *            : String, dessen linker Teil zurückgegeben werden soll
+	 * @param count
+	 *            : Anzahl Zeichen, die zurückgegeben werden sollen
 	 * @return gestrippter String oder "", wenn input null oder leer
 	 */
-	private String left(final String input, final int count)	{
-		if ((input == null) || (input.equals("")))	{
+	private String left(final String input, final int count){
+		if ((input == null) || (input.equals(""))) {
 			return "";
-		} else	{
+		} else {
 			return input.substring(0, count);
 		}
 	}
 	
-	
 	/**
 	 * 
-	 * @param countryIso2: Land, in welchem nach der Postleitzahl gesucht werden soll
-	 * @param postalCode: Postleitzahl, für welche der Ort gefunden werden soll
-	 * @param language: Resultat in dieser Sprache ausgeben
+	 * @param countryIso2
+	 *            : Land, in welchem nach der Postleitzahl gesucht werden soll
+	 * @param postalCode
+	 *            : Postleitzahl, für welche der Ort gefunden werden soll
+	 * @param language
+	 *            : Resultat in dieser Sprache ausgeben
 	 * @return String[]: String-Array aller passenden Einträge, null, wenn nichts gefunden
 	 */
 	public static String[] geoNames_PlaceNameFromPostalCode(final String countryIso2,
-															final String postalCode,
-															final String language)	{
+		final String postalCode, final String language){
 		// Initialisieren Result
 		String[] result = null;
 		
 		// *** minimales Fehlerhandling, damit unnötige Abfragen schon mal vermieden werden
 		// countryIso2 muss 2 Zeichen lang sein
-		if (countryIso2.length() != 2)	{
+		if (countryIso2.length() != 2) {
 			return null;
 		}
 		// darf nicht null oder leer sein
-		if ((postalCode.equals("")) || (postalCode == null))	{
+		if ((postalCode.equals("")) || (postalCode == null)) {
 			return null;
 		}
 		// language muss 2 Zeichen lang sein
-		if (language.length() != 2)	{
+		if (language.length() != 2) {
 			return null;
 		}
 		
 		// *** Erstellen der URL für die Abfrage
-		String url = "http://ws.geonames.org/postalCodeSearch?postalcode=" + postalCode + "&country=" + countryIso2 + "lang=" + language + "&style=full";
+		String url =
+			"http://ws.geonames.org/postalCodeSearch?postalcode=" + postalCode + "&country="
+				+ countryIso2 + "lang=" + language + "&style=full";
 		
 		try {
-			Node		n;
-			Node		currN;
-			NodeList	nList;
-			NodeList	nListSub;
+			Node n;
+			Node currN;
+			NodeList nList;
+			NodeList nListSub;
 			
-			File	file;
+			File file;
 			
 			// den Parser anzapfen
 			DOMParser p = new DOMParser();
@@ -607,11 +655,11 @@ public class importingData 	{
 			n = doc.getDocumentElement().getFirstChild();
 			n = n.getNextSibling();
 			nList = n.getParentNode().getChildNodes();
-			for (int i = 0; i < nList.getLength(); i++)	{
+			for (int i = 0; i < nList.getLength(); i++) {
 				currN = nList.item(i);
 				String currNodeName = currN.getNodeName();
-				if (currNodeName.equals("#text") == false)	{
-					if (currNodeName.equals("code") == false)	{
+				if (currNodeName.equals("#text") == false) {
+					if (currNodeName.equals("code") == false) {
 						System.out.println("Child " + i + " Name:      " + currN.getNodeName());
 						System.out.println("Child " + i + " Type:      " + currN.getNodeType());
 						System.out.println("Child " + i + " String:    " + currN.getNodeValue());
@@ -619,14 +667,17 @@ public class importingData 	{
 						System.out.println("Child " + i + " LocalName: " + currN.getLocalName());
 					}
 					nListSub = currN.getChildNodes();
-					for (int j = 0; j < nListSub.getLength(); j++)	{
+					for (int j = 0; j < nListSub.getLength(); j++) {
 						currN = nListSub.item(j);
-						if (currN.getNodeName().equals("#text") == false)	{
+						if (currN.getNodeName().equals("#text") == false) {
 							System.out.println("Child " + i + " Name:      " + currN.getNodeName());
 							System.out.println("Child " + i + " Type:      " + currN.getNodeType());
-							System.out.println("Child " + i + " String:    " + currN.getNodeValue());
-							System.out.println("Child " + i + " Text:      " + currN.getTextContent());
-							System.out.println("Child " + i + " LocalName: " + currN.getLocalName());
+							System.out
+								.println("Child " + i + " String:    " + currN.getNodeValue());
+							System.out.println("Child " + i + " Text:      "
+								+ currN.getTextContent());
+							System.out
+								.println("Child " + i + " LocalName: " + currN.getLocalName());
 						}
 					}
 				}
@@ -639,55 +690,37 @@ public class importingData 	{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	/*	try {
-			Node n;
-			Node currN;
-			NodeList nList;
-			NodeList nListSub;
-			DOMParser p = new DOMParser();
-			p.parse(xmlDoc);
-			Document doc = p.getDocument();
-			
-			// Anzahl gefundener Einträge <totalResultsCount>
-			n = doc.getDocumentElement().getFirstChild();
-			n = n.getNextSibling();
-			//System.out.println("Anzahl gefundener Einträge: " + n.getNodeName());
-			
-			// next
-			nList = n.getParentNode().getChildNodes();
-			System.out.println("Und nun: " + nList.getLength());
-			for (int i = 0; i < nList.getLength(); i++)	{
-				currN = nList.item(i);
-				String currNodeName = currN.getNodeName();
-				if (currNodeName.equals("#text") == false)	{
-					if (currNodeName.equals("code") == false)	{
-						System.out.println("Child " + i + " Name:      " + currN.getNodeName());
-						System.out.println("Child " + i + " Type:      " + currN.getNodeType());
-						System.out.println("Child " + i + " String:    " + currN.getNodeValue());
-						System.out.println("Child " + i + " Text:      " + currN.getTextContent());
-						System.out.println("Child " + i + " LocalName: " + currN.getLocalName());
-					}
-					nListSub = currN.getChildNodes();
-					for (int j = 0; j < nListSub.getLength(); j++)	{
-						currN = nListSub.item(j);
-						if (currN.getNodeName().equals("#text") == false)	{
-							System.out.println("Child " + i + " Name:      " + currN.getNodeName());
-							System.out.println("Child " + i + " Type:      " + currN.getNodeType());
-							System.out.println("Child " + i + " String:    " + currN.getNodeValue());
-							System.out.println("Child " + i + " Text:      " + currN.getTextContent());
-							System.out.println("Child " + i + " LocalName: " + currN.getLocalName());
-						}
-					}
-				}
-				
-			}
-		}
-		*/
+		/*
+		 * try { Node n; Node currN; NodeList nList; NodeList nListSub; DOMParser p = new
+		 * DOMParser(); p.parse(xmlDoc); Document doc = p.getDocument();
+		 * 
+		 * // Anzahl gefundener Einträge <totalResultsCount> n =
+		 * doc.getDocumentElement().getFirstChild(); n = n.getNextSibling();
+		 * //System.out.println("Anzahl gefundener Einträge: " + n.getNodeName());
+		 * 
+		 * // next nList = n.getParentNode().getChildNodes(); System.out.println("Und nun: " +
+		 * nList.getLength()); for (int i = 0; i < nList.getLength(); i++) { currN = nList.item(i);
+		 * String currNodeName = currN.getNodeName(); if (currNodeName.equals("#text") == false) {
+		 * if (currNodeName.equals("code") == false) { System.out.println("Child " + i +
+		 * " Name:      " + currN.getNodeName()); System.out.println("Child " + i + " Type:      " +
+		 * currN.getNodeType()); System.out.println("Child " + i + " String:    " +
+		 * currN.getNodeValue()); System.out.println("Child " + i + " Text:      " +
+		 * currN.getTextContent()); System.out.println("Child " + i + " LocalName: " +
+		 * currN.getLocalName()); } nListSub = currN.getChildNodes(); for (int j = 0; j <
+		 * nListSub.getLength(); j++) { currN = nListSub.item(j); if
+		 * (currN.getNodeName().equals("#text") == false) { System.out.println("Child " + i +
+		 * " Name:      " + currN.getNodeName()); System.out.println("Child " + i + " Type:      " +
+		 * currN.getNodeType()); System.out.println("Child " + i + " String:    " +
+		 * currN.getNodeValue()); System.out.println("Child " + i + " Text:      " +
+		 * currN.getTextContent()); System.out.println("Child " + i + " LocalName: " +
+		 * currN.getLocalName()); } } }
+		 * 
+		 * } }
+		 */
 		return result;
 	}
 	
-	
-	public static void xmlParser(final String xmlDoc) {
+	public static void xmlParser(final String xmlDoc){
 		try {
 			Node n;
 			Node currN;
@@ -696,29 +729,27 @@ public class importingData 	{
 			DOMParser p = new DOMParser();
 			p.parse(xmlDoc);
 			Document doc = p.getDocument();
-					
+			
 			/*
 			 * <>
-			 * 
-			 * 
 			 */
-			
+
 			// Anzahl gefundener Einträge <totalResultsCount>
-			//System.out.println("root: " + doc.getFirstChild().getNodeName());
+			// System.out.println("root: " + doc.getFirstChild().getNodeName());
 			
 			// Anzahl gefundener Einträge <totalResultsCount>
 			n = doc.getDocumentElement().getFirstChild();
 			n = n.getNextSibling();
-			//System.out.println("Anzahl gefundener Einträge: " + n.getNodeName());
+			// System.out.println("Anzahl gefundener Einträge: " + n.getNodeName());
 			
 			// next
 			nList = n.getParentNode().getChildNodes();
 			System.out.println("Und nun: " + nList.getLength());
-			for (int i = 0; i < nList.getLength(); i++)	{
+			for (int i = 0; i < nList.getLength(); i++) {
 				currN = nList.item(i);
 				String currNodeName = currN.getNodeName();
-				if (currNodeName.equals("#text") == false)	{
-					if (currNodeName.equals("code") == false)	{
+				if (currNodeName.equals("#text") == false) {
+					if (currNodeName.equals("code") == false) {
 						System.out.println("Child " + i + " Name:      " + currN.getNodeName());
 						System.out.println("Child " + i + " Type:      " + currN.getNodeType());
 						System.out.println("Child " + i + " String:    " + currN.getNodeValue());
@@ -726,93 +757,102 @@ public class importingData 	{
 						System.out.println("Child " + i + " LocalName: " + currN.getLocalName());
 					}
 					nListSub = currN.getChildNodes();
-					for (int j = 0; j < nListSub.getLength(); j++)	{
+					for (int j = 0; j < nListSub.getLength(); j++) {
 						currN = nListSub.item(j);
-						if (currN.getNodeName().equals("#text") == false)	{
+						if (currN.getNodeName().equals("#text") == false) {
 							System.out.println("Child " + i + " Name:      " + currN.getNodeName());
 							System.out.println("Child " + i + " Type:      " + currN.getNodeType());
-							System.out.println("Child " + i + " String:    " + currN.getNodeValue());
-							System.out.println("Child " + i + " Text:      " + currN.getTextContent());
-							System.out.println("Child " + i + " LocalName: " + currN.getLocalName());
+							System.out
+								.println("Child " + i + " String:    " + currN.getNodeValue());
+							System.out.println("Child " + i + " Text:      "
+								+ currN.getTextContent());
+							System.out
+								.println("Child " + i + " LocalName: " + currN.getLocalName());
 						}
 					}
 				}
 				
 			}
 			
-			
-			/*Node n = doc.getDocumentElement().getFirstChild();
-			while (n!=null && !n.getNodeName().equals("totalResultsCount")) 
-				n = n.getNextSibling();
-			PrintStream out = System.out;
-			out.println("<?xml version=\"1.0\"?>");
-			out.println("<totalResultsCount>");
-			if (n!=null)
-				print(n, out);
-			*/
+			/*
+			 * Node n = doc.getDocumentElement().getFirstChild(); while (n!=null &&
+			 * !n.getNodeName().equals("totalResultsCount")) n = n.getNextSibling(); PrintStream out
+			 * = System.out; out.println("<?xml version=\"1.0\"?>");
+			 * out.println("<totalResultsCount>"); if (n!=null) print(n, out);
+			 */
 			System.out.println("</code>");
 			
-		} catch (Exception e)	{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
 	
-	static void print(Node node, PrintStream out) {
-		    int type = node.getNodeType();
-		    switch (type) {
-		      case Node.ELEMENT_NODE:
-		        out.print("<" + node.getNodeName());
-		        NamedNodeMap attrs = node.getAttributes();
-		        int len = attrs.getLength();
-		        for (int i=0; i<len; i++) {
-		            Attr attr = (Attr)attrs.item(i);
-		            out.print(" " + attr.getNodeName() + "=\"" +
-		                      escapeXML(attr.getNodeValue()) + "\"");
-		        }
-		        out.print('>');
-		        NodeList children = node.getChildNodes();
-		        len = children.getLength();
-		        for (int i=0; i<len; i++)
-		          print(children.item(i), out);
-		        out.print("</" + node.getNodeName() + ">");
-		        break;
-		      case Node.ENTITY_REFERENCE_NODE:
-		        out.print("&" + node.getNodeName() + ";");
-		        break;
-		      case Node.CDATA_SECTION_NODE:
-		        out.print("<![CDATA[" + node.getNodeValue() + "]]>");
-		        break;
-		      case Node.TEXT_NODE:
-		        out.print(escapeXML(node.getNodeValue()));
-		        break;
-		      case Node.PROCESSING_INSTRUCTION_NODE:
-		        out.print("<?" + node.getNodeName());
-		        String data = node.getNodeValue();
-		        if (data!=null && data.length()>0)
-		           out.print(" " + data);
-		        out.println("?>");
-		        break;
-		    }
-		  }
-
-		  static String escapeXML(String s) {
-		    StringBuffer str = new StringBuffer();
-		    int len = (s != null) ? s.length() : 0;
-		    for (int i=0; i<len; i++) {
-		       char ch = s.charAt(i);
-		       switch (ch) {
-		       case '<': str.append("&lt;"); break;
-		       case '>': str.append("&gt;"); break;
-		       case '&': str.append("&amp;"); break;
-		       case '"': str.append("&quot;"); break;
-		       case '\'': str.append("&apos;"); break;
-		       default: str.append(ch);
-		     }
-		    }
-		    return str.toString();
-		  }
-	public void tmp(final String countryCode, final String tempDir)	{
+	static void print(Node node, PrintStream out){
+		int type = node.getNodeType();
+		switch (type) {
+		case Node.ELEMENT_NODE:
+			out.print("<" + node.getNodeName());
+			NamedNodeMap attrs = node.getAttributes();
+			int len = attrs.getLength();
+			for (int i = 0; i < len; i++) {
+				Attr attr = (Attr) attrs.item(i);
+				out.print(" " + attr.getNodeName() + "=\"" + escapeXML(attr.getNodeValue()) + "\"");
+			}
+			out.print('>');
+			NodeList children = node.getChildNodes();
+			len = children.getLength();
+			for (int i = 0; i < len; i++)
+				print(children.item(i), out);
+			out.print("</" + node.getNodeName() + ">");
+			break;
+		case Node.ENTITY_REFERENCE_NODE:
+			out.print("&" + node.getNodeName() + ";");
+			break;
+		case Node.CDATA_SECTION_NODE:
+			out.print("<![CDATA[" + node.getNodeValue() + "]]>");
+			break;
+		case Node.TEXT_NODE:
+			out.print(escapeXML(node.getNodeValue()));
+			break;
+		case Node.PROCESSING_INSTRUCTION_NODE:
+			out.print("<?" + node.getNodeName());
+			String data = node.getNodeValue();
+			if (data != null && data.length() > 0)
+				out.print(" " + data);
+			out.println("?>");
+			break;
+		}
+	}
+	
+	static String escapeXML(String s){
+		StringBuffer str = new StringBuffer();
+		int len = (s != null) ? s.length() : 0;
+		for (int i = 0; i < len; i++) {
+			char ch = s.charAt(i);
+			switch (ch) {
+			case '<':
+				str.append("&lt;");
+				break;
+			case '>':
+				str.append("&gt;");
+				break;
+			case '&':
+				str.append("&amp;");
+				break;
+			case '"':
+				str.append("&quot;");
+				break;
+			case '\'':
+				str.append("&apos;");
+				break;
+			default:
+				str.append(ch);
+			}
+		}
+		return str.toString();
+	}
+	
+	public void tmp(final String countryCode, final String tempDir){
 		String downloadLoc;
 		String theFileName;
 		
@@ -835,33 +875,31 @@ public class importingData 	{
 	
 	private void importTabDelimited(final String file){
 		try {
-			char delimiter = (char)9;
+			char delimiter = (char) 9;
 			CSVReader cr = new CSVReader(new FileReader(file), delimiter);
 			String[] line;
 			while ((line = cr.readNext()) != null) {
-				//importLine(line);
-		    	// TODO hier könnte man noch ggf ; durch , ersetzen (Excel -> csv !)
-		    	//line = StringTool.convertEncoding(line, SRC_ENCODING);
-				new Plz(line[0],	// Land (+)
-						line[0],	// LandIso2 +
-						line[1],	// Plz +
-						line[2],	// Ort +
-						"",			// Strasse (+)
-						line[3],	// Kanton +
-						line[4]);	// KantonKuerzel +
-/*
-00 country code      : iso country code, 2 characters
-01 postal code       : varchar(10)
-02 place name        : varchar(180)
-03 admin name1       : 1. order subdivision (state) varchar(100)
-04 admin code1       : 1. order subdivision (state) varchar(20)
-05 admin name2       : 2. order subdivision (county/province) varchar(100)
-06 admin code2       : 2. order subdivision (county/province) varchar(20)
-07 admin name3       : 3. order subdivision (community) varchar(100)
-08 atitude          : estimated latitude (wgs84)
-09 longitude         : estimated longitude (wgs84)
-10 accuracy          : accuracy of lat/lng from 1=estimated to 6=centroid
-*/
+				// importLine(line);
+				// TODO hier könnte man noch ggf ; durch , ersetzen (Excel -> csv !)
+				// line = StringTool.convertEncoding(line, SRC_ENCODING);
+				new Plz(line[0], // Land (+)
+					line[0], // LandIso2 +
+					line[1], // Plz +
+					line[2], // Ort +
+					"", // Strasse (+)
+					line[3], // Kanton +
+					line[4]); // KantonKuerzel +
+				/*
+				 * 00 country code : iso country code, 2 characters 01 postal code : varchar(10) 02
+				 * place name : varchar(180) 03 admin name1 : 1. order subdivision (state)
+				 * varchar(100) 04 admin code1 : 1. order subdivision (state) varchar(20) 05 admin
+				 * name2 : 2. order subdivision (county/province) varchar(100) 06 admin code2 : 2.
+				 * order subdivision (county/province) varchar(20) 07 admin name3 : 3. order
+				 * subdivision (community) varchar(100) 08 atitude : estimated latitude (wgs84) 09
+				 * longitude : estimated longitude (wgs84) 10 accuracy : accuracy of lat/lng from
+				 * 1=estimated to 6=centroid
+				 */
+
 			}
 			return;
 		} catch (Exception ex) {
@@ -870,16 +908,17 @@ public class importingData 	{
 		}
 		
 	}
-
-	public void readIntoDB(final String file)	{
+	
+	public void readIntoDB(final String file){
 		try {
 			FileReader fr = new FileReader(file);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}
 	}
-	public void zipReader(final String zipFile, final String dataFileName, final String tempDir)	{
+	
+	public void zipReader(final String zipFile, final String dataFileName, final String tempDir){
 		ZipInputStream inStream;
 		try {
 			inStream = new ZipInputStream(new FileInputStream(zipFile));

@@ -12,6 +12,7 @@
  *******************************************************************************/
 
 package ch.marlovits.addressSearch.views;
+
 //ch.marlovits.addressSearch
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -45,11 +46,11 @@ import ch.marlovits.addressSearch.directories.PhoneBookContentParser;
 import ch.rgw.tools.ExHandler;
 
 public class WeisseSeitenSearchForm extends Composite {
-
+	
 	private final ListenerList listeners = new ListenerList();
-
+	
 	private List<KontaktEntry> kontakte = new Vector<KontaktEntry>();
-
+	
 	private String searchInfoText = "";
 	private Composite infoComposite;
 	private Text searchInfoTextField;
@@ -63,13 +64,13 @@ public class WeisseSeitenSearchForm extends Composite {
 	private int numOfPages = 0;
 	private int numOfEntries = 1;
 	private String country = "ch";
-
-	public WeisseSeitenSearchForm(Composite parent, int style) {
+	
+	public WeisseSeitenSearchForm(Composite parent, int style){
 		super(parent, style);
 		createPartControl(parent);
 	}
-
-	private void createPartControl(Composite parent) {
+	
+	private void createPartControl(Composite parent){
 		setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
 		setLayout(new GridLayout(1, false));
 		setLayout(new GridLayout(3, false));
@@ -93,14 +94,14 @@ public class WeisseSeitenSearchForm extends Composite {
 		
 		geoText = new Combo(comp1, SWT.BORDER);
 		geoText.setLayoutData(SWTHelper.getFillGridData(1, true, 1, false));
-		geoText.addSelectionListener(new SelectionListener()	{
+		geoText.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				String currText = geoText.getText();
-				if (currText.startsWith(" ***"))	{
+				if (currText.startsWith(" ***")) {
 					SWTHelper.showInfo("", "Dieser Punkt kann nicht ausgewählt werden!");
 					geoText.setText("");
 				}
@@ -111,12 +112,12 @@ public class WeisseSeitenSearchForm extends Composite {
 		searchBtn.setText(Messages.getString("WeisseSeitenSearchForm.btn.Suchen")); //$NON-NLS-1$
 		
 		infoComposite = new Composite(comp1, SWT.NONE);
-		infoComposite.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));		
+		infoComposite.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		GridLayout gl1 = new GridLayout(6, false);
-		gl1.marginWidth     =  0;
-		gl1.verticalSpacing =  0;
-		gl1.marginTop       = -5;    // strange...
-		gl1.marginBottom    = -5;    // strange...
+		gl1.marginWidth = 0;
+		gl1.verticalSpacing = 0;
+		gl1.marginTop = -5; // strange...
+		gl1.marginBottom = -5; // strange...
 		infoComposite.setLayout(gl1);
 		
 		searchInfoTextField = new Text(infoComposite, SWT.NONE);
@@ -127,22 +128,22 @@ public class WeisseSeitenSearchForm extends Composite {
 		previousBtn.setText("<");
 		previousBtn.setEnabled(true);
 		previousBtn.setVisible(false);
-		previousBtn.addSelectionListener(new SelectionListener(){
+		previousBtn.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				System.out.println("numOfPages: " + numOfPages);
 				System.out.println("startEntryIndex: " + startEntryIndex);
-				if (startEntryIndex >= 0)	{
+				if (startEntryIndex >= 0) {
 					startEntryIndex = (startEntryIndex == 0) ? 0 : startEntryIndex - 1;
 					System.out.println("startEntryIndex: " + startEntryIndex);
 					searchAction(nameText.getText(), geoText.getText());
 				}
-				if (startEntryIndex == 0)	{
+				if (startEntryIndex == 0) {
 					previousBtn.setEnabled(false);
-				} else	{
+				} else {
 					previousBtn.setEnabled(true);
 				}
 			}
@@ -152,31 +153,31 @@ public class WeisseSeitenSearchForm extends Composite {
 		nextBtn.setText(">");
 		nextBtn.setEnabled(true);
 		nextBtn.setVisible(false);
-		nextBtn.addSelectionListener(new SelectionListener(){
+		nextBtn.addSelectionListener(new SelectionListener() {
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+			public void widgetDefaultSelected(SelectionEvent e){}
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				System.out.println("numOfPages: " + numOfPages);
 				System.out.println("startEntryIndex: " + startEntryIndex);
-				if (startEntryIndex < numOfPages+1)	{
+				if (startEntryIndex < numOfPages + 1) {
 					startEntryIndex = startEntryIndex + 1;
 					startEntryIndex = (startEntryIndex > numOfPages) ? numOfPages : startEntryIndex;
 					System.out.println("startEntryIndex: " + startEntryIndex);
 					searchAction(nameText.getText(), geoText.getText());
 					previousBtn.setEnabled(true);
 				}
-				if (startEntryIndex >= numOfPages)	{
+				if (startEntryIndex >= numOfPages) {
 					nextBtn.setEnabled(false);
-				} else	{
+				} else {
 					nextBtn.setEnabled(true);
 				}
-		}
+			}
 		});
 		
 		nameText.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e){
 				if (e.character == SWT.CR) {
 					startEntryIndex = 0;
 					searchAction(nameText.getText(), geoText.getText());
@@ -185,7 +186,7 @@ public class WeisseSeitenSearchForm extends Composite {
 		});
 		
 		geoText.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e){
 				if (e.character == SWT.CR) {
 					startEntryIndex = 0;
 					searchAction(nameText.getText(), geoText.getText());
@@ -194,16 +195,16 @@ public class WeisseSeitenSearchForm extends Composite {
 		});
 		
 		searchBtn.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e){
 				startEntryIndex = 0;
 				searchAction(nameText.getText(), geoText.getText());
 			}
 		});
 	}
 	
-	private void setSearchText(DirectoriesContentParser parser)	{
+	private void setSearchText(DirectoriesContentParser parser){
 		boolean visible = true;
-		if (parser != null)	{
+		if (parser != null) {
 			int numOfEntries = parser.getNumOfEntries();
 			searchInfoText = parser.getSearchInfo();
 			searchInfoTextField.setText(searchInfoText);
@@ -211,10 +212,10 @@ public class WeisseSeitenSearchForm extends Composite {
 			visible = true;
 			numOfPages = (numOfEntries - 1) / entriesToRead;
 			previousBtn.setEnabled(false);
-			if (numOfPages > 0)	{
+			if (numOfPages > 0) {
 				nextBtn.setEnabled(true);
 			}
-		} else	{
+		} else {
 			visible = false;
 			numOfPages = 0;
 		}
@@ -223,31 +224,32 @@ public class WeisseSeitenSearchForm extends Composite {
 		nextBtn.setVisible(visible);
 	}
 	
-	public void setCountry(final String countryIso2)	{
+	public void setCountry(final String countryIso2){
 		country = countryIso2;
 	}
 	
 	/**
-	 * Liest Kontaktinformationen anhand der Kriterien name & geo.
-	 * Bei der Suche wird die Kontakteliste und der InfoText abgefüllt.
+	 * Liest Kontaktinformationen anhand der Kriterien name & geo. Bei der Suche wird die
+	 * Kontakteliste und der InfoText abgefüllt.
 	 */
-	private void readKontakte(final String name, final String geo, final int startPageNum) {
+	private void readKontakte(final String name, final String geo, final int startPageNum){
 		final Cursor backupCursor = getShell().getCursor();
-		final Cursor waitCursor = new Cursor(getShell().getDisplay(),
-				SWT.CURSOR_WAIT);
-
+		final Cursor waitCursor = new Cursor(getShell().getDisplay(), SWT.CURSOR_WAIT);
+		
 		getShell().setCursor(waitCursor);
-
+		
 		try {
 			String content = DirectoriesHelper.readContent(name, geo, country, startPageNum);
-			if ((content == null) || (content.equalsIgnoreCase("")))	{
+			if ((content == null) || (content.equalsIgnoreCase(""))) {
 				SWTHelper.alert("Shit!", "content null or empty");
 			}
 			
 			DirectoriesContentParser parser = null;
 			Class cls;
 			try {
-				cls = Class.forName("ch.marlovits.addressSearch.directories.DirectoriesContentParser");
+				cls =
+					Class
+						.forName("ch.marlovits.addressSearch.directories.DirectoriesContentParser");
 				Class partypes[] = new Class[4];
 				partypes[0] = String.class;
 				partypes[1] = String.class;
@@ -284,35 +286,31 @@ public class WeisseSeitenSearchForm extends Composite {
 				e.printStackTrace();
 			}
 			
-			
-			
-			
-			
-			
-			//////////////DirectoriesContentParser parser = new DirectoriesContentParser(content, name, geo, country);
+			// ////////////DirectoriesContentParser parser = new DirectoriesContentParser(content,
+			// name, geo, country);
 			kontakte = parser.extractKontakte();
 			searchInfoText = parser.getSearchInfo();
 			setSearchText(parser);
-			if (parser.hasCitiesList())	{
+			if (parser.hasCitiesList()) {
 				SWTHelper.showInfo("", parser.getCitiesHitListMessage());
 				String[][] citiesList = parser.getCitiesHitList();
-				if ((citiesList != null) && (citiesList.length > 0))	{
+				if ((citiesList != null) && (citiesList.length > 0)) {
 					String tmp = "";
 					String itemsString = "";
 					String delim = "";
 					String itemsDelim = "";
-					for (int i = 0; i < citiesList.length; i++)	{
-						String city   = citiesList[i][0];
-						//String city   = citiesList[i][0];
+					for (int i = 0; i < citiesList.length; i++) {
+						String city = citiesList[i][0];
+						// String city = citiesList[i][0];
 						String marker = (citiesList[i][1].equalsIgnoreCase("0") ? " *** " : "");
 						itemsString = itemsString + itemsDelim + marker + citiesList[i][0] + marker;
 						itemsDelim = ";";
-						//for (int i2 = 0; i2 < 2; i2++){
-						//	tmp = tmp + delim + citiesList[i][i2];
-						//	delim = ";";
-						//}
+						// for (int i2 = 0; i2 < 2; i2++){
+						// tmp = tmp + delim + citiesList[i][i2];
+						// delim = ";";
+						// }
 					}
-					//System.out.println(tmp);
+					// System.out.println(tmp);
 					String savedText = geoText.getText();
 					geoText.setItems(itemsString.split(";"));
 					geoText.setVisibleItemCount(itemsString.length());
@@ -326,124 +324,128 @@ public class WeisseSeitenSearchForm extends Composite {
 			getShell().setCursor(backupCursor);
 		}
 	}
-
+	
 	/**
 	 * Aktion wenn Such-Button klicked oder Default-Action (Return).
 	 */
-	private void searchAction(String name, String geo) {
+	private void searchAction(String name, String geo){
 		String savedText = geoText.getText();
 		geoText.setRedraw(false);
-		geoText.setItems(new String[] {""});
+		geoText.setItems(new String[] {
+			""
+		});
 		geoText.setText(savedText);
 		geoText.setRedraw(true);
-		readKontakte(name, geo,  startEntryIndex);
+		readKontakte(name, geo, startEntryIndex);
 		resultChanged();
 	}
-
-	private void resultChanged() {
+	
+	private void resultChanged(){
 		for (Object listener : listeners.getListeners()) {
 			if (listener != null) {
 				((Listener) listener).handleEvent(null);
 			}
 		}
 	}
-
+	
 	/**
-	 * Retourniert String array für Dialoge
-	 *  //+++++ versucht Detailinfos zu lesen
+	 * Retourniert String array für Dialoge //+++++ versucht Detailinfos zu lesen
 	 */
-	private String[] getFields(KontaktEntry entry) {
+	private String[] getFields(KontaktEntry entry){
 		
-		//if (country.equalsIgnoreCase("ch"))	{
-			entry = DirectoriesContentParser.parseVCard(entry.getDetailLink(), country);
-		//}
-		///////////KontaktEntry k = getKontakte().get(1);
+		// if (country.equalsIgnoreCase("ch")) {
+		entry = DirectoriesContentParser.parseVCard(entry.getDetailLink(), country);
+		// }
+		// /////////KontaktEntry k = getKontakte().get(1);
 		
-		if (1==1) {
-		if (!entry.isDetail()) { // Sind Detailinformationen vorhanden
-			//++++ wenn keine Detailinfo da -> nach vollem Namen suchen -> ergibt meist Detail-Info
-			final String name = entry.getName() + " " //$NON-NLS-1$
-				+ entry.getVorname();
-			final String geo = entry.getPlz() + " " //$NON-NLS-1$
-				+ entry.getOrt();
-			readKontakte(name, geo, startEntryIndex); // Detail infos lesen (meist...)
-			KontaktEntry detailEntry = null;
-			if (getKontakte().size() == 1) {
-				// nur ein Eintrag gefunden -> benutzen
-				detailEntry = getKontakte().get(0);
-			} else if (getKontakte().size() > 1) {
-				// falls mehr als ein Eintrag gefunden -> Match auf Strasse versuchen, der erste Eintrag gewinnt...
-				// kann falsch sein
-				String strasse = entry.getAdresse().trim();
-				for (KontaktEntry tempEntry: getKontakte()) {
-					if (strasse.contains(tempEntry.getAdresse())) {
-						detailEntry = tempEntry;
+		if (1 == 1) {
+			if (!entry.isDetail()) { // Sind Detailinformationen vorhanden
+				// ++++ wenn keine Detailinfo da -> nach vollem Namen suchen -> ergibt meist
+				// Detail-Info
+				final String name = entry.getName() + " " //$NON-NLS-1$
+					+ entry.getVorname();
+				final String geo = entry.getPlz() + " " //$NON-NLS-1$
+					+ entry.getOrt();
+				readKontakte(name, geo, startEntryIndex); // Detail infos lesen (meist...)
+				KontaktEntry detailEntry = null;
+				if (getKontakte().size() == 1) {
+					// nur ein Eintrag gefunden -> benutzen
+					detailEntry = getKontakte().get(0);
+				} else if (getKontakte().size() > 1) {
+					// falls mehr als ein Eintrag gefunden -> Match auf Strasse versuchen, der erste
+					// Eintrag gewinnt...
+					// kann falsch sein
+					String strasse = entry.getAdresse().trim();
+					for (KontaktEntry tempEntry : getKontakte()) {
+						if (strasse.contains(tempEntry.getAdresse())) {
+							detailEntry = tempEntry;
+						}
+					}
+				}
+				if (detailEntry != null) {
+					// Falls bei Detailsuche Fehler passiert, dann sind weniger Infos vorhanden
+					if (detailEntry.countNotEmptyFields() > entry.countNotEmptyFields()) {
+						entry = detailEntry;
 					}
 				}
 			}
-			if (detailEntry != null) {
-				// Falls bei Detailsuche Fehler passiert, dann sind weniger Infos vorhanden
-				if (detailEntry.countNotEmptyFields() > entry.countNotEmptyFields()) {
-					entry = detailEntry;
-				}
-			}
 		}
-		}
-		return new String[] { entry.getName(), entry.getVorname(),
-				"", entry.getAdresse(), entry.getPlz(), //$NON-NLS-1$
-				entry.getOrt(), entry.getTelefon(), entry.getZusatz(),
-				entry.getFax(), entry.getEmail(),
-				//+++++ new:
-				entry.getWebsite(), entry.getTelefon2(), entry.getMobile(), entry.getLedigname(),
-				entry.getProfession(), entry.getCategory(),
-				(entry.getIsOrganisation() ? "1" : "0"),
-				entry.getTitle(), entry.getCountry()
+		return new String[] {
+			entry.getName(), entry.getVorname(),
+			"", entry.getAdresse(), entry.getPlz(), //$NON-NLS-1$
+			entry.getOrt(), entry.getTelefon(), entry.getZusatz(),
+			entry.getFax(),
+			entry.getEmail(),
+			// +++++ new:
+			entry.getWebsite(), entry.getTelefon2(), entry.getMobile(), entry.getLedigname(),
+			entry.getProfession(), entry.getCategory(), (entry.getIsOrganisation() ? "1" : "0"),
+			entry.getTitle(), entry.getCountry()
 		};
-	
+		
 	}
-
+	
 	/**
 	 * Öffnet Dialog zum Erfassen eines Patienten
 	 */
-	public void openPatientenDialog(KontaktEntry entry) {
+	public void openPatientenDialog(KontaktEntry entry){
 		if (entry != null) {
-			final PatientErfassenDialog dialog = new PatientErfassenDialog(
-					getShell(), entry.toHashmap());
+			final PatientErfassenDialog dialog =
+				new PatientErfassenDialog(getShell(), entry.toHashmap());
 			dialog.open();
 		}
 	}
-
+	
 	/**
 	 * Öffnet Dialog zum Erfassen eines Kontaktes
 	 */
-	public void openKontaktDialog(KontaktEntry entry) {
+	public void openKontaktDialog(KontaktEntry entry){
 		if (entry != null) {
-			final KontaktErfassenDialog dialog = new KontaktErfassenDialog(
-					getShell(), getFields(entry));
+			final KontaktErfassenDialog dialog =
+				new KontaktErfassenDialog(getShell(), getFields(entry));
 			dialog.open();
 		}
 	}
-
+	
 	/**
 	 * Kontakt Liste
 	 */
-	public List<KontaktEntry> getKontakte() {
+	public List<KontaktEntry> getKontakte(){
 		return this.kontakte;
 	}
-
+	
 	/**
 	 * Infotext zum Suchresultat: z.B. "123 Treffer"
 	 */
-	public String getSearchInfoText() {
+	public String getSearchInfoText(){
 		return this.searchInfoText;
 	}
-
-	public void addResultChangeListener(Listener listener) {
+	
+	public void addResultChangeListener(Listener listener){
 		listeners.add(listener);
 	}
-
-	public void removeResultChangeListener(Listener listener) {
+	
+	public void removeResultChangeListener(Listener listener){
 		listeners.add(listener);
 	}
-
+	
 }

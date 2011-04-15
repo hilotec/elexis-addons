@@ -24,48 +24,57 @@ import ch.elexis.selectors.FieldDescriptor;
 import ch.elexis.util.SWTHelper;
 
 @SuppressWarnings("unchecked")
-public class EditVaccinationDialog extends TitleAreaDialog{
+public class EditVaccinationDialog extends TitleAreaDialog {
 	VaccinationType vt;
-
-	FieldDescriptor<VaccinationType>[] fields=new FieldDescriptor[]{
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_nameOfVaccination,VaccinationType.NAME,FieldDescriptor.Typ.STRING,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_vaccinationSubstance,VaccinationType.PRODUCT,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_ageFromTo,VaccinationType.RECOMMENDED_AGE,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance1_2,VaccinationType.DELAY1TO2,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance2_3,VaccinationType.DELAY2TO3,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance3_4,VaccinationType.DELAY3TO4,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distanceRappel,VaccinationType.DELAY_REP,null),
-		new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_remarks,VaccinationType.REMARKS,null),
+	
+	FieldDescriptor<VaccinationType>[] fields =
+		new FieldDescriptor[] {
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_nameOfVaccination,
+				VaccinationType.NAME, FieldDescriptor.Typ.STRING, null),
+			new FieldDescriptor<VaccinationType>(
+				Messages.EditVaccinationDialog_vaccinationSubstance, VaccinationType.PRODUCT, null),
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_ageFromTo,
+				VaccinationType.RECOMMENDED_AGE, null),
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance1_2,
+				VaccinationType.DELAY1TO2, null),
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance2_3,
+				VaccinationType.DELAY2TO3, null),
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distance3_4,
+				VaccinationType.DELAY3TO4, null),
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_distanceRappel,
+				VaccinationType.DELAY_REP, null),
+			new FieldDescriptor<VaccinationType>(Messages.EditVaccinationDialog_remarks,
+				VaccinationType.REMARKS, null),
 		
-	};
+		};
+	
 	public EditVaccinationDialog(Shell shell, VaccinationType vacc){
 		super(shell);
-		vt=vacc;
+		vt = vacc;
 		
 	}
-
+	
 	@Override
-	protected Control createDialogArea(Composite parent) {
-		DisplayPanel panel=new DisplayPanel(parent, fields, 2, 2, new IAction[0]);
+	protected Control createDialogArea(Composite parent){
+		DisplayPanel panel = new DisplayPanel(parent, fields, 2, 2, new IAction[0]);
 		panel.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		panel.setAutosave(true);
 		panel.setObject(vt);
 		return panel;
 	}
-
+	
 	@Override
-	public void create() {
+	public void create(){
 		super.create();
 		setTitle(Messages.EditVaccinationDialog_enterVaccination);
 		getShell().setText(Messages.EditVaccinationDialog_defineVaccination);
-		getShell().setSize(800,600);
+		getShell().setSize(800, 600);
 		SWTHelper.center(getShell());
 	}
-
+	
 	@Override
-	protected void okPressed() {
+	protected void okPressed(){
 		super.okPressed();
 	}
-
 	
 }

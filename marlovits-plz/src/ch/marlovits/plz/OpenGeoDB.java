@@ -14,30 +14,29 @@ import ch.rgw.tools.JdbcLink.Stm;
 public class OpenGeoDB {
 	protected static Log log = Log.get("PersistentObject");
 	
-	public OpenGeoDB() {
+	public OpenGeoDB(){
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
-	public void createOpenGeoDBTables()	{
+	public void createOpenGeoDBTables(){
 		final Stm stm = PersistentObject.getConnection().getStatement();
 		
 		log.log("Creating Tables for OpenGeoDB", Log.SYNCMARK);
 		java.io.InputStream is = null;
-		//Stm stm = null;
+		// Stm stm = null;
 		try {
 			File base = new File(Hub.getBasePath());
-			String myBasePath = base.getParent().toString() + File.separator + "marlovits-plz" + File.separator + "src" + File.separator + "ch" + File.separator + "marlovits" + File.separator + "plz";
-			String createscript =
-				myBasePath + File.separator + "openGeoDB.script";
+			String myBasePath =
+				base.getParent().toString() + File.separator + "marlovits-plz" + File.separator
+					+ "src" + File.separator + "ch" + File.separator + "marlovits" + File.separator
+					+ "plz";
+			String createscript = myBasePath + File.separator + "openGeoDB.script";
 			is = new FileInputStream(createscript);
 			if (stm.execScript(is, true, true) == true) {
 				PersistentObject.disconnect();
-				MessageDialog
-					.openInformation(
-						null,
-						"Titel ???",
-						"Die Tabellen für OpenGeoDB wurden erstellt.");
+				MessageDialog.openInformation(null, "Titel ???",
+					"Die Tabellen für OpenGeoDB wurden erstellt.");
 			} else {
 				log.log("Kein create script für die OpenGeoDB Tabellen gefunden.", Log.ERRORS);
 				return;
@@ -55,7 +54,7 @@ public class OpenGeoDB {
 		}
 	}
 	
-	public void importOpenDBData()	{
-		
+	public void importOpenDBData(){
+
 	}
 }
