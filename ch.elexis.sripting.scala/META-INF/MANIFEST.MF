@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Scala support for the Elexis scripting system
-Bundle-SymbolicName: ch.elexis.sripting.scala;singleton:=true
+Bundle-SymbolicName: ch.elexis.scripting.scala;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: weirich@elexis.ch
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

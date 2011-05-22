@@ -9,7 +9,7 @@
  *    G. Weirich - initial implementation
  *    J, Kurath - Sponsoring
  *    
- * $Id: MesswertFactory.java 1185 2006-10-29 15:29:30Z rgw_ch $
+ * $Id$
  *******************************************************************************/
 
 package ch.elexis.stickynotes.ui;

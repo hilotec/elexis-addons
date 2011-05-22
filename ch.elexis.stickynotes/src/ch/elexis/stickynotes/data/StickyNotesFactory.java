@@ -9,7 +9,7 @@
  *    G. Weirich - initial implementation
  *    J, Kurath - Sponsoring
  *    
- * $Id: StickyNotesFactory.java 5518 2009-07-04 14:02:31Z rgw_ch $
+ * $Id$
  *******************************************************************************/
 
 package ch.elexis.stickynotes.data;
