@@ -1,0 +1,2 @@
+- Manual sequence arrangement of property pages http://www.eclipse.org/forums/index.php?t=msg&goto=523728&
+- DateTime Combo -> SWT 3.7 provides a new DateTimeCombo, replace the Nebula one used with this one
