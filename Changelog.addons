@@ -1,0 +1,9 @@
+Changelog 2.1.5.rc3
+
+a68a172d1398: 2011-05-28: mdescher: Merge with eecc163981ee45ed7d8cca023bcd82557e7e47f1
+9acbaacac1be: 2011-05-28: mdescher: Feature: at.medevit.elexis.properties 1.0.0 - Initial release
+eecc163981ee: 2011-05-22: rgw@macbook: fix broken classpaths and typos
+3e49a909d64c: 2011-05-20: Niklaus Giger: Ticket 51: Verzeichnisse haben den Symbolischen Namen des Plug-Ins. build.xml, etc angepasst
+
+Changelog 2.1.5.rc2
+0013f054da31: 2011-04-15: Niklaus Giger: ElexisFormat konsequent angewendet
