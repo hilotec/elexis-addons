@@ -1,2 +1,4 @@
 26.5.2011 - Version 1.0.0 - M. Descher - Birth of my daughter Anna :) 
 	- Initial release
+7.6.2011 - Version 1.0.1 - M. Descher
+	- Added propertyPage to show the XIDs of a PersistentObject

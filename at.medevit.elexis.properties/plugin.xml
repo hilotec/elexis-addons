@@ -25,6 +25,17 @@
             </instanceof>
          </enabledWhen>
       </page>
+      <page
+            class="at.medevit.elexis.properties.propertyPage.XIDPropertyPage"
+            icon="rsc/icons/emblem-symbolic-link-2.png"
+            id="at.medevit.elexis.properties.propertyPage.XIDPropertyPage"
+            name="XID">
+         <enabledWhen>
+            <instanceof
+                  value="ch.elexis.data.PersistentObject">
+            </instanceof>
+         </enabledWhen>
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
