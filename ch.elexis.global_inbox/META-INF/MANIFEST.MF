@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Global Inbox
 Bundle-SymbolicName: ch.elexis.global_inbox;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 Bundle-Activator: ch.elexis.global_inbox.Activator
 Bundle-Vendor: weirich@elexis.ch
 Bundle-Localization: plugin
