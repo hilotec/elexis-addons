@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Runtime for Scala plugins in Elexis
 Bundle-SymbolicName: ch.elexis.scala.runtime
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 Bundle-ClassPath: bin/,
  .,
  scala-dbc.jar,

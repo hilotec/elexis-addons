@@ -2,5 +2,5 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: StatisticsFragmentExample Fragment
 Bundle-SymbolicName: StatisticsFragmentExample;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 Fragment-Host: Waelti.Statistics;bundle-version="0.0.1"
