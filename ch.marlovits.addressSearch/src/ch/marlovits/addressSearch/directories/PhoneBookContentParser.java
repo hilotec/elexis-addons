@@ -8,7 +8,7 @@
  * Contributors:
  *    M. Imhof - initial implementation
  *    
- * $Id: DirectoriesContentParser.java 5277 2009-05-05 19:00:19Z tschaller $
+ * $Id$
  *******************************************************************************/
 
 package ch.marlovits.addressSearch.directories;
