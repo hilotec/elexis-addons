@@ -1,0 +1,5 @@
+This is a quite experimental parser to import RTF documents into the document storage system.
+
+The Importer tries to find patient identifying patterns in the rtf and import the documents to that patient.
+
+If it can't match a file, it writes an error message to the log. 
