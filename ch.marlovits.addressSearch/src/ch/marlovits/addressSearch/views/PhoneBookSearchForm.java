@@ -8,7 +8,7 @@
  * Contributors:
  *    M. Imhof - initial implementation
  *    
- * $Id: WeisseSeitenSearchForm.java 4646 2008-10-29 07:39:39Z michael_imhof $
+ * $Id$
  *******************************************************************************/
 
 package ch.marlovits.addressSearch.views;
