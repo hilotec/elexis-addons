@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="de.ralfebert.rcputils.feature"
+      label="Eclipse RCP Utilities"
+      version="2.0.2"
+      provider-name="Ralf Ebert">
+
+   <description url="http://github.com/ralfebert/rcputils">
+      Utility classes for Eclipse RCP development
+   </description>
+
+   <license url="http://www.eclipse.org/legal/epl-v10.html">
+      Eclipse Public License - v1.0
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.core.commands"/>
+      <import plugin="org.eclipse.core.databinding"/>
+      <import plugin="org.eclipse.core.databinding.observable"/>
+      <import plugin="org.eclipse.core.databinding.beans"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.jobs"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.jface.databinding"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.osgi"/>
+   </requires>
+
+   <plugin
+         id="de.ralfebert.rcputils"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="de.ralfebert.rcputils.wired"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
