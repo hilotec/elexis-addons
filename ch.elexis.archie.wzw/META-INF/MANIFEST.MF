@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: WZW-Statistiken
+Bundle-SymbolicName: ch.elexis.archie.wzw
+Bundle-Version: 0.0.1
+Bundle-Vendor: elexis.ch
+Fragment-Host: ch.unibe.iam.scg.archie;bundle-version="1.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
