@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import ch.elexis.Hub;
 import ch.elexis.data.Konsultation;
 import ch.elexis.data.Query;
 import ch.elexis.data.Rechnung;
@@ -98,6 +99,9 @@ public abstract class BaseStats extends AbstractTimeSeries {
 				}
 			});
 
+		}
+		if(bOnlyActiveMandator){
+			qbe.add(Konsultation.FLD_MANDATOR_ID, Query.EQUALS, Hub.actMandant.getId());
 		}
 		return qbe.execute();
 	}

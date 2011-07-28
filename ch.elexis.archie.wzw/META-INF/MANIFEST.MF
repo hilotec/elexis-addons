@@ -6,3 +6,8 @@ Bundle-Version: 0.0.1
 Bundle-Vendor: elexis.ch
 Fragment-Host: ch.unibe.iam.scg.archie;bundle-version="1.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: ch.elexis.arzttarife_ch;bundle-version="2.0.8",
+ ch.elexis.artikel_ch;bundle-version="2.0.2",
+ ch.elexis.eigenartikel;bundle-version="1.0.4",
+ ch.elexis.medikamente.bag;bundle-version="2.0.3",
+ ch.elexis.labortarif.ch2009;bundle-version="1.0.3"
