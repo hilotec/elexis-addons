@@ -8,7 +8,7 @@
  * Contributors:
  *    M. Imhof - initial implementation
  *    
- * $Id: HtmlParser.java 4643 2008-10-28 12:19:52Z michael_imhof $
+ * $Id$
  *******************************************************************************/
 
 package ch.marlovits.addressSearch.directories;
