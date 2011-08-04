@@ -41,7 +41,7 @@ public class Rtf2XML {
 
         String text = new String(rtfSource.getText(rtfElement.getStartOffset(),
                 rtfElement.getEndOffset() - rtfElement.getStartOffset())
-                .getBytes("ISO-8859-1"));
+                .getBytes("UTF-8"));
 
         org.w3c.dom.Element node = xmlTarget.createElement("p");
         node.appendChild(xmlTarget.createTextNode(text));

@@ -29,16 +29,33 @@ public class Importer extends ImporterPage {
 	Rtf2XML r2 = new Rtf2XML();
 	ManualParser mp = new ManualParser();
 	Log log = Log.get("RTF importer");
+	int success = 0;
+	int failure = 0;
+	IDocumentManager dm;
 
 	// Betrifft: Muster Max, Placebogasse 34, Winterthur, 20.09.58
 	// Pattern namePattern = Pattern
 	// .compile("^Betrifft:\\s*([^,]+)\\s*,\\s*([^,]+)\\s*,\\s*([^,]+)\\s*,\\s*([^,]+)\\s*");
-	Pattern namePattern = Pattern.compile("^Betrifft:\\s*");
+	static final String TERM = "([^,]+)";
+	static final String COMMA = "\\s*,\\s*";
+
+	Pattern namePattern = Pattern.compile("^Betrifft:\\s*" + TERM + COMMA
+			+ TERM + COMMA + TERM + COMMA + TERM);
 
 	@Override
 	public IStatus doImport(IProgressMonitor monitor) throws Exception {
 		File dir = new File(this.results[0]);
+		dm = (IDocumentManager) Extensions
+				.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
+		if (dm == null) {
+			SWTHelper.showError("Es ist kein DokumentManager installiert",
+					"Bitte installieren Sie Omnivore Direct oder Ähnliches");
+			return Status.CANCEL_STATUS;
+		}
 		importDirectory(dir);
+		SWTHelper.showInfo("Import RTF-Texte",
+				"Erfolgreich: " + Integer.toString(success) + ", Fehler: "
+						+ Integer.toString(failure));
 		return Status.OK_STATUS;
 	}
 
@@ -53,8 +70,6 @@ public class Importer extends ImporterPage {
 						try {
 							Patient pat = mp.findPatient(file);
 							if (pat != null) {
-								IDocumentManager dm = (IDocumentManager) Extensions
-										.findBestService(GlobalServiceDescriptors.DOCUMENT_MANAGEMENT);
 								try {
 									GenericDocument fd = new GenericDocument(
 											pat,
@@ -66,17 +81,22 @@ public class Importer extends ImporterPage {
 											"", null);
 									dm.addDocument(fd);
 									fd = null;
+									success++;
 								} catch (Exception ex) {
 									ExHandler.handle(ex);
 									log.log("Import failed: "
 											+ file.getAbsolutePath() + " "
 											+ ex.getMessage(), Log.ERRORS);
+									failure++;
 								}
 
+							} else {
+								failure++;
 							}
 						} catch (Exception ex) {
 							log.log("Failed importing "
 									+ file.getAbsolutePath(), Log.ERRORS);
+							failure++;
 						}
 					}
 				}
