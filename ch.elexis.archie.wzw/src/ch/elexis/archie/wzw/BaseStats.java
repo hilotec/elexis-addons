@@ -23,6 +23,8 @@ public abstract class BaseStats extends AbstractTimeSeries {
 	protected String[] headings;
 	private String dateMethod = "Rechnungsdatum";
 	private boolean bOnlyActiveMandator;
+	protected int clicksPerRound;
+	protected int HUGE_NUMBER=1000000;
 
 	public BaseStats(String name, String desc, String[] headings) {
 		super(name);
@@ -61,22 +63,28 @@ public abstract class BaseStats extends AbstractTimeSeries {
 		return Arrays.asList(headings);
 	}
 
-	protected List<Konsultation> getConses() {
+	protected List<Konsultation> getConses(final IProgressMonitor monitor) {
+		HUGE_NUMBER=1000000;
+		monitor.beginTask("Sammle Konsultationsdaten ", HUGE_NUMBER);
+		monitor.subTask("Datenbankabfrage und PostQueryFilters");
 		Query<Konsultation> qbe = new Query<Konsultation>(Konsultation.class);
 		final String dateFrom = new TimeTool(getStartDate().getTime().getTime())
 				.toString(TimeTool.DATE_COMPACT);
 		final String dateUntil = new TimeTool(getEndDate().getTimeInMillis())
 				.toString(TimeTool.DATE_COMPACT);
 		if (getDateType().equals("Konsultationsdatum")) {
-			qbe.add(Konsultation.FLD_DATE, ">=", dateFrom);
-			qbe.add(Konsultation.FLD_DATE, "<=", dateUntil);
+			qbe.add(Konsultation.FLD_DATE, Query.GREATER_OR_EQUAL, dateFrom);
+			qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, dateUntil);
 		} else if (getDateType().equals("Rechnungsdatum")) {
 			qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, dateFrom);
-			qbe.add(Konsultation.FLD_BILL_ID, Query.NOT_EQUAL, null);
+			qbe.add(Konsultation.FLD_BILL_ID, "NOT", null);
 			qbe.addPostQueryFilter(new IFilter() {
 				@Override
 				public boolean select(Object element) {
 					Konsultation k = (Konsultation) element;
+					monitor.subTask(k.getDatum());
+					monitor.worked(1);
+					HUGE_NUMBER--;
 					Rechnung rn = k.getRechnung();
 					String rndate = new TimeTool(rn.getDatumRn()).toString(TimeTool.DATE_COMPACT);
 					return rndate.compareTo(dateFrom)>=0 && rndate.compareTo(dateUntil) <=0;
@@ -84,11 +92,14 @@ public abstract class BaseStats extends AbstractTimeSeries {
 			});
 		} else if (getDateType().equals("Zahlungsdatum")) {
 			qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, dateFrom);
-			qbe.add(Konsultation.FLD_BILL_ID, Query.NOT_EQUAL, null);
+			qbe.add(Konsultation.FLD_BILL_ID, "NOT", null);
 			qbe.addPostQueryFilter(new IFilter() {
 				@Override
 				public boolean select(Object element) {
 					Konsultation k = (Konsultation) element;
+					monitor.subTask(k.getLabel());
+					monitor.worked(1);
+					HUGE_NUMBER--;
 					Rechnung rn = k.getRechnung();
 					if(rn.getStatus()==RnStatus.BEZAHLT || rn.getStatus()==RnStatus.ZUVIEL_BEZAHLT){
 						// dunno
