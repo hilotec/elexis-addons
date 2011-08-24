@@ -12,7 +12,6 @@
  *******************************************************************************/
 package ch.elexis.archie.wzw;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,6 @@ import ch.elexis.data.Verrechnet;
 import ch.elexis.labortarif2009.data.Labor2009Tarif;
 import ch.elexis.medikamente.bag.data.BAGMedi;
 import ch.rgw.tools.ExHandler;
-import ch.rgw.tools.Money;
 import ch.rgw.tools.TimeTool;
 
 /**
