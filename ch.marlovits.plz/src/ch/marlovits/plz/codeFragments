@@ -1,0 +1,152 @@
+/** 
+ * Convert a point from a screen coordinates to a component's  
+ * coordinate system 
+ * 
+ * @param p a Point object (converted to the new coordinate system) 
+ * @param c a Component object 
+ */ 
+public static void convertPointFromScreen(Point p,Component c) { 
+    Rectangle b;
+    int x,y;
+
+    do { 
+        if(c instanceof JComponent) { 
+            x = ((JComponent)c).getX();
+            y = ((JComponent)c).getY();
+        } else if(c instanceof java.applet.Applet || 
+                   c instanceof java.awt.Window) { 
+            try { 
+                Point pp = c.getLocationOnScreen();
+                x = pp.x;
+                y = pp.y;
+            } catch (IllegalComponentStateException icse) { 
+        x = c.getX();
+        y = c.getY();
+            } 
+        } else { 
+    x = c.getX();
+    y = c.getY();
+        } 
+
+        p.x -= x;
+        p.y -= y;
+
+        if(c instanceof java.awt.Window || c instanceof java.applet.Applet) 
+            break;
+        c = c.getParent();
+    } while(c != null);
+}
+public static void convertPointToScreen(Point p, Composite c) { 
+	int x = 0;
+	int y = 0;
+	
+	do { 
+		if(c instanceof Composite) { 
+			x = c.getBounds().x;
+			y = c.getBounds().y;
+		} 
+		
+		p.x += x;
+		p.y += y;
+		
+		c = c.getParent();
+		} while(c != null);
+	}
+public boolean isPrintableChar(char c)	{
+	Character.UnicodeBlock block = Character.UnicodeBlock.of( c );
+	return (!Character.isISOControl(c)) &&
+			c != KeyEvent.CHAR_UNDEFINED &&
+			block != null &&
+			block != Character.UnicodeBlock.SPECIALS;
+	}
+protected Composite getTopWindow()	{
+	Composite currComposite = parent;
+	while(currComposite.getParent() != null)	{
+		currComposite = currComposite.getParent();
+	}
+	return currComposite;
+}
+	public class PopupMenuExample extends JPanel {
+		private static final long serialVersionUID = 1L;
+		public JPopupMenu popup;
+
+		  public PopupMenuExample() {
+		    popup = new JPopupMenu();
+		    ActionListener menuListener = new ActionListener() {
+		      public void actionPerformed(ActionEvent event) {
+		        System.out.println("Popup menu item ["
+		            + event.getActionCommand() + "] was pressed.");
+		      }
+		    };
+		    JMenuItem item;
+		    popup.add(item = new JMenuItem("Left", new ImageIcon("1.gif")));
+		    item.setHorizontalTextPosition(JMenuItem.RIGHT);
+		    item.addActionListener(menuListener);
+		    popup.add(item = new JMenuItem("Center", new ImageIcon("2.gif")));
+		    item.setHorizontalTextPosition(JMenuItem.RIGHT);
+		    item.addActionListener(menuListener);
+		    popup.add(item = new JMenuItem("Right", new ImageIcon("3.gif")));
+		    item.setHorizontalTextPosition(JMenuItem.RIGHT);
+		    item.addActionListener(menuListener);
+		    popup.add(item = new JMenuItem("Full", new ImageIcon("4.gif")));
+		    item.setHorizontalTextPosition(JMenuItem.RIGHT);
+		    item.addActionListener(menuListener);
+		    popup.addSeparator();
+		    popup.add(item = new JMenuItem("Settings . . ."));
+		    item.addActionListener(menuListener);
+
+		    popup.setLabel("Justification");
+		    popup.setBorder(new BevelBorder(BevelBorder.RAISED));
+		    popup.addPopupMenuListener(new PopupPrintListener());
+
+		    addMouseListener(new MousePopupListener());
+		  }
+
+		  // An inner class to check whether mouse events are the popup trigger
+		  class MousePopupListener extends MouseAdapter {
+		    public void mousePressed(MouseEvent e) {
+		      checkPopup(e);
+		    }
+		    public void mouseClicked(MouseEvent e) {
+		      checkPopup(e);
+		    }
+		    public void mouseReleased(MouseEvent e) {
+		      checkPopup(e);
+		    }
+		    private void checkPopup(MouseEvent e) {
+		      if (e.isPopupTrigger()) {
+		        popup.show(PopupMenuExample.this, e.getX(), e.getY());
+		      }
+		    }
+		  }
+		  // An inner class to show when popup events occur
+		  class PopupPrintListener implements PopupMenuListener {
+		    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+		      System.out.println("Popup menu will be visible!");
+		    }
+		    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+		      System.out.println("Popup menu will be invisible!");
+		    }
+		    public void popupMenuCanceled(PopupMenuEvent e) {
+		      System.out.println("Popup menu is hidden!");
+		    }
+		  }
+		}
+
+
+
+	public void floatingWindow()	{
+		JFrame frame = new JFrame("Hello!!");
+		frame.setAlwaysOnTop(true);
+		frame.setLocationByPlatform(true);
+		frame.add(new JLabel("             Textbausteinauswahl              "));
+		frame.pack();
+		frame.setVisible(true);
+		}
+
+	@SuppressWarnings("serial")
+	// ugly, but I like it...
+	class FakeFinally extends Exception {
+	}
+
+	

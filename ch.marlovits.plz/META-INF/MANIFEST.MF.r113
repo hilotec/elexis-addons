@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: marlovits_plz
+Bundle-SymbolicName: ch.marlovits.plz;singleton:=true
+Bundle-Version: 1.0.0
+Require-Bundle: ch.elexis;bundle-version="1.4.0",
+ org.eclipse.ui;bundle-version="3.4.1",
+ ch.elexis.importer.div;bundle-version="1.4.0",
+ ch.rgw.utility;bundle-version="1.0.0",
+ org.eclipse.ui.forms;bundle-version="3.3.101"
+Bundle-Vendor: marlovits.ch
+Import-Package: org.eclipse.core.runtime
+Bundle-ClassPath: lib/geonames-1.0.1-java5.jar,
+ .

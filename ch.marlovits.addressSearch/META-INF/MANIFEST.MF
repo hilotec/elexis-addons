@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Plugin zur Suche von Adressdaten
+Bundle-SymbolicName: ch.marlovits.addressSearch;singleton:=true
+Bundle-Version: 1.4.1
+Bundle-Vendor: medshare.ch mod Marlovits
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ ch.elexis,
+ ch.rgw.utility
+Export-Package: ch.marlovits.addressSearch.directories,
+ ch.marlovits.addressSearch.views;
+  uses:="ch.marlovits.addressSearch.directories,
+   org.eclipse.jface.viewers,
+   org.eclipse.swt.graphics,
+   org.eclipse.ui.part,
+   org.eclipse.swt.widgets"
+Import-Package: org.apache.commons.lang
