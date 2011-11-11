@@ -1,3 +1,6 @@
+Changelog 2.1.6.rc3
+87b1529dbda7: 2011-10-16: Niklaus Giger: Ticket #632: Corrected path for ch.elexis.scripting.scala
+
 Changelog 2.1.6.rc0
 467e52c1970b: 2011-07-29: Niklaus Giger: Merge from 2.1.dev 10f08f387c8c
 4ba432dfc6bb: 2011-07-13: rgw@macbook: remove stale file
