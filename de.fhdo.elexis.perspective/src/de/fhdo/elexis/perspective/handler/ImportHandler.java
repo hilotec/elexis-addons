@@ -38,11 +38,13 @@ import org.eclipse.ui.statushandlers.IStatusAdapterConstants;
 import org.eclipse.ui.statushandlers.StatusAdapter;
 import org.eclipse.ui.statushandlers.StatusManager;
 
+import de.fhdo.elexis.Messages;
+
 /**
  * Imports selected perspectives from given .xml files
  * 
- * This class pops up a FileDialog to select one or more stored perspectives to be restored
- * An error correction routine is provided if perspectives with the same name are tried to restore
+ * This class pops up a FileDialog to select one or more stored perspectives to be restored An error
+ * correction routine is provided if perspectives with the same name are tried to restore
  * 
  * @author Bernhard Rimatzki, Thorsten Wagner, Pascal Proksch, Sven Lüttmann
  * @version 1.0
@@ -50,85 +52,94 @@ import org.eclipse.ui.statushandlers.StatusManager;
  */
 
 public class ImportHandler extends AbstractHandler implements IHandler {
-
+	
 	@Override
-	@SuppressWarnings("all") 
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@SuppressWarnings("all")
+	public Object execute(ExecutionEvent event) throws ExecutionException{
 		
 		IWorkbenchWindow mainWindow = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		PerspectiveRegistry perspRegistry = (PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
-		String importMessage = "";
-
+		PerspectiveRegistry perspRegistry =
+			(PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
+		String importMessage = ""; //$NON-NLS-1$
+		
 		//
 		// Open a FileDialog to select the .xml files with stored perspectives
 		// Only display .xml Files to select
 		//
 		FileDialog diag = new FileDialog(mainWindow.getShell(), SWT.MULTI);
 		
-		String[] filterNames = {"XML"};
-		String[] filterExtensions = {"*.xml"};
+		String[] filterNames = {
+			"XML"};//$NON-NLS-1$
+		String[] filterExtensions = {
+			"*.xml"};//$NON-NLS-1$
 		
 		diag.setFilterNames(filterNames);
 		diag.setFilterExtensions(filterExtensions);
 		
-		if( diag.open() == null )
+		if (diag.open() == null)
 			return null;
 		
-
-
 		//
-		// Since it is possible to select multiple perspectives to be restored we have to iterate over the selected files
+		// Since it is possible to select multiple perspectives to be restored we have to iterate
+// over the selected files
 		//
-		for ( String file : diag.getFileNames() )
-		{	
-			String filename = diag.getFilterPath() +"/"+ file;
+		for (String file : diag.getFileNames()) {
+			String filename = diag.getFilterPath() + File.separator + file;
 			FileReader reader;
 			XMLMemento memento = null;
 			
 			try {
-				reader = new FileReader( new File( filename ) );
+				reader = new FileReader(new File(filename));
 				memento = XMLMemento.createReadRoot(reader);
 				PerspectiveDescriptor newPersp = new PerspectiveDescriptor(null, null, null);
 				
 				//
 				// Get the label and the ID of the stored perspective
 				//
-				String label = memento.getChild("descriptor").getString("label");
-				String id = memento.getChild("descriptor").getString("id");
-
+				String label = memento.getChild("descriptor").getString("label"); //$NON-NLS-1$ //$NON-NLS-2$
+				String id = memento.getChild("descriptor").getString("id"); //$NON-NLS-1$ //$NON-NLS-2$
+				
 				//
 				// Find the perspective by label within the preference store
 				//
-				PerspectiveDescriptor pd = (PerspectiveDescriptor)perspRegistry.findPerspectiveWithLabel(label);
+				PerspectiveDescriptor pd =
+					(PerspectiveDescriptor) perspRegistry.findPerspectiveWithLabel(label);
 				
-				String[] buttonLabels = {"Abbrechen","Überschreiben","Neu benennen"};
-		
-				while(pd != null) { 
-
-					//
-					// If pd != null the perspective is already present in the preference store though we have to store it with a different name
-					//
-					String notDeleted = "";
-					String dialogMessage = "Name der zu importierenden Perspektive \""+ label  + "\" ist bereits vorhanden.\n" + 
-					"Was soll getan werden?";
+				String[] buttonLabels =
+					{
+						Messages.ImportHandler_Abort, Messages.ImportHandler_Overwrite,
+						Messages.ImportHandler_Rename
+					};
 				
-					MessageDialog mesDiag = new MessageDialog(mainWindow.getShell(), "Perspektive überschreiben", null, dialogMessage, 0, buttonLabels, 0);
+				while (pd != null) {
+					
+					//
+					// If pd != null the perspective is already present in the preference store
+// though we have to store it with a different name
+					//
+					String notDeleted = "";//$NON-NLS-1$
+					String dialogMessage =
+						String.format(Messages.ImportHandler_Name_Import_Already_Exists, label);
+					MessageDialog mesDiag =
+						new MessageDialog(mainWindow.getShell(),
+							Messages.ImportHandler_OverWrite_Perspective, null, dialogMessage, 0,
+							buttonLabels, 0);
 					int ergMesDiag = mesDiag.open();
 					
-					
-					if(ergMesDiag == 0)  //Cancel was pressed
+					if (ergMesDiag == 0) // Cancel was pressed
 						return null;
-					else if(ergMesDiag == 1) // Overwrite was pressed
+					else if (ergMesDiag == 1) // Overwrite was pressed
 					{
-						perspRegistry.deletePerspective( pd );
-						PerspectiveDescriptor pd2 = (PerspectiveDescriptor)perspRegistry.findPerspectiveWithLabel(label);
+						perspRegistry.deletePerspective(pd);
+						PerspectiveDescriptor pd2 =
+							(PerspectiveDescriptor) perspRegistry.findPerspectiveWithLabel(label);
 						
 						//
-						// If the perspective could not be deleted, the user have to choose another name
+						// If the perspective could not be deleted, the user have to choose another
+// name
 						//
-						if(pd2 != null)
-						{
-							notDeleted = "Gewählte Perspektive kann nicht überschrieben werden! \n";
+						if (pd2 != null) {
+							notDeleted = Messages.ImportHandler_Cannot_Overwrite_Perspective;
 							ergMesDiag = 2;
 						}
 						
@@ -138,77 +149,78 @@ public class ImportHandler extends AbstractHandler implements IHandler {
 						pd = null;
 					}
 					
-					if(ergMesDiag == 2) // Rename was pressed
+					if (ergMesDiag == 2) // Rename was pressed
 					{
-
-						String dialogMessageOverride = notDeleted + "Wählen Sie einen neuen Namen für die Perspektive:";;
-						InputDialog inputDiag = new InputDialog(mainWindow.getShell(), "Perspektive umbenennen", dialogMessageOverride, null, null);
+						
+						String dialogMessageOverride =
+							notDeleted + Messages.ImportHandler_Choose_new_name_for_Perspective;
+						;
+						InputDialog inputDiag =
+							new InputDialog(mainWindow.getShell(),
+								Messages.ImportHandler_Rename_Perspective, dialogMessageOverride,
+								null, null);
 						
 						inputDiag.open();
 						
-						String[] idsplit = id.split("\\.");
-						System.out.println("ID: " + idsplit.length);
-						id = "";
+						String[] idsplit = id.split("\\.");//$NON-NLS-1$
+						System.out.println("ID: " + idsplit.length);//$NON-NLS-1$
+						id = "";//$NON-NLS-1$
 						label = inputDiag.getValue();
 						
-						for(int i = 0; i < idsplit.length-1; i++) {
-							id += idsplit[i] + ".";
+						for (int i = 0; i < idsplit.length - 1; i++) {
+							id += idsplit[i] + ".";//$NON-NLS-1$
 						}
 						
 						id += label;
 						
-						
 						//
 						// Create a new perspective with the new name
 						//
-						newPersp = new PerspectiveDescriptor( id, label, pd );
+						newPersp = new PerspectiveDescriptor(id, label, pd);
 						
-						pd = (PerspectiveDescriptor)perspRegistry.findPerspectiveWithLabel(label);
+						pd = (PerspectiveDescriptor) perspRegistry.findPerspectiveWithLabel(label);
 					}
 				}
 				
-				memento.getChild("descriptor").putString("label", label);
-				memento.getChild("descriptor").putString("id", id);
+				memento.getChild("descriptor").putString("label", label); //$NON-NLS-1$ //$NON-NLS-2$
+				memento.getChild("descriptor").putString("id", id);//$NON-NLS-1$ //$NON-NLS-2$
 				
 				newPersp.restoreState(memento);
 				
-				
-
 				reader.close();
-
+				
 				//
 				// Save the new generated perspective in the preference store
 				//
 				perspRegistry.saveCustomPersp(newPersp, memento);
 				
-				importMessage += file + " gespeichert als: " + newPersp.getLabel() + "\n";
-
+				importMessage +=
+					String.format(Messages.ImportHandler_Saved_As, file, newPersp.getLabel());
+				
 			} catch (WorkbenchException e) {
 				unableToLoadPerspective(e.getStatus());
-			}catch (IOException e) {
-				unableToLoadPerspective(null);	
+			} catch (IOException e) {
+				unableToLoadPerspective(null);
 			}
 		}
 		
-		MessageDialog.openInformation(mainWindow.getShell(), "Erfolgreich importiert!", "Perspektive(n) erfolgreich importiert\n" + importMessage);
+		MessageDialog.openInformation(mainWindow.getShell(),
+			Messages.ImportHandler_Successfully_Imported,
+			Messages.ImportHandler_Imported_perspectives_successfully + importMessage);
 		
 		return null;
 	}
 	
-	
-	
-	private void unableToLoadPerspective(IStatus status) {
-		String msg = "Unable to load perspective.";
+	private void unableToLoadPerspective(IStatus status){
+		String msg = Messages.ImportHandler_Unable_to_load_Perspective;
 		
 		if (status == null) {
-			IStatus errStatus = new Status(IStatus.ERROR, WorkbenchPlugin.PI_WORKBENCH, msg); 
-			StatusManager.getManager().handle(errStatus,
-					StatusManager.SHOW | StatusManager.LOG);
+			IStatus errStatus = new Status(IStatus.ERROR, WorkbenchPlugin.PI_WORKBENCH, msg);
+			StatusManager.getManager().handle(errStatus, StatusManager.SHOW | StatusManager.LOG);
 		} else {
 			StatusAdapter adapter = new StatusAdapter(status);
 			adapter.setProperty(IStatusAdapterConstants.TITLE_PROPERTY, msg);
-			StatusManager.getManager().handle(adapter,
-					StatusManager.SHOW | StatusManager.LOG);
+			StatusManager.getManager().handle(adapter, StatusManager.SHOW | StatusManager.LOG);
 		}
 	}
 }

@@ -33,11 +33,13 @@ import org.eclipse.ui.internal.dialogs.SelectPerspectiveDialog;
 import org.eclipse.ui.internal.registry.PerspectiveDescriptor;
 import org.eclipse.ui.internal.registry.PerspectiveRegistry;
 
+import de.fhdo.elexis.Messages;
+
 /**
  * Export selected perspectives from the preference store to a certain .xml file.
  * 
- * This class pops up a dialog to select a perspective from the preference store to be saved.
- * You got to chose a filename and location for the .xml file where to save the perspective description.
+ * This class pops up a dialog to select a perspective from the preference store to be saved. You
+ * got to chose a filename and location for the .xml file where to save the perspective description.
  * 
  * @author Bernhard Rimatzki, Thorsten Wagner, Pascal Proksch, Sven Lüttmann
  * @version 1.0
@@ -45,98 +47,99 @@ import org.eclipse.ui.internal.registry.PerspectiveRegistry;
  */
 
 public class ExportHandler extends AbstractHandler implements IHandler {
-
 	
 	@Override
-	@SuppressWarnings("all") 
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
+	@SuppressWarnings("all")
+	public Object execute(ExecutionEvent event) throws ExecutionException{
+		
 		IWorkbenchWindow mainWindow = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		PerspectiveRegistry perspRegistry = (PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
+		PerspectiveRegistry perspRegistry =
+			(PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
 		
 		//
 		// Open the dialog to select a stored perspective
 		// If 'Cancel' is pressed return
 		//
-		SelectPerspectiveDialog selectionDialog = new SelectPerspectiveDialog(mainWindow.getShell(), perspRegistry);
+		SelectPerspectiveDialog selectionDialog =
+			new SelectPerspectiveDialog(mainWindow.getShell(), perspRegistry);
 		
-		if( selectionDialog.open() == SelectPerspectiveDialog.CANCEL )
+		if (selectionDialog.open() == SelectPerspectiveDialog.CANCEL)
 			return null;
 		
 		PerspectiveDescriptor pDesc;
 		pDesc = (PerspectiveDescriptor) selectionDialog.getSelection();
 		
 		XMLMemento mem = null;
-
+		
 		try {
 			//
 			// Try to get the internal memento for the selected perspective
 			// If it fails display an error message and return
-			//			
-			mem = (XMLMemento) perspRegistry.getCustomPersp( pDesc.getId() );
+			//
+			mem = (XMLMemento) perspRegistry.getCustomPersp(pDesc.getId());
 			
-		} 
-		catch (WorkbenchException e2) {
-
-			MessageDialog.openError(mainWindow.getShell(), "Fehler", "Export der Perspektive fehlgeschlagen!");
+		} catch (WorkbenchException e2) {
+			
+			MessageDialog.openError(mainWindow.getShell(), Messages.ExportHandler_Error,
+				Messages.ExportHandler_Error_Exporting);
 			return null;
-		} 
-		catch (IOException e2) {
-
-			MessageDialog.openError(mainWindow.getShell(), "Fehler", "Export der Perspektive fehlgeschlagen!");
+		} catch (IOException e2) {
+			
+			MessageDialog.openError(mainWindow.getShell(), Messages.ExportHandler_Error,
+				Messages.ExportHandler_Error_Exporting);
 			return null;
 		}
-
-
+		
 		//
-		// Ok now we do have the internal memento and can save this to a certain user selected location and filename
-		// Therefore we open a FileDialog and let the user select the filename and the location
+		// Ok now we do have the internal memento and can save this to a certain
+		// user selected location and filename
+		// Therefore we open a FileDialog and let the user select the filename
+		// and the location
 		//
-		FileDialog diag = new FileDialog( mainWindow.getShell(), SWT.SAVE);
+		FileDialog diag = new FileDialog(mainWindow.getShell(), SWT.SAVE);
 		String filename;
 		
 		//
-		// Only .xml is allowed as file extension so we have to pass this setting to the FileDialog
+		// Only .xml is allowed as file extension so we have to pass this
+		// setting to the FileDialog
 		//
 		String[] filetypes = new String[1];
-		filetypes[0] = "*.xml";
+		filetypes[0] = "*.xml";//$NON-NLS-1$ 
 		diag.setFilterExtensions(filetypes);
 		
 		//
-		// If 'filename' is null 'Cancel' was pressed by the user otherwise the variable contains the absolute path and the filename
+		// If 'filename' is null 'Cancel' was pressed by the user otherwise the
+		// variable contains the absolute path and the filename
 		//
-		if( (filename = diag.open()) == null )
+		if ((filename = diag.open()) == null)
 			return null;
-
+		
 		File file = new File(filename);
 		FileWriter writer = null;
-
+		
 		try {
 			
 			//
 			// Let's now save the memento in the selected .xml file
 			// If something crashes print out the error message on the screen
 			//
-		   writer = new FileWriter( file );
-		   mem.save(writer);
-		} 
-		catch (IOException e1) {
-		   
-			MessageDialog.openError( mainWindow.getShell(), "An Error occurred", e1.getMessage() );
+			writer = new FileWriter(file);
+			mem.save(writer);
+		} catch (IOException e1) {
+			
+			MessageDialog.openError(mainWindow.getShell(), Messages.ExportHandler_ErrorOccured,
+				e1.getMessage());
 			return null;
-		}
-		finally
-		{
-		   try {
-		       writer.close();
-		   } 
-		   catch (IOException e) {
-			   MessageDialog.openError( mainWindow.getShell(), "An Error occurred", e.getMessage() );
-		   }
+		} finally {
+			try {
+				writer.close();
+			} catch (IOException e) {
+				MessageDialog.openError(mainWindow.getShell(), Messages.ExportHandler_ErrorOccured,
+					e.getMessage());
+			}
 		}
 		
 		return null;
 	}
-
+	
 }
- 

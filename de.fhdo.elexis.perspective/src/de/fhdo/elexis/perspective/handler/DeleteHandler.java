@@ -14,7 +14,6 @@
 
 package de.fhdo.elexis.perspective.handler;
 
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -27,6 +26,8 @@ import org.eclipse.ui.internal.dialogs.SelectPerspectiveDialog;
 import org.eclipse.ui.internal.registry.PerspectiveDescriptor;
 import org.eclipse.ui.internal.registry.PerspectiveRegistry;
 
+import de.fhdo.elexis.Messages;
+
 /**
  * Deletes a selected perspectives from the preference store.
  * 
@@ -38,48 +39,55 @@ import org.eclipse.ui.internal.registry.PerspectiveRegistry;
  */
 
 public class DeleteHandler extends AbstractHandler implements IHandler {
-
+	
 	@Override
-	@SuppressWarnings("all") 
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@SuppressWarnings("all")
+	public Object execute(ExecutionEvent event) throws ExecutionException{
 		
 		IWorkbenchWindow mainWindow = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		PerspectiveRegistry perspRegistry = (PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
+		PerspectiveRegistry perspRegistry =
+			(PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
 		
 		//
 		// Open the dialog to select a stored perspective to be deleted
 		// If 'Cancel' is pressed return
 		//
-		SelectPerspectiveDialog selectionDialog = new SelectPerspectiveDialog(mainWindow.getShell(), perspRegistry);
+		SelectPerspectiveDialog selectionDialog =
+			new SelectPerspectiveDialog(mainWindow.getShell(), perspRegistry);
 		
-		if(selectionDialog.open() == SelectPerspectiveDialog.CANCEL )
+		if (selectionDialog.open() == SelectPerspectiveDialog.CANCEL)
 			return null;
 		
 		//
 		// Ask if the user really wants to delete the selected perspective
 		//
-		if ( !MessageDialog.openQuestion( mainWindow.getShell(), "Wirklich löschen?", "Soll die Perspektive \"" + selectionDialog.getSelection().getLabel() + "\" wirklich gelöscht werden?") )
+		if (!MessageDialog.openQuestion(mainWindow.getShell(), Messages.DeleteHandler_ReallyDelete,
+			String.format(Messages.DeleteHandler_Really_Want_To_Delete_selected_Perspective, selectionDialog.getSelection().getLabel())))
 			return null;
 		
 		//
 		// Get the selected perspective description
 		//
-		PerspectiveDescriptor pDesc = (PerspectiveDescriptor)selectionDialog.getSelection();
+		PerspectiveDescriptor pDesc = (PerspectiveDescriptor) selectionDialog.getSelection();
 		
 		//
 		// Delete the selected perspective from the preference store
 		//
-		perspRegistry.deletePerspective( pDesc );
+		perspRegistry.deletePerspective(pDesc);
 		
 		//
-		// If the perspective could not be deleted it is still present in the preference store and thus we can check for it 
-		// 
-		PerspectiveDescriptor pd2 = (PerspectiveDescriptor)perspRegistry.findPerspectiveWithLabel( pDesc.getLabel() );
+		// If the perspective could not be deleted it is still present in the
+		// preference store and thus we can check for it
+		//
+		PerspectiveDescriptor pd2 =
+			(PerspectiveDescriptor) perspRegistry.findPerspectiveWithLabel(pDesc.getLabel());
 		
-		if( pd2 != null )
-			MessageDialog.openInformation( mainWindow.getShell(), "Fehler beim Löschen", "Die ausgewählte Perspektive konnte nicht gelöscht werden! (Systeminterne Perspektive)");
+		if (pd2 != null)
+			MessageDialog.openInformation(mainWindow.getShell(),
+				Messages.DeleteHandler_ErrorWhileDeleting,
+				Messages.DeleteHandler_CannotDeleteInternalPerspective);
 		
 		return null;
 	}
-
+	
 }
