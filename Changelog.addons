@@ -1,3 +1,12 @@
+Changelog 2.1.6
+c65bcba8805d: 2011-11-25: Niklaus Giger: Ticket #677: Show only user perspectives. Removed non used files
+0e54bb854c39: 2011-11-21: Niklaus Giger: Corrected provider for de.fhdo.elexis.perspective
+c1ba7dd23df5: 2011-11-17: Niklaus Giger: Ticket #677: Improved documentation, add test descripton, i18n work
+1bb309cc37e9: 2011-11-17: rgw@iMac: Added de.fhdo.elexis.perspective from Trunk. copyright messages and whatisit.textile
+fb0199936bca: 2011-11-17: rgw@iMac: Added de.fhdo.elexis.perspective from Trunk. added copyright info
+579a3b7370cf: 2011-11-14: rgw@iMac: Merge with c6e5de0d8e5f8f3394975c019eabe72a5bdcb4ce
+07f9223fe211: 2011-11-03: rgw@iMac: dependency to core
+
 Changelog 2.1.6.rc3
 87b1529dbda7: 2011-10-16: Niklaus Giger: Ticket #632: Corrected path for ch.elexis.scripting.scala
 
