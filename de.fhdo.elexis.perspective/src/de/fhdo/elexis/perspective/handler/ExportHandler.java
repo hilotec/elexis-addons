@@ -7,15 +7,17 @@
  *
  * Contributors:
  *     Bernhard Rimatzki, Thorsten Wagner, Pascal Proksch, Sven Lüttmann
-		- initial implementation
- *    
- *    $Id$
+ *  	- initial implementation
+ * Niklaus Giger - show only user defined perspectives. Cleanup    
+ *
  *******************************************************************************/
 package de.fhdo.elexis.perspective.handler;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -24,6 +26,7 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
@@ -32,7 +35,6 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.dialogs.SelectPerspectiveDialog;
 import org.eclipse.ui.internal.registry.PerspectiveDescriptor;
 import org.eclipse.ui.internal.registry.PerspectiveRegistry;
-
 import de.fhdo.elexis.Messages;
 
 /**
@@ -48,13 +50,29 @@ import de.fhdo.elexis.Messages;
 
 public class ExportHandler extends AbstractHandler implements IHandler {
 	
+	@SuppressWarnings("restriction")
+	private class UserPerspectiveRegistry extends PerspectiveRegistry {
+		
+		public IPerspectiveDescriptor[] getPerspectives(){
+			IPerspectiveDescriptor[] descs =
+				WorkbenchPlugin.getDefault().getPerspectiveRegistry().getPerspectives();
+			List<IPerspectiveDescriptor> perspectives = new ArrayList<IPerspectiveDescriptor>(10);
+			for (IPerspectiveDescriptor item : descs) {
+				if (item.getDescription() == null)
+					perspectives.add(item);
+			}
+			return (IPerspectiveDescriptor[]) perspectives
+				.toArray(new IPerspectiveDescriptor[perspectives.size()]);
+			
+		}
+	}
+	
 	@Override
 	@SuppressWarnings("all")
 	public Object execute(ExecutionEvent event) throws ExecutionException{
 		
 		IWorkbenchWindow mainWindow = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		PerspectiveRegistry perspRegistry =
-			(PerspectiveRegistry) WorkbenchPlugin.getDefault().getPerspectiveRegistry();
+		PerspectiveRegistry perspRegistry = new UserPerspectiveRegistry();
 		
 		//
 		// Open the dialog to select a stored perspective
