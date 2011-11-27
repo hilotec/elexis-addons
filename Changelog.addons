@@ -1,4 +1,4 @@
-Changelog 2.1.6
+Changelog 2.1.6.0
 c65bcba8805d: 2011-11-25: Niklaus Giger: Ticket #677: Show only user perspectives. Removed non used files
 0e54bb854c39: 2011-11-21: Niklaus Giger: Corrected provider for de.fhdo.elexis.perspective
 c1ba7dd23df5: 2011-11-17: Niklaus Giger: Ticket #677: Improved documentation, add test descripton, i18n work
