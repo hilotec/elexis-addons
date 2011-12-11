@@ -1,3 +1,5 @@
+Changelog for 2.1.7
+
 Changelog 2.1.6.0
 c65bcba8805d: 2011-11-25: Niklaus Giger: Ticket #677: Show only user perspectives. Removed non used files
 0e54bb854c39: 2011-11-21: Niklaus Giger: Corrected provider for de.fhdo.elexis.perspective
