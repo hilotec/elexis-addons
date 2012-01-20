@@ -1,3 +1,6 @@
+Changelog 2.1.6.2
+5222f50a0d59: 2012-01-19: thomashu: Ticket: #482 - initial import of at.medevit.elexis.medietikette plugin, providing placeholders for printing medicament etiquette
+
 Changelog 2.1.6.0
 c65bcba8805d: 2011-11-25: Niklaus Giger: Ticket #677: Show only user perspectives. Removed non used files
 0e54bb854c39: 2011-11-21: Niklaus Giger: Corrected provider for de.fhdo.elexis.perspective
