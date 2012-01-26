@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<service:service category="feature" id="at.medevit.elexis.medietikette"
+	name="Elexis Medikamenten Etikette" provider="office@medevit.at" type="Basis-System"
+	version="1.0.0" xmlns:service="http://www.medelexis.ch/services"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ">
+	<service:description>Elexis Medikamenten Etikette</service:description>
+</service:service>
