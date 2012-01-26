@@ -3,6 +3,8 @@ syntax:glob
 .svn
 *.class
 bin
+*.fo
+*~
 
 syntax: regexp
 ^elexis-order-medicom-pharma/doc/elexis-order-medicom-pharma\.html$
