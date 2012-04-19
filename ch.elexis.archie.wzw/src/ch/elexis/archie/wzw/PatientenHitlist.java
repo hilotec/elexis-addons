@@ -71,143 +71,143 @@ public class PatientenHitlist extends BaseStats {
 	@Override
 	protected IStatus createContent(IProgressMonitor monitor) {
 		try {
-			HashMap<String, PatientStat> pstat = new HashMap<String, PatientenHitlist.PatientStat>();
+			final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
 			List<Konsultation> conses = getConses(monitor);
-			int clicksPerRound = HUGE_NUMBER / conses.size();
-			for (Konsultation k : conses) {
-				Mandant m = k.getMandant();
-				if (m != null) {
-					Fall fall = k.getFall();
-					if (fall != null) {
-						Patient pat = fall.getPatient();
-						if (pat != null) {
-							PatientStat ps = pstat.get(pat.getId());
-							if (ps == null) {
-								ps = new PatientStat(pat);
-								pstat.put(pat.getId(), ps);
+			if (conses.size() > 0) {
+				int clicksPerRound = HUGE_NUMBER / conses.size();
+				for (Konsultation k : conses) {
+					Mandant m = (Mandant) k.getResponsible();
+					if (m != null) {
+						Fall fall = (Fall) k.getCustomerRelation();
+						if (fall != null) {
+							Patient pat = fall.getPatient();
+							if (pat != null) {
+								PatientStat ps = pstat.get(pat.getId());
+								if (ps == null) {
+									ps = new PatientStat(pat);
+									pstat.put(pat.getId(), ps);
+								}
+								ps.addCons(k);
 							}
-							ps.addCons(k);
+						}
+						monitor.worked(clicksPerRound);
+						if (monitor.isCanceled()) {
+							return Status.CANCEL_STATUS;
 						}
 					}
-					monitor.worked(clicksPerRound);
-					if (monitor.isCanceled()) {
-						return Status.CANCEL_STATUS;
-					}
 				}
-			}
-
-			// Resultat-Array für Archie aufbauen
-			final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
-			Comparable<?>[] sum_all = new Comparable<?>[this.dataSet
-					.getHeadings().size()];
-			Comparable<?>[] sum_male = new Comparable<?>[this.dataSet
+				
+				// Resultat-Array für Archie aufbauen
+				Comparable<?>[] sum_all = new Comparable<?>[this.dataSet.getHeadings().size()];
+				Comparable<?>[] sum_male = new Comparable<?>[this.dataSet.getHeadings().size()];
+				Comparable<?>[] sum_female = new Comparable<?>[this.dataSet.getHeadings().size()];
 					.getHeadings().size()];
 			Comparable<?>[] sum_female = new Comparable<?>[this.dataSet
 					.getHeadings().size()];
-			result.add(sum_all);
-			result.add(sum_female);
-			result.add(sum_male);
-			sum_all[0] = "Durchschnitt Alle";
-			sum_female[0] = "Frauen";
-			sum_male[0] = "Männer";
-			for (PatientStat ps : pstat.values()) {
-				Comparable<?>[] row = new Comparable<?>[this.dataSet
+				result.add(sum_all);
+				result.add(sum_female);
+				result.add(sum_male);
+				sum_all[0] = "Durchschnitt Alle";
+				sum_female[0] = "Frauen";
+				sum_male[0] = "Männer";
+				for (PatientStat ps : pstat.values()) {
+					Comparable<?>[] row = new Comparable<?>[this.dataSet.getHeadings().size()];
 						.getHeadings().size()];
-				Patient pat = Patient.load(ps.PatientID);
-				if (pat != null && pat.isValid()) {
-					row[0] = pat.getPatCode();
-					row[1] = pat.getAlter();
-					row[2] = pat.getGeschlecht();
-					row[3] = round(ps.costTotal);
-					row[4] = round(ps.costTarmedAL + ps.costTarmedTL);
-					row[5] = round(ps.costTarmedAL);
-					row[6] = round(ps.costTarmedTL);
-					row[7] = round(ps.costMedical);
-					row[8] = round(ps.costMedikamente);
-					row[9] = round(ps.costPhysio);
-					row[10] = round(ps.costOther);
-					row[11] = ps.numCons;
-					row[12] = ps.numVisits;
-					row[13] = ps.bills.size();
-					result.add(row);
-					if (pat.getGeschlecht().equalsIgnoreCase(Person.MALE)) {
-						males++;
-						age_male += (Double.parseDouble((String) row[1]));
-						cost_male += (Double) row[3];
-						tarmed_male += (Double) row[4];
-						tal_male += (Double) row[5];
-						ttl_male += (Double) row[6];
-						medicals_male += (Double) row[7];
-						medics_male += (Double) row[8];
-						physio_male += (Double) row[9];
-						other_male += (Double) row[10];
-						cons_male += (Integer) row[11];
-						visit_male += (Integer) row[12];
-						bills_male += (Integer) row[13];
-					} else {
-						females++;
-						age_female += (Double.parseDouble((String) row[1]));
-						cost_female += (Double) row[3];
-						tarmed_female += (Double) row[4];
-						tal_female += (Double) row[5];
-						ttl_female += (Double) row[6];
-						medicals_female += (Double) row[7];
-						medics_female += (Double) row[8];
-						physio_female += (Double) row[9];
-						other_female += (Double) row[10];
-						cons_female += (Integer) row[11];
-						visit_female += (Integer) row[12];
-						bills_female += (Integer) row[13];
-
+					Patient pat = Patient.load(ps.PatientID);
+					if (pat != null && pat.isValid()) {
+						row[0] = pat.getPatCode();
+						row[1] = pat.getAlter();
+						row[2] = pat.getGeschlecht();
+						row[3] = round(ps.costTotal);
+						row[4] = round(ps.costTarmedAL + ps.costTarmedTL);
+						row[5] = round(ps.costTarmedAL);
+						row[6] = round(ps.costTarmedTL);
+						row[7] = round(ps.costMedical);
+						row[8] = round(ps.costMedikamente);
+						row[9] = round(ps.costPhysio);
+						row[10] = round(ps.costOther);
+						row[11] = ps.numCons;
+						row[12] = ps.numVisits;
+						row[13] = ps.bills.size();
+						result.add(row);
+						if (pat.getGeschlecht().equalsIgnoreCase(Person.MALE)) {
+							males++;
+							age_male += (Double.parseDouble((String) row[1]));
+							cost_male += (Double) row[3];
+							tarmed_male += (Double) row[4];
+							tal_male += (Double) row[5];
+							ttl_male += (Double) row[6];
+							medicals_male += (Double) row[7];
+							medics_male += (Double) row[8];
+							physio_male += (Double) row[9];
+							other_male += (Double) row[10];
+							cons_male += (Integer) row[11];
+							visit_male += (Integer) row[12];
+							bills_male += (Integer) row[13];
+						} else {
+							females++;
+							age_female += (Double.parseDouble((String) row[1]));
+							cost_female += (Double) row[3];
+							tarmed_female += (Double) row[4];
+							tal_female += (Double) row[5];
+							ttl_female += (Double) row[6];
+							medicals_female += (Double) row[7];
+							medics_female += (Double) row[8];
+							physio_female += (Double) row[9];
+							other_female += (Double) row[10];
+							cons_female += (Integer) row[11];
+							visit_female += (Integer) row[12];
+							bills_female += (Integer) row[13];
+							
+						}
 					}
 				}
-			}
-			sum_female[1] = round(age_female / females);
-			sum_female[2] = new Integer(females);
-			sum_female[3] = round(cost_female / females);
-			sum_female[4] = round(tarmed_female / females);
-			sum_female[5] = round(tal_female / females);
-			sum_female[6] = round(ttl_female / females);
-			sum_female[7] = round(medicals_female / females);
-			sum_female[8] = round(medics_female / females);
-			sum_female[9] = round(physio_female / females);
-			sum_female[10] = round(other_female / females);
-			sum_female[11] = round(cons_female / females);
-			sum_female[12] = round(visit_female / females);
-			sum_female[13] = round(bills_female / females);
-
-			sum_male[1] = round(age_male / males);
-			sum_male[2] = new Integer(males);
-			sum_male[3] = round(cost_male / males);
-			sum_male[4] = round(tarmed_male / males);
-			sum_male[5] = round(tal_male / males);
-			sum_male[6] = round(ttl_male / males);
-			sum_male[7] = round(medicals_male / males);
-			sum_male[8] = round(medics_male / males);
-			sum_male[9] = round(physio_male / males);
-			sum_male[10] = round(other_male / males);
-			sum_male[11] = round(cons_male / males);
-			sum_male[12] = round(visit_male / males);
-			sum_male[13] = round(bills_male / males);
-
-			sum_all[1] = round((age_male + age_female) / (males + females));
-			sum_all[2] = new Integer(males + females);
-			sum_all[3] = round((cost_male + cost_female) / (males + females));
-			sum_all[4] = round((tarmed_male + tarmed_female)
+				sum_female[1] = round(age_female / females);
+				sum_female[2] = new Integer(females);
+				sum_female[3] = round(cost_female / females);
+				sum_female[4] = round(tarmed_female / females);
+				sum_female[5] = round(tal_female / females);
+				sum_female[6] = round(ttl_female / females);
+				sum_female[7] = round(medicals_female / females);
+				sum_female[8] = round(medics_female / females);
+				sum_female[9] = round(physio_female / females);
+				sum_female[10] = round(other_female / females);
+				sum_female[11] = round(cons_female / females);
+				sum_female[12] = round(visit_female / females);
+				sum_female[13] = round(bills_female / females);
+				
+				sum_male[1] = round(age_male / males);
+				sum_male[2] = new Integer(males);
+				sum_male[3] = round(cost_male / males);
+				sum_male[4] = round(tarmed_male / males);
+				sum_male[5] = round(tal_male / males);
+				sum_male[6] = round(ttl_male / males);
+				sum_male[7] = round(medicals_male / males);
+				sum_male[8] = round(medics_male / males);
+				sum_male[9] = round(physio_male / males);
+				sum_male[10] = round(other_male / males);
+				sum_male[11] = round(cons_male / males);
+				sum_male[12] = round(visit_male / males);
+				sum_male[13] = round(bills_male / males);
+				
+				sum_all[1] = round((age_male + age_female) / (males + females));
+				sum_all[2] = new Integer(males + females);
+				sum_all[3] = round((cost_male + cost_female) / (males + females));
+				sum_all[4] = round((tarmed_male + tarmed_female) / (males + females));
 					/ (males + females));
-			sum_all[5] = round((tal_male + tal_female) / (males + females));
-			sum_all[6] = round((ttl_male + ttl_female) / (males + females));
-			sum_all[7] = round((medicals_male + medicals_female)
-					/ (males + females));
-			sum_all[8] = round((medics_male + medics_female)
+				sum_all[5] = round((tal_male + tal_female) / (males + females));
+				sum_all[6] = round((ttl_male + ttl_female) / (males + females));
+				sum_all[7] = round((medicals_male + medicals_female) / (males + females));
+				sum_all[8] = round((medics_male + medics_female) / (males + females));
+				sum_all[9] = round((physio_male + physio_female) / (males + females));
 					/ (males + females));
 			sum_all[9] = round((physio_male + physio_female)
 					/ (males + females));
-			sum_all[10] = round((other_male + other_female) / (males + females));
-			sum_all[11] = round((cons_male + cons_female) / (males + females));
-			sum_all[12] = round((visit_male + visit_female) / (males + females));
-			sum_all[13] = round((bills_male + bills_female) / (males + females));
-
+				sum_all[10] = round((other_male + other_female) / (males + females));
+				sum_all[11] = round((cons_male + cons_female) / (males + females));
+				sum_all[12] = round((visit_male + visit_female) / (males + females));
+				sum_all[13] = round((bills_male + bills_female) / (males + females));
+			}
 			// Und an Archie übermitteln
 			this.dataSet.setContent(result);
 			monitor.done();
