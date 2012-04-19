@@ -28,58 +28,61 @@ public class AlleLeistungen extends BaseStats {
 
 	@Override
 	protected IStatus createContent(IProgressMonitor monitor) {
-		List<Konsultation> conses = getConses(monitor);
-		int clicksPerRound = HUGE_NUMBER / conses.size();
-		HashMap<String, TarifStat> tstats = new HashMap<String, TarifStat>();
-		for (Konsultation k : conses) {
-			Mandant m = k.getMandant();
-			if (m != null) {
-				Fall fall = k.getFall();
-				if (fall != null) {
-					Patient pat = fall.getPatient();
-					if (pat != null) {
-						List<Verrechnet> vr = k.getLeistungen();
-						for (Verrechnet v : vr) {
-							IVerrechenbar vv = v.getVerrechenbar();
-							if (vv == null) {
-								System.out.println(v.getLabel());
-							} else {
-								String sname = vv.getCodeSystemName();
-								String scode = vv.getCode();
-								TarifStat ts = tstats.get(sname + scode);
-								if (ts == null) {
-									ts = new TarifStat();
-									ts.tarif = vv.getCodeSystemName();
-									ts.ziffer = vv.getCode();
-									ts.text = vv.getText();
-									tstats.put(sname + scode, ts);
-								}
-								ts.count += v.getZahl();
-								ts.umsatz += v.getNettoPreis().doubleValue()
-										+ v.getZahl();
-							}
-						}
+		final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
 
+		List<Konsultation> conses = getConses(monitor);
+		if (conses.size() > 0) {
+			int clicksPerRound = HUGE_NUMBER / conses.size();
+			HashMap<String, TarifStat> tstats = new HashMap<String, TarifStat>();
+			for (Konsultation k : conses) {
+				Mandant m = (Mandant) k.getResponsible();
+				if (m != null) {
+					Fall fall = (Fall) k.getCustomerRelation();
+					if (fall != null) {
+						Patient pat = fall.getPatient();
+						if (pat != null) {
+							List<Verrechnet> vr = k.getLeistungen();
+							for (Verrechnet v : vr) {
+								IVerrechenbar vv = v.getVerrechenbar();
+								if (vv == null) {
+									System.out.println(v.getLabel());
+								} else {
+									String sname = vv.getCodeSystemName();
+									String scode = vv.getCode();
+									TarifStat ts = tstats.get(sname + scode);
+									if (ts == null) {
+										ts = new TarifStat();
+										ts.tarif = vv.getCodeSystemName();
+										ts.ziffer = vv.getCode();
+										ts.text = vv.getText();
+										tstats.put(sname + scode, ts);
+									}
+									ts.count += v.getZahl();
+									ts.umsatz += v.getNettoPreis().doubleValue() + v.getZahl();
+										+ v.getZahl();
+								}
+							}
+
+						}
+					}
+					monitor.worked(clicksPerRound);
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
 					}
 				}
-				monitor.worked(clicksPerRound);
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
 			}
-		}
-
-		// Resultat-Array für Archie aufbauen
-		final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
-		for (TarifStat ts : tstats.values()) {
-			Comparable<?>[] row = new Comparable<?>[this.dataSet.getHeadings()
+			
+			// Resultat-Array für Archie aufbauen
+			for (TarifStat ts : tstats.values()) {
+				Comparable<?>[] row = new Comparable<?>[this.dataSet.getHeadings().size()];
 					.size()];
-			row[0] = ts.tarif;
-			row[1] = ts.ziffer;
-			row[2] = ts.text;
-			row[3] = new Integer(ts.count);
-			row[4] = new Money(ts.umsatz);
-			result.add(row);
+				row[0] = ts.tarif;
+				row[1] = ts.ziffer;
+				row[2] = ts.text;
+				row[3] = new Integer(ts.count);
+				row[4] = new Money(ts.umsatz);
+				result.add(row);
+			}
 		}
 		// Und an Archie übermitteln
 		this.dataSet.setContent(result);
