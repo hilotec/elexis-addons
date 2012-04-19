@@ -39,8 +39,8 @@ import ch.rgw.tools.ExHandler;
 import ch.rgw.tools.TimeTool;
 
 /**
- * This view lists patients with their cost, can be ordered by sex, age,
- * Tarmed-AL-cost, Tarmed-TL-cost, Physio cost, lab cost
+ * This view lists patients with their cost, can be ordered by sex, age, Tarmed-AL-cost,
+ * Tarmed-TL-cost, Physio cost, lab cost
  * 
  * @author gerry
  * 
@@ -48,37 +48,36 @@ import ch.rgw.tools.TimeTool;
 public class PatientenHitlist extends BaseStats {
 	static final String NAME = "Patienten-Hitliste";
 	static final String DESC = "Listet Patienten nach Kosten";
-	static final String[] HEADINGS = { "PatientNr", "Alter", "Geschlecht",
-			"Kosten", "Tarmed", "Tarmed-AL", "Tarmed-TL", "Medicals",
-			"Medikamente", "Physio", "Andere", "Anz. Kons", "Anz. Besuch",
-			"Anz. Rn" };
-
-	private double age_sum;
+	static final String[] HEADINGS = {
+		"PatientNr", "Alter", "Geschlecht", "Kosten", "Tarmed", "Tarmed-AL", "Tarmed-TL",
+		"Medicals", "Medikamente", "Physio", "Andere", "Anz. Kons", "Anz. Besuch", "Anz. Rn"
+	};
+	
 	private int males;
 	private int females;
 	private double age_female;
 	private double age_male;
-	private double cost_male, cost_female, tarmed_male, tarmed_female,
-			tal_male, tal_female, ttl_male, ttl_female, medicals_male,
-			medicals_female, medics_male, medics_female, physio_male,
-			physio_female, other_male, other_female, cons_male, cons_female,
+	private double cost_male, cost_female, tarmed_male, tarmed_female, tal_male, tal_female,
+			ttl_male, ttl_female, medicals_male, medicals_female, medics_male, medics_female,
+			physio_male, physio_female, other_male, other_female, cons_male, cons_female,
 			visit_male, visit_female, bills_female, bills_male;
-
-	public PatientenHitlist() {
+	
+	public PatientenHitlist(){
 		super(NAME, DESC, HEADINGS);
 	}
-
+	
 	@Override
-	protected IStatus createContent(IProgressMonitor monitor) {
+	protected IStatus createContent(IProgressMonitor monitor){
 		try {
-			final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
+			HashMap<String, PatientStat> pstat =
+				new HashMap<String, PatientenHitlist.PatientStat>();
 			List<Konsultation> conses = getConses(monitor);
 			if (conses.size() > 0) {
 				int clicksPerRound = HUGE_NUMBER / conses.size();
 				for (Konsultation k : conses) {
-					Mandant m = (Mandant) k.getResponsible();
+					Mandant m = k.getMandant();
 					if (m != null) {
-						Fall fall = (Fall) k.getCustomerRelation();
+						Fall fall = k.getFall();
 						if (fall != null) {
 							Patient pat = fall.getPatient();
 							if (pat != null) {
@@ -98,12 +97,10 @@ public class PatientenHitlist extends BaseStats {
 				}
 				
 				// Resultat-Array für Archie aufbauen
+				final ArrayList<Comparable<?>[]> result = new ArrayList<Comparable<?>[]>();
 				Comparable<?>[] sum_all = new Comparable<?>[this.dataSet.getHeadings().size()];
 				Comparable<?>[] sum_male = new Comparable<?>[this.dataSet.getHeadings().size()];
 				Comparable<?>[] sum_female = new Comparable<?>[this.dataSet.getHeadings().size()];
-					.getHeadings().size()];
-			Comparable<?>[] sum_female = new Comparable<?>[this.dataSet
-					.getHeadings().size()];
 				result.add(sum_all);
 				result.add(sum_female);
 				result.add(sum_male);
@@ -112,7 +109,6 @@ public class PatientenHitlist extends BaseStats {
 				sum_male[0] = "Männer";
 				for (PatientStat ps : pstat.values()) {
 					Comparable<?>[] row = new Comparable<?>[this.dataSet.getHeadings().size()];
-						.getHeadings().size()];
 					Patient pat = Patient.load(ps.PatientID);
 					if (pat != null && pat.isValid()) {
 						row[0] = pat.getPatCode();
@@ -194,39 +190,35 @@ public class PatientenHitlist extends BaseStats {
 				sum_all[2] = new Integer(males + females);
 				sum_all[3] = round((cost_male + cost_female) / (males + females));
 				sum_all[4] = round((tarmed_male + tarmed_female) / (males + females));
-					/ (males + females));
 				sum_all[5] = round((tal_male + tal_female) / (males + females));
 				sum_all[6] = round((ttl_male + ttl_female) / (males + females));
 				sum_all[7] = round((medicals_male + medicals_female) / (males + females));
 				sum_all[8] = round((medics_male + medics_female) / (males + females));
 				sum_all[9] = round((physio_male + physio_female) / (males + females));
-					/ (males + females));
-			sum_all[9] = round((physio_male + physio_female)
-					/ (males + females));
 				sum_all[10] = round((other_male + other_female) / (males + females));
 				sum_all[11] = round((cons_male + cons_female) / (males + females));
 				sum_all[12] = round((visit_male + visit_female) / (males + females));
 				sum_all[13] = round((bills_male + bills_female) / (males + females));
+				// Und an Archie übermitteln
+				this.dataSet.setContent(result);
+				monitor.done();
+				return Status.OK_STATUS;
 			}
-			// Und an Archie übermitteln
-			this.dataSet.setContent(result);
-			monitor.done();
-			return Status.OK_STATUS;
 		} catch (Throwable t) {
 			ExHandler.handle(t);
-			return new Status(Status.ERROR, "ch.elexis.archie.wzw",
-					t.getMessage());
+			return new Status(Status.ERROR, "ch.elexis.archie.wzw", t.getMessage());
 		}
-
+		return Status.CANCEL_STATUS;
+		
 	}
-
-	private double round(double x) {
+	
+	private double round(double x){
 		return Math.round(x * 100) / 100.0;
 	}
-
+	
 	static class PatientStat {
-
-		PatientStat(Patient pat) {
+		
+		PatientStat(Patient pat){
 			PatientID = pat.getId();
 			birthDate = new TimeTool(pat.get(Patient.FLD_DOB));
 			sex = pat.getGeschlecht();
@@ -241,8 +233,8 @@ public class PatientenHitlist extends BaseStats {
 			costOther = 0.0;
 			costTotal = 0.0;
 		}
-
-		void addCons(Konsultation k) {
+		
+		void addCons(Konsultation k){
 			TimeTool kdate = new TimeTool(k.getDatum());
 			numCons++;
 			List<Verrechnet> vr = k.getLeistungen();
@@ -250,26 +242,24 @@ public class PatientenHitlist extends BaseStats {
 			for (Verrechnet v : vr) {
 				IVerrechenbar vv = v.getVerrechenbar();
 				if (vv != null) {
-					double cost = v.getNettoPreis().doubleValue()*v.getZahl();
+					double cost = v.getNettoPreis().doubleValue() * v.getZahl();
 					costTotal += cost;
 					if (vv instanceof TarmedLeistung) {
 						TarmedLeistung tl = (TarmedLeistung) vv;
 						if (tl.getCode().equals("00.0060")) {
 							numVisits++;
 						}
-						double cal = Math.round(v.getZahl()*tl.getAL()
-								* tl.getFactor(kdate, fall)) / 100.0;
+						double cal =
+							Math.round(v.getZahl() * tl.getAL() * tl.getFactor(kdate, fall)) / 100.0;
 						costTarmedAL += cal;
-						double ctl = Math.round(v.getZahl()*tl.getTL()
-								* tl.getFactor(kdate, fall)) / 100.0;
+						double ctl =
+							Math.round(v.getZahl() * tl.getTL() * tl.getFactor(kdate, fall)) / 100.0;
 						costTarmedTL += ctl;
 					} else if (vv instanceof PhysioLeistung) {
 						costPhysio += cost;
-					} else if (vv instanceof Medical
-							|| vv instanceof MiGelArtikel) {
+					} else if (vv instanceof Medical || vv instanceof MiGelArtikel) {
 						costMedical += cost;
-					} else if (vv instanceof Medikament
-							|| vv instanceof BAGMedi) {
+					} else if (vv instanceof Medikament || vv instanceof BAGMedi) {
 						costMedikamente += cost;
 					} else if (vv instanceof Labor2009Tarif) {
 						costLabor += cost;
@@ -285,7 +275,7 @@ public class PatientenHitlist extends BaseStats {
 				}
 			}
 		}
-
+		
 		String PatientID;
 		TimeTool birthDate;
 		String sex;
