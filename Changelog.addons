@@ -1,3 +1,10 @@
+Changelog 2.1.6.3
+a10abe09131f: 2012-04-19: Niklaus Giger: Ticket: #935 Adapted wzw patch to 2.1.6
+0b720a4ee7a2: 2012-04-19: thomashu: Ticket: #935 - fixed division by zero in wzw statistics
+666f905175df: 2012-04-19: thomashu: Ticket: #935 - fixed division by zero in wzw statistics
+e6bb2afb89d9: 2012-03-22: Gerry Weirich (ub): added medelexis.xml
+a6d5081150d2: 2012-01-26: rgw: Ticket #653: added Medelexis text templator
+
 Changelog 2.1.6.2
 5222f50a0d59: 2012-01-19: thomashu: Ticket: #482 - initial import of at.medevit.elexis.medietikette plugin, providing placeholders for printing medicament etiquette
 
