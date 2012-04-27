@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WZW-Statistiken
 Bundle-SymbolicName: ch.elexis.archie.wzw;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 1.0.0
 Bundle-Vendor: elexis.ch
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: ch.elexis.artikel_ch;bundle-version="2.0.2",
