@@ -231,7 +231,6 @@ end
     #
     def installLauncherAndConfiguration(destRoot, product, tgtPlatform, configIni=nil)
       tPlugins = File.join(destRoot, 'plugins')
-      task tPlugins do FileUtils.makedirs(tPlugins) end
       tConf    = File.join(destRoot, 'configuration')
       if !product['configIni'].eql?('default')
 	raise "Don't know how to handle non default configIni section in product definition"
@@ -542,7 +541,9 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
 	      Dir.glob(File.join($tgtPath, 'plugins',"#{x}*")).size.should == 1
 	    end
 	}
-check task('app'), "org.eclipse.equinox.launcher should be installed in subdirectory for launcher" do
+
+# Some of these integration tests fail for a not yet investigated reason, if you call package a second time!
+check task('app'), "org.eclipse.equinox.launcher should be installed in subdirectory #{$tgtPath}/plugins for launcher" do
   path = File.join($tgtPath, 'plugins',"org.eclipse.equinox.launcher*","*")
   Dir.glob(path).size.should > 1
 end

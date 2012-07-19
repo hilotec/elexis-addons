@@ -5,6 +5,7 @@ syntax:glob
 bin
 *.fo
 *~
+target
 
 syntax: regexp
 ^elexis-order-medicom-pharma/doc/elexis-order-medicom-pharma\.html$
