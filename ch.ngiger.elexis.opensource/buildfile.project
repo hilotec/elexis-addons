@@ -231,6 +231,7 @@ end
     #
     def installLauncherAndConfiguration(destRoot, product, tgtPlatform, configIni=nil)
       tPlugins = File.join(destRoot, 'plugins')
+      task tPlugins do FileUtils.makedirs(tPlugins) end
       tConf    = File.join(destRoot, 'configuration')
       if !product['configIni'].eql?('default')
 	raise "Don't know how to handle non default configIni section in product definition"
@@ -400,6 +401,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
 	  destRoot = File.join(project.path_to(:target), platform2path(tgtPlatform, '.'))
 	  task 'app' => destRoot
 	  task 'app' => File.join(destRoot, 'plugins')
+	  task File.join(destRoot, 'plugins') do FileUtils.makedirs(File.join(destRoot, 'plugins')) end
 	  allProjects.each { |proj| task 'app' => project(proj).package(:plugin).to_s }
 	  task destRoot => tRsc do
 	    FileUtils.makedirs(File.join(destRoot, 'plugins'))
@@ -514,6 +516,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
   task 'app' =>  project(x).package(:plugin) do
       jarname = project(x).package(:plugin).to_s
       destDir = File.join(project.path_to(:target), $tgtBase, 'plugins')
+      FileUtils.makedirs(destDir, :verbose => Buildr.application.options.trace) if !File.directory?(destDir)
       destName = File.join(destDir, File.basename(jarname))
       Buildr::Eclipse.installPlugin(jarname.to_s, destDir, $tgtBase)
   end
