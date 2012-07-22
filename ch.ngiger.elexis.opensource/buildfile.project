@@ -28,11 +28,11 @@
   package(:izpack).include($myInstXml)
 
   Macosx_x86_64  =  { 'osgi.os' => 'macosx', 'osgi.ws' => 'cocoa', 'osgi.arch' => 'x86_64',
-                      'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/elexis',
+                      'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac',
                       'condition' => 'izpack.macinstall+is64bit',
                       'description' => 'MacOSX (64-bit) abhängige Dateien'}
   Macosx_x86     =  { 'osgi.os' => 'macosx', 'osgi.ws' => 'cocoa', 'osgi.arch' => 'x86',
-                      'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/elexis',
+                      'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac',
                       'condition' => 'izpack.macinstall+is32bit',
                       'description' => 'MacOSX (32-bit) abhängige Dateien'}
   Linux_x86_64   =  { 'osgi.os' => 'linux', 'osgi.ws' => 'gtk',    'osgi.arch' => 'x86_64',
@@ -142,9 +142,9 @@ end
     download(demoZipFile => "http://ftp.medelexis.ch/downloads_opensource/elexis/demoDB/demoDB_elexis_#{DemoDB}.zip")
 
     def getDefaultPlatform()
-      values = { 'osgi.os' =>java.lang.System.get_property('os.name').downcase,
+      values = { 'osgi.os' => RbConfig::CONFIG['target_os'].downcase, # was java.lang.System.get_property('os.name').downcase,
 		    'osgi.ws' => 'cocoa',
-		    'osgi.arch' => java.lang.System.get_property('os.arch')}
+		    'osgi.arch' =>  RbConfig::CONFIG['target_cpu'], } # was java.lang.System.get_property('os.arch')}
       case values['osgi.os']
 	when /linux/i then
 	  values['osgi.ws'] = 'gtk'
@@ -522,7 +522,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
     }
   task(:package => 'app')
   task('app').enhance do
-    logbackXml = File.join(java.lang.System.getProperty('user.home'), 'elexis', 'logback.xml')
+    logbackXml = File.join( File.expand_path('~'), 'elexis', 'logback.xml') # java.lang.System.getProperty('user.home')
     fileName   = File.join(project.path_to(:target), $tgtBase, product['launcher']+'.ini')
     puts "enhance enhance app: add config #{logbackXml} to #{fileName}"
     File.open(fileName, "a").puts("\n-Dlogback.configurationFile=#{logbackXml}\n")

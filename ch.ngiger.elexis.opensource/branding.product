@@ -94,7 +94,7 @@
       <plugin id="org.eclipse.ui.forms"/>
       <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.update.configurator"/>
-      <plugin id="org.ekkescorner.logging.osgi" fragment=""/>
+      <!--plugin id="org.ekkescorner.logging.osgi" fragment=""/-->
       <plugin id="org.hamcrest.core"/>
       <plugin id="org.jdom"/>
       <plugin id="org.junit"/>
