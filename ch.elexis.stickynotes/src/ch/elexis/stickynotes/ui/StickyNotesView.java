@@ -55,15 +55,15 @@ public class StickyNotesView extends ViewPart implements IActivationListener, He
 		}
 	};
 	
-	private final ElexisEventListenerImpl eeli_user =
-		new ElexisEventListenerImpl(Anwender.class, ElexisEvent.EVENT_USER_CHANGED) {
-			
-			@Override
-			public void catchElexisEvent(ElexisEvent ev){
-				prefs = new SettingsPreferenceStore(Hub.userCfg);
-			}
-			
-		};
+	private final ElexisEventListenerImpl eeli_user = new ElexisEventListenerImpl(Anwender.class,
+		ElexisEvent.EVENT_USER_CHANGED) {
+		
+		@Override
+		public void catchElexisEvent(ElexisEvent ev){
+			prefs = new SettingsPreferenceStore(Hub.userCfg);
+		}
+		
+	};
 	
 	@Override
 	public void createPartControl(Composite parent){
@@ -73,6 +73,7 @@ public class StickyNotesView extends ViewPart implements IActivationListener, He
 		Composite body = form.getBody();
 		body.setLayout(new GridLayout());
 		etf = new EnhancedTextField(body);
+		etf.connectGlobalActions(getViewSite());
 		etf.setLayoutData(SWTHelper.getFillGridData(1, true, 1, true));
 		GlobalEventDispatcher.addActivationListener(this, this);
 		
