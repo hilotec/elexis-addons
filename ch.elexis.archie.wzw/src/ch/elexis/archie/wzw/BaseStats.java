@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
 import ch.elexis.Hub;
 import ch.elexis.data.Konsultation;
@@ -68,15 +67,30 @@ public abstract class BaseStats extends AbstractTimeSeries {
 		monitor.beginTask("Sammle Konsultationsdaten ", HUGE_NUMBER);
 		monitor.subTask("Datenbankabfrage und PostQueryFilters");
 		Query<Konsultation> qbe = new Query<Konsultation>(Konsultation.class);
-		final String dateFrom = new TimeTool(getStartDate().getTime().getTime())
+		String dateFrom =
+			new TimeTool(getStartDate().getTime().getTime())
 				.toString(TimeTool.DATE_COMPACT);
-		final String dateUntil = new TimeTool(getEndDate().getTimeInMillis())
+		String dateUntil =
+			new TimeTool(getEndDate().getTimeInMillis())
 				.toString(TimeTool.DATE_COMPACT);
+		
+		final TimeTool from = new TimeTool(dateFrom);
+		final TimeTool to = new TimeTool(dateUntil);
+
 		if (getDateType().equals("Konsultationsdatum")) {
-			qbe.add(Konsultation.FLD_DATE, Query.GREATER_OR_EQUAL, dateFrom);
-			qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, dateUntil);
+			qbe.addPostQueryFilter(new IFilter() {
+				@Override
+				public boolean select(Object element){
+					Konsultation k = (Konsultation) element;
+					monitor.subTask(k.getDatum());
+					monitor.worked(1);
+					HUGE_NUMBER--;
+
+					TimeTool konsDatum = new TimeTool(k.getDatum());
+					return konsDatum.isAfterOrEqual(from) && konsDatum.isBeforeOrEqual(to);
+				}
+			});
 		} else if (getDateType().equals("Rechnungsdatum")) {
-			qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, dateFrom);
 			qbe.add(Konsultation.FLD_BILL_ID, "NOT", null);
 			qbe.addPostQueryFilter(new IFilter() {
 				@Override
@@ -85,13 +99,13 @@ public abstract class BaseStats extends AbstractTimeSeries {
 					monitor.subTask(k.getDatum());
 					monitor.worked(1);
 					HUGE_NUMBER--;
+
 					Rechnung rn = k.getRechnung();
-					String rndate = new TimeTool(rn.getDatumRn()).toString(TimeTool.DATE_COMPACT);
-					return rndate.compareTo(dateFrom)>=0 && rndate.compareTo(dateUntil) <=0;
+					TimeTool rndate = new TimeTool(rn.getDatumRn());
+					return rndate.isAfterOrEqual(from) && rndate.isBeforeOrEqual(to);
 				}
 			});
 		} else if (getDateType().equals("Zahlungsdatum")) {
-			qbe.add(Konsultation.FLD_DATE, Query.LESS_OR_EQUAL, dateFrom);
 			qbe.add(Konsultation.FLD_BILL_ID, "NOT", null);
 			qbe.addPostQueryFilter(new IFilter() {
 				@Override
@@ -100,13 +114,13 @@ public abstract class BaseStats extends AbstractTimeSeries {
 					monitor.subTask(k.getLabel());
 					monitor.worked(1);
 					HUGE_NUMBER--;
+
 					Rechnung rn = k.getRechnung();
 					if(rn.getStatus()==RnStatus.BEZAHLT || rn.getStatus()==RnStatus.ZUVIEL_BEZAHLT){
-						// dunno
-						return false;
+						TimeTool rndate = new TimeTool(rn.getDatumRn());
+						return rndate.isAfterOrEqual(from) && rndate.isBeforeOrEqual(to);
 					}
-					String rndate = new TimeTool(rn.getDatumRn()).toString(TimeTool.DATE_COMPACT);
-					return rndate.compareTo(dateFrom)>=0 && rndate.compareTo(dateUntil) <=0;
+					return false;
 				}
 			});
 
