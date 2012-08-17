@@ -1,4 +1,15 @@
-Changelog for 2.1.7
+Changelog for 2.1.7.rc0
+78708c60129c: 2012-08-16: marcode79: [951] Context menu in stickynotes does not activate copy/paste action
+34927c8dfa05: 2012-07-22: Niklaus Giger: Fixes to make MacOSX-product runnable
+2dd38f2155ad: 2012-07-20: Niklaus Giger: Second patch for build problem
+577e0744f3e6: 2012-07-19: Niklaus Giger: Fix build problem with plugins dir
+43f6cdd08351: 2012-07-15: Niklaus Giger: Add ch.ngiger.elexis.opensource and ch.ngiger.elexis.branding to enable buildr.apache.org builds
+9cd848fbe52a: 2012-03-28: Gerry Weirich (ub): extended AlleLeistungenRoh with mandator and case id
+26b78462b200: 2012-03-25: Gerry Weirich (ub): added "alle leistungen roh" statistics for Dr. Daubitz
+7584ad8dc887: 2012-03-23: rgw@macbook: added medelexis.xml
+bb9f39c7119f: 2012-01-26: Niklaus Giger: Merged mit Stand 2.1.6.2
+be1739507da2: 2012-01-05: Niklaus Giger: Buildr. Replace bin/->bin in MANIFEST.MF
+78be336f0ed2: 2011-12-11: Niklaus Giger: Ticket 632: Started Changelog for 2.1.7
 
 Changelog 2.1.6.3
 a10abe09131f: 2012-04-19: Niklaus Giger: Ticket: #935 Adapted wzw patch to 2.1.6
