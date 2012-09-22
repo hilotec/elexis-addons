@@ -33,6 +33,8 @@
    </vm>
 
    <plugins>
+      <plugin id="LogBackend"/>
+      <plugin id="at.medevit.smooks.libs"/>
       <plugin id="ch.elexis"/>
       <plugin id="ch.elexis.artikel_ch"/>
       <plugin id="ch.elexis.arzttarife_ch"/>
@@ -49,13 +51,18 @@
       <plugin id="ch.elexis.scripting.beanshell"/>
       <plugin id="ch.medelexis.text.templator"/>
       <plugin id="ch.ngiger.elexis.branding"/>
+      <plugin id="ch.qos.logback.classic"/>
+      <plugin id="ch.qos.logback.core"/>
+      <plugin id="ch.qos.logback.slf4j" fragment="true"/>
       <plugin id="ch.rgw.utility"/>
       <plugin id="com.ibm.icu"/>
       <plugin id="javax.servlet"/>
       <plugin id="org.apache.commons.lang"/>
+      <plugin id="org.apache.commons.logging"/>
       <plugin id="org.eclipse.core.commands"/>
       <plugin id="org.eclipse.core.contenttype"/>
       <plugin id="org.eclipse.core.databinding"/>
+      <plugin id="org.eclipse.core.databinding.beans"/>
       <plugin id="org.eclipse.core.databinding.observable"/>
       <plugin id="org.eclipse.core.databinding.property"/>
       <plugin id="org.eclipse.core.expressions"/>
@@ -94,15 +101,13 @@
       <plugin id="org.eclipse.ui.forms"/>
       <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.update.configurator"/>
-      <!--plugin id="org.ekkescorner.logging.osgi" fragment=""/-->
-      <plugin id="org.hamcrest.core"/>
+      <plugin id="org.ekkescorner.logging.osgi"/>
       <plugin id="org.jdom"/>
-      <plugin id="org.junit"/>
-      <plugin id="org.slf4j.api" fragment=""/>
-      <plugin id="org.slf4j.ext" fragment=""/>
-      <plugin id="org.slf4j.jcl" fragment=""/>
-      <plugin id="org.slf4j.jul" fragment=""/>
-      <plugin id="org.slf4j.log4j" fragment=""/>
+      <plugin id="org.slf4j.api"/>
+      <plugin id="org.slf4j.ext"/>
+      <plugin id="org.slf4j.jcl"/>
+      <plugin id="org.slf4j.jul"/>
+      <plugin id="org.slf4j.log4j"/>
    </plugins>
 
    <configurations>

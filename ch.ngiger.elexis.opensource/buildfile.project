@@ -18,7 +18,6 @@
 #   -destination /tmp/unpacked
 
   require 'buildrizpack'
-  Java.load # needed to load class path for apache logger
   DeployElexis = File.expand_path(File.join(Dir.pwd, 'deploy'))
   layout[:target] = DeployElexis
   ProductInfoFile = _('branding.product')
@@ -71,9 +70,9 @@
       'ch.ngiger.elexis.branding',
       'ch.rgw.utility',
       'de.fhdo.elexis.perspective',
-#      'LogBackend',
+      'LogBackend',
       'org.iatrix.help.wiki',
-#      'org.ekkescorner.logging.osgi',
+      'org.ekkescorner.logging.osgi',
       ]
     chProjects = [
       'ch.elexis.arzttarife_ch',
@@ -81,7 +80,7 @@
       'ch.elexis.diagnosecodes_ch',
       'ch.elexis.labortarif.ch2009',
       'ch.elexis.artikel_ch',
-# 'ch.ngiger.elexis.oddb_ch',
+      'ch.ngiger.elexis.oddb_ch',
     ]
     oo2Projects = [] #  'ch.elexis.noatext' ]
     txtTemplProjects = [ 'ch.medelexis.text.templator' ]
