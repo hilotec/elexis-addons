@@ -13,5 +13,4 @@ Require-Bundle: ch.elexis;bundle-version="2.0.0",
  ch.elexis.scala.runtime;bundle-version="1.0.0",
  org.eclipse.core.runtime,
  ch.elexis.core;bundle-version="0.0.2"
-Bundle-ClassPath: bin,
- .
+Bundle-ClassPath: .
