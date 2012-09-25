@@ -20,11 +20,13 @@
   require 'buildrizpack'
   DeployElexis = File.expand_path(File.join(Dir.pwd, 'deploy'))
   layout[:target] = DeployElexis
+  puts "DeployElexis is #{DeployElexis}"
   ProductInfoFile = _('branding.product')
   $myInstXml = File.join(path_to(:target), 'installer.xml')
   package(:izpack, :file=> "deploy/elexis-#{project.parent.version}-installer.jar").input = $myInstXml
   package(:izpack).izpackVersion = '4.3.5'
   package(:izpack).include($myInstXml)
+  task($myInstXml => task(:doc))
 
   Macosx_x86_64  =  { 'osgi.os' => 'macosx', 'osgi.ws' => 'cocoa', 'osgi.arch' => 'x86_64',
                       'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac',
@@ -104,10 +106,10 @@ class  BuildrIzPack::Pack
       Buildr::Eclipse.installPlugin(jarname.to_s, tgtDir)
       files = (Dir.glob(File.join(tgtDir, '**','*')) + Dir.glob(File.join(tgtDir, '**','.*'))).sort.uniq
       files.each{ |x|
-		  next if File.directory?(x)
-		  path = x.sub(baseDir, File.join('$INSTALL_PATH','plugins'))
-		  addFile(x, path)
-		}
+                  next if File.directory?(x)
+                  path = x.sub(baseDir, File.join('$INSTALL_PATH','plugins'))
+                  addFile(x, path)
+                }
       return
     end
 
@@ -128,10 +130,10 @@ end
     allProjects = (kernProjects + chProjects + oo2Projects + txtTemplProjects)
     allProjects.each {
       |proj|
-	dependencies << project(proj)
-	jars << project(proj).package(:plugin).to_s if project(proj).package(:plugin)
-	project(proj).dependencies.each {|aDep|
-                                         jars << aDep if /.jar/.match(aDep.to_s)
+        dependencies << project(proj)
+        jars << project(proj).package(:plugin).to_s if project(proj).package(:plugin)
+        project(proj).dependencies.each {|aDep|
+                                          jars << aDep if /.jar/.match(aDep.to_s)
                                         }
     }
 
@@ -142,14 +144,14 @@ end
 
     def getDefaultPlatform()
       values = { 'osgi.os' => RbConfig::CONFIG['target_os'].downcase, # was java.lang.System.get_property('os.name').downcase,
-		    'osgi.ws' => 'cocoa',
-		    'osgi.arch' =>  RbConfig::CONFIG['target_cpu'], } # was java.lang.System.get_property('os.arch')}
+                    'osgi.ws' => 'cocoa',
+                    'osgi.arch' =>  RbConfig::CONFIG['target_cpu'], } # was java.lang.System.get_property('os.arch')}
       case values['osgi.os']
-	when /linux/i then
-	  values['osgi.ws'] = 'gtk'
-	when /win/i then
-	  values['osgi.ws'] = 'win32'
-	  values['osgi.os'] = 'win32'
+        when /linux/i then
+          values['osgi.ws'] = 'gtk'
+        when /win/i then
+          values['osgi.ws'] = 'win32'
+          values['osgi.os'] = 'win32'
       end
       values['osgi.arch'] = 'x86_64' if /amd64/.match(values['osgi.arch'])
       # trace "getDefaultPlatform returns #{values.inspect}"
@@ -171,31 +173,31 @@ end
 
     def getArtefactOrOsgiJar(jarname, defPlatform, jars = nil)
       if jars
-	indexInJars = jars.index{|x|  x.class != String and x.id.eql?(jarname) }
-	if indexInJars
-	  trace "getArtefactOrOsgiJar found #{jarname} in jars #{jars[indexInJars].inspect}"
-	  return jars[indexInJars]
-	end
+        indexInJars = jars.index{|x|  x.class != String and x.id.eql?(jarname) }
+        if indexInJars
+          trace "getArtefactOrOsgiJar found #{jarname} in jars #{jars[indexInJars].inspect}"
+          return jars[indexInJars]
+        end
       end
 
       begin
-	otherArtifact = artifact(jarname)
-	if ! EclipseExtension::jarMatchesPlatformFilter(otherArtifact, defPlatform)
-	  trace "getArtefactOrOsgiJar skipping 1 #{otherArtifact.to_s} #{defPlatform.inspect} for #{jarname}"
-	  return nil
-	end
-	trace "getArtefactOrOsgiJar found otherArtifact #{otherArtifact.to_s}  for #{jarname}"
-	return otherArtifact
+        otherArtifact = artifact(jarname)
+        if ! EclipseExtension::jarMatchesPlatformFilter(otherArtifact, defPlatform)
+          trace "getArtefactOrOsgiJar skipping 1 #{otherArtifact.to_s} #{defPlatform.inspect} for #{jarname}"
+          return nil
+        end
+        trace "getArtefactOrOsgiJar found otherArtifact #{otherArtifact.to_s}  for #{jarname}"
+        return otherArtifact
       rescue
       end
 
-      fileName = File.join(ENV['OSGi'], 'plugins', "#{jarname}_*")
+      fileName = File.expand_path(File.join(ENV['OSGi'], 'plugins', "#{jarname}_*"))
       files = Dir.glob(fileName)
       files.each{ |aFile|
-	if EclipseExtension::jarMatchesPlatformFilter(aFile, defPlatform)
-	  trace "getArtefactOrOsgiJar found file #{aFile.inspect} for #{jarname}"
-	  return aFile
-	end
+        if EclipseExtension::jarMatchesPlatformFilter(aFile, defPlatform)
+          trace "getArtefactOrOsgiJar found file #{aFile.inspect} for #{jarname}"
+          return aFile
+        end
       }
       trace "getArtefactOrOsgiJar:Check your buildfile. Could not find dependency #{jarname} specified in #{project.name}!"
     end
@@ -206,21 +208,21 @@ end
       elexisApp = File.join(destRoot, launcherName +'.app')
       info "Macos #{macApp} -> #{elexisApp}"
       if File.exists?(macApp) then
-	FileUtils.mv(macApp, elexisApp, :verbose => Buildr.application.options.trace)
-	Dir.glob(File.join(elexisApp, '**/*')).each {
-	  |x|
-	      dest = x.sub(/launcher/i,  launcherName)
-	      dest.sub!(   /eclipse/i,  launcherName)
-	      trace "macos found #{x} => #{dest} #{x.eql?(dest)}"
-	      FileUtils.mv(x, dest, :verbose => Buildr.application.options.trace) if !x.eql?(dest)
-	      }
+        FileUtils.mv(macApp, elexisApp, :verbose => Buildr.application.options.trace)
+        Dir.glob(File.join(elexisApp, '**/*')).each {
+          |x|
+              dest = x.sub(/launcher/i,  launcherName)
+              dest.sub!(   /eclipse/i,  launcherName)
+              trace "macos found #{x} => #{dest} #{x.eql?(dest)}"
+              FileUtils.mv(x, dest, :verbose => Buildr.application.options.trace) if !x.eql?(dest)
+              }
       end
       infoPlist = File.join(elexisApp, 'Contents', 'Info.plist')
       inhalt = IO.readlines(infoPlist)
       toReplace = { '<string>eclipse</string>' => '<string>'+ launcherName+'</string>',
-		    '<string>Eclipse.icns</string>' => '<string></string>',
-		    '<string>Eclipse</string>' => '<string>'+ launcherName+'</string>',
-		    }
+                    '<string>Eclipse.icns</string>' => '<string></string>',
+                    '<string>Eclipse</string>' => '<string>'+ launcherName+'</string>',
+                    }
       inhalt.each { |x| toReplace.each { |from, to| x.sub!(from, to) } }
       File.open(infoPlist, 'w') {|f| f.write(inhalt) }
       File.open(File.join(elexisApp, 'Contents', 'MacOS', launcherName+'.ini'), 'w') {|f| f.write(initArgs) }
@@ -232,7 +234,7 @@ end
       tPlugins = File.join(destRoot, 'plugins')
       tConf    = File.join(destRoot, 'configuration')
       if !product['configIni'].eql?('default')
-	raise "Don't know how to handle non default configIni section in product definition"
+        raise "Don't know how to handle non default configIni section in product definition"
       end
 
       [tPlugins,tConf].each{ |d| FileUtils.makedirs(d) }
@@ -244,20 +246,20 @@ id=#{product['id']}
 ))
       # copy common launcher jar
       Dir.glob(File.join(ENV['OSGi'], 'plugins', "org.eclipse.equinox.launcher_*.jar")).each {
-	|jarFile|
-	  next if File.basename(jarFile).index('.source_')
-	  next if !EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
-	  subDir = File.join(tPlugins, File.basename(jarFile, '.jar'))
-	  FileUtils.cp(jarFile, tPlugins, :verbose => Buildr.application.options.trace, :preserve => true)
+        |jarFile|
+          next if File.basename(jarFile).index('.source_')
+          next if !EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
+          subDir = File.join(tPlugins, File.basename(jarFile, '.jar'))
+          FileUtils.cp(jarFile, tPlugins, :verbose => Buildr.application.options.trace, :preserve => true)
       }
       # unpack correct os specific launcher jar
       Dir.glob(File.join(ENV['OSGi'], 'plugins', "org.eclipse.equinox.launcher.*.jar")).each {
-	|jarFile|
-	  next if File.basename(jarFile).index('.source_')
-	  next if !EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
-	  subDir = File.join(tPlugins, File.basename(jarFile, '.jar'))
-	  unzipper =  Buildr::Unzip.new(subDir=>jarFile)
-	  unzipper.extract
+        |jarFile|
+          next if File.basename(jarFile).index('.source_')
+          next if !EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
+          subDir = File.join(tPlugins, File.basename(jarFile, '.jar'))
+          unzipper =  Buildr::Unzip.new(subDir=>jarFile)
+          unzipper.extract
       }
       # Copy equinox executable
       execJar = Dir.glob(File.join(ENV['OSGi'], 'features', 'org.eclipse.equinox.executable_*jar'))[0]
@@ -278,18 +280,18 @@ id=#{product['id']}
 
       # Here Eclipse uses ws/os/arch instead of ow/ws/arch in other places (.e.g, destination of install!!)
       pathName = File.join(ENV['OSGi'], 'features', 'org.eclipse.equinox.executable_*', 'bin',
-                           tgtPlatform['osgi.ws'],  tgtPlatform['osgi.os'], tgtPlatform['osgi.arch'], '**')
+                            tgtPlatform['osgi.ws'],  tgtPlatform['osgi.os'], tgtPlatform['osgi.arch'], '**')
       Dir.glob(pathName).each{
-	|x|
-	  next if File.basename(x).eql?('eclipsec.exe')
-	  if File.basename(x).eql?('launcher') || File.basename(x).eql?('launcher.exe')
-	    tgt = File.join(destRoot, File.basename(x))
-	    tgt.gsub!('launcher', product['launcher'])
-	    FileUtils.cp_r(x, tgt, :verbose => Buildr.application.options.trace, :preserve => true)
-	    FileUtils.chmod(0755, tgt)
-	  else
-	    FileUtils.cp_r(x, destRoot, :verbose => Buildr.application.options.trace, :preserve => true)
-	  end
+        |x|
+          next if File.basename(x).eql?('eclipsec.exe')
+          if File.basename(x).eql?('launcher') || File.basename(x).eql?('launcher.exe')
+            tgt = File.join(destRoot, File.basename(x))
+            tgt.gsub!('launcher', product['launcher'])
+            FileUtils.cp_r(x, tgt, :verbose => Buildr.application.options.trace, :preserve => true)
+            FileUtils.chmod(0755, tgt)
+          else
+            FileUtils.cp_r(x, destRoot, :verbose => Buildr.application.options.trace, :preserve => true)
+          end
       }
 -      configIni = %(#Product Runtime Configuration File
 # created by buildr.apache.org at #{Time.now}"
@@ -310,9 +312,9 @@ osgi.bundles=#{product['configurations'].sort.join(',')}
       initArgs = initArgs.split(' ').join("\n")
       initArgs << "\n"
       if /macosx/.match(tgtPlatform['osgi.os'])
-	handleMacApp(destRoot,  product['launcher'], initArgs)
+        handleMacApp(destRoot,  product['launcher'], initArgs)
       else
-	Buildr::write(File.join(destRoot, product['launcher']+'.ini'), initArgs)
+        Buildr::write(File.join(destRoot, product['launcher']+'.ini'), initArgs)
       end
 
 
@@ -324,15 +326,24 @@ osgi.bundles=#{product['configurations'].sort.join(',')}
     # oRsc  = File.expand_path(File.join(project._, '..', '..', 'elexis-base', 'BuildElexis', 'rsc'))
     pRsc  = File.expand_path(File.join(project._, 'rsc'))
     files = Dir.glob(File.join(pRsc, '*.textile'))
+    puts "Patching files #{files.inspect}"
     htmlFiles = []
     files.each do |src|
       htmlFile = File.join(pRsc, "#{File.basename(src, '.textile')}.html")
       desc 'Create opensource installers'
       task 'izpack' => htmlFile
       htmlFiles << htmlFile
-      file htmlFile => src do  Wikitext::HtmlFromTextile(htmlFile, src) end
+      file htmlFile => src do
+        Wikitext::HtmlFromTextile(htmlFile, src)
+        # Remove wrong header at top of the file
+        what = "<?xml version='1.0' encoding='utf-8' ?>"
+        inhalt = IO.read(htmlFile.sub(what,''))
+        puts "Patching HTML #{htmlFile} #{inhalt.index(what)}"
+        File.open(htmlFile, 'w+'){|f| f.write(inhalt) }
+      end
     end if files.size > 0
-
+    puts "Patching htmlFiles #{htmlFiles.inspect}"
+    task($myInstXml => htmlFiles)
     # What we want:
     # Copy all common stuff from ../elexis-base/BuildElexis/rsc into _+'rsc'  e.g. *.html, i18n
     # Copy specific elexis.<os> from ../elexis-base/BuildElexis/rsc/os into _+'target/{os}/rsc'
@@ -366,64 +377,55 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
     allCommonJars = []
     platforms.each {
       |tgtPlatform|
-	  jars2copy = []
-	  tgtPlatform['os_files'] = []
-	(product['plugins'] + product['fragments']).each { |aRef|
-							  arte = getArtefactOrOsgiJar(aRef.to_s, tgtPlatform, jars)
-							  if arte == nil
-							    trace "No arte for #{aRef.to_s}"
-							    next
-							  end
+          jars2copy = []
+          tgtPlatform['os_files'] = []
+        (product['plugins'] + product['fragments']).each { |aRef|
+                                                          arte = getArtefactOrOsgiJar(aRef.to_s, tgtPlatform, jars)
+                                                          if arte == nil
+                                                            trace "No arte for #{aRef.to_s}"
+                                                            next
+                                                          end
                                                           next if arte.to_s.index('.source_')
-							  jars2copy << arte
-							  allJars << arte
+                                                          jars2copy << arte
+                                                          allJars << arte
                                                           if EclipseExtension::getPlatformFilter(arte)
                                                             tgtPlatform['os_files'] << arte
                                                           else
                                                             allCommonJars << arte
-                                                         end
-							}
- 	jars2copy.each{ |jar| task dest => jar }
- 	tRsc    = File.join(osPath, platform2path(tgtPlatform,'.'))
-	tgtPlatform['os_specific'] = tRsc
-	task $myInstXml => tRsc
- 	task tRsc do
-           if !File.directory?(tRsc)
- 	    FileUtils.makedirs(tRsc)
- 	    product = EclipseExtension::readProductInfo(ProductInfoFile)
- 	    installLauncherAndConfiguration(tRsc, product, tgtPlatform, installerConfigIni)
- 	    # OS specific part for the launcher
-	  end
-	end
-	if platform2path(tgtPlatform, '.').eql?(platform2path(getDefaultPlatform, '.'))
-	  destRoot = File.join(project.path_to(:target), platform2path(tgtPlatform, '.'))
-	  task 'app' => destRoot
-	  task 'app' => File.join(destRoot, 'plugins')
-	  task File.join(destRoot, 'plugins') do FileUtils.makedirs(File.join(destRoot, 'plugins')) end
-	  allProjects.each { |proj| task 'app' => project(proj).package(:plugin).to_s }
-	  task destRoot => tRsc do
-	    FileUtils.makedirs(File.join(destRoot, 'plugins'))
-	    FileUtils.cp_r(tRsc, File.dirname(destRoot), :verbose => Buildr.application.options.trace, :preserve=>true)
-	    jars2copy.uniq.each {
-	      |jar|
-	      task 'app' => Buildr::Eclipse.installPlugin(jar.to_s, File.join(destRoot, 'plugins'), tgtPlatform)
-	    }
-	  end
-	end
+                                                          end
+                                                        }
+        jars2copy.each{ |jar| task dest => jar }
+        tRsc    = File.join(osPath, platform2path(tgtPlatform,'.'))
+        tgtPlatform['os_specific'] = tRsc
+        task $myInstXml => tRsc
+        task tRsc do
+            if !File.directory?(tRsc)
+            FileUtils.makedirs(tRsc)
+            product = EclipseExtension::readProductInfo(ProductInfoFile)
+            installLauncherAndConfiguration(tRsc, product, tgtPlatform, installerConfigIni)
+            # OS specific part for the launcher
+          end
+        end
+        if platform2path(tgtPlatform, '.').eql?(platform2path(getDefaultPlatform, '.'))
+          destRoot = File.join(project.path_to(:target), platform2path(tgtPlatform, '.'))
+          task 'app' => destRoot
+          task 'app' => File.join(destRoot, 'plugins')
+          task File.join(destRoot, 'plugins') do FileUtils.makedirs(File.join(destRoot, 'plugins')) end
+          allProjects.each { |proj| task 'app' => project(proj).package(:plugin).to_s }
+          task destRoot => tRsc do
+            FileUtils.makedirs(File.join(destRoot, 'plugins'))
+            FileUtils.cp_r(tRsc, File.dirname(destRoot), :verbose => Buildr.application.options.trace, :preserve=>true)
+            jars2copy.uniq.each {
+              |jar|
+              task 'app' => Buildr::Eclipse.installPlugin(jar.to_s, File.join(destRoot, 'plugins'), tgtPlatform)
+            }
+          end
+        end
     }
-
-    htmlFiles.each{ |x|
-		    file File.join(izRsc, File.basename(x)) => x do
-		      FileUtils.makedirs(izRsc)
-		      FileUtils.cp(x,    izRsc, :verbose => Buildr.application.options.trace)
-		      kernPack.addFile(x, File.join('$INSTALLATION_PATH', 'docs', File.basename(x)))
-		    end if File.expand_path(File.dirname(x)) != izRsc
-		    task dest => [x, File.join(izRsc, File.basename(x))]
-		  }
 
     allProjects.each{ |x| file($myInstXml => project(x).package(:plugin).to_s) }
     allCommonJars.each{ |x| file($myInstXml => x.to_s) }
-    task($myInstXml => [ demoZipFile ]) do
+    task($myInstXml => [ demoZipFile , project.parent.task(:doc)]) do
       allProjects.each{ |x| project(x).package(:plugin).invoke }
       FileUtils.makedirs(path_to(:target), :verbose => Buildr.application.options.trace) if !File.directory?(path_to(:target))
       kernProjects.each{ |x| kernPack.addEclipseJar(project(x).package(:plugin).to_s) }
@@ -432,70 +434,86 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
       tgtPanel = File.join(path_to(:target), 'TargetPanel.txt')
       Buildr::write(tgtPanel, "$SYSTEM_user_home/elexis/bin/elexis-#{project.parent.version}")
       xm = Builder::XmlMarkup.new(:target=>File.open($myInstXml, 'w+'), :indent => 2)
-      xm.instruct!
+      xm.instruct! :xml, :version => '1.0', :encoding => 'utf-8', :standalone => "yes"
+      xm.comment! %(Created by #{__FILE__} #{Time.now}
+      * Copyright by Gerry Weirich 2006 - 2012.
+      * Contributors:
+        * G. Weirich - initial implementation
+        * Niklaus Giger 2012 - moved to use Apache Buildr
+      )
+      xm.comment! 'This creates the izPack installer package'
       xm.installation('version'=>'1.0') {
-	puts "kernpack: project.parent.version ist #{project.parent.version} nanme #{project.parent.name}"
-	xm.tag!('info') { xm.appversion(project.parent.version); xm.appname(project.parent.name) }
-	xm.guiprefs('width' => '800', 'height' => '600', 'resizable' => 'yes')
-	xm.variables { |x| xm.variable('name' => 'appversion', 'value' => "#{project.parent.version}") }
-	xm.panels { |x| xm.panel('classname' => 'HTMLInfoPanel')
-			xm.panel('classname' => 'HTMLLicencePanel')
-			xm.panel('classname' => 'TargetPanel')
-			xm.panel('classname' => 'PacksPanel')
-			xm.panel('classname' => 'InstallPanel')
-			xm.panel('classname' => 'ShortcutPanel')
-			xm.panel('classname' => 'FinishPanel')
+        xm.tag!('info') {  xm.appname(project.name)
+                          xm.appversion(project.version)
+                          xm.authors{ |x| xm.author('name' => "www.elexis.ch", 'email' => 'info@elexis.ch') }
+                          xm.url('http://www.elexis.ch')
+                          }
+        puts "kernpack: project.parent.version ist #{project.parent.version} nanme #{project.parent.name}"
+        xm.tag!('info') { xm.appversion(project.parent.version); xm.appname(project.parent.name) }
+        xm.guiprefs('width' => '800', 'height' => '600', 'resizable' => 'yes')
+        xm.variables { |x| xm.variable('name' => 'appversion', 'value' => "#{project.parent.version}") }
+        xm.panels { |x| xm.panel('classname' => 'HTMLInfoPanel')
+                        xm.panel('classname' => 'HTMLLicencePanel')
+                        xm.panel('classname' => 'TargetPanel')
+                        xm.panel('classname' => 'PacksPanel')
+                        xm.panel('classname' => 'InstallPanel')
+                        xm.panel('classname' => 'ShortcutPanel')
+                        xm.panel('classname' => 'FinishPanel')
 
-		    }
-	xm.locale { |x| xm.langpack('iso3'=>'eng'); xm.langpack('iso3'=>'deu'); xm.langpack('iso3'=>'fra') }
-	xm.native('type' => 'izpack', 'name' => 'ShellLink.dll')
-	  xm.conditions { |j|
-	    xm.condition('type' => 'variable', 'id'=>'is32bit') { |x| xm.name('SYSTEM_sun_arch_data_model'); xm.value('32') }
-	    xm.condition('type' => 'variable', 'id'=>'is64bit') { |x| xm.name('SYSTEM_sun_arch_data_model'); xm.value('64') }
-			}
-	xm.resources{ |x|
-		      xm.res('id' =>'TargetPanel.dir', 'src' => tgtPanel)
-		      xm.res('id' =>'BSFActionsSpec.xml', 'src' => _('rsc/BSFActionsSpec.xml'))
-		      xm.res('id' =>'copyConfiguration.bsh', 'src' => _('rsc/copyConfiguration.bsh'))
-		      xm.res('id' =>'patchForLogback.bsh', 'src' => _('rsc/patchForLogback.bsh'))
-		      xm.res('id' =>'unzipDemoDB.bsh', 'src' => _('rsc/unzipDemoDB.bsh'))
-		      xm.res('id' =>'packsLang.xml_eng', 'src' => _('rsc/i18n/packsLang.xml_eng'))
-		      xm.res('id' =>'packsLang.xml_fra', 'src' => _('rsc/i18n/packsLang.xml_fra'))
-		      xm.res('id' =>'HTMLLicencePanel.licence', 'src' => _('rsc/license.html'))
-		      xm.res('id' =>'HTMLInfoPanel.info', 'src' => _('rsc/info.html'), 'parse'=>'yes', 'type'=>'xml')
-		      xm.res('id' =>'HTMLInfoPanel.info_fra', 'src' => _('rsc/info_fra.html'), 'parse'=>'yes', 'type'=>'xml')
-		      xm.res('id' =>'HTMLInfoPanel.info_eng', 'src' => _('rsc/info_eng.html'), 'parse'=>'yes', 'type'=>'xml')
-		      xm.res('id' =>'medelexis-logo.png', 'src' => _('rsc/elexis-logo.png'))
-		      xm.res('id' =>'Win_shortcutSpec.xml', 'src' => _('rsc/Shortcuts_Windows.xml'))
-		      xm.res('id' =>'Unix_shortcutSpec.xml', 'src' => _('rsc/Shortcuts_Linux.xml'))
-		      }
-	xm.jar('src' => _('rsc/deps/apache/commons-logging/1.1.1/commons-logging-1.1.1.jar'), 'stage' => 'both')
-	xm.jar('src' => _('rsc/deps/bsh/bsh/2.0b4/bsh-2.0b4.jar'), 'stage' => 'both')
-	xm.jar('src' => _('rsc/deps/apache/bsf/2.4.0/bsf-2.4.0.jar'), 'stage' => 'both')
-	xm.jar('src' => _('rsc/deps/apache/commons-io/1.4/commons-io-1.4.jar'), 'stage' => 'both')
-	xm.listeners{ |x| xm.listener('installer' => 'BSFInstallerListener', 'uninstaller' => 'BSFUninstallerListener') }
-	xm.summarylogfilepath('$INSTALL_PATH/Uninstaller/MySummary.htm')
-	xm.packs {
-	xm.pack('name' => 'DemoDB', 'required' => 'no', 'preselected'=>'no') {
-	  xm.description('DemoDB. Nützlich, um Elexis kennen zu lernen.')
-	  xm.singlefile('src'=> demoZipFile, 'target' =>"$USER_HOME/elexis/demoDB_#{parent.version}.zip")
-				    }
-	  allPacks.each { |aPack| aPack.emitIzPackXML(xm) }
-	  platforms.each { |tgtPlatform|
-	    tRsc    = tgtPlatform['os_specific']
-	    xm.pack('name' =>platform2path(tgtPlatform,'.'), 'condition'=>tgtPlatform['condition'], 'required' => 'yes') {
-	    |x| xm.description(tgtPlatform['description'])
-		xm.executable('targetfile' => tgtPlatform['executable'], 'keep' => 'true')
-		xm.singlefile('src' => tgtPanel, 'target' => "$INSTALL_PATH/#{tgtPlatform['condition']}")
-		tgtPlatform['os_files'].each { |jar| xm.singlefile('src' => jar, 'target' => jar.sub(File.dirname(jar), '$INSTALL_PATH/plugins')) }
-		(Dir.glob(File.join(tRsc, '.*')) + Dir.glob(File.join(tRsc, '**', '*'))).each { |fileOrDir|
-			next if File.directory?(fileOrDir)
-			xm.singlefile('src' => fileOrDir, 'target' =>  fileOrDir.sub(tRsc, '$INSTALL_PATH'))
-		}
-	      }
-	    }
-	  }
-	}
+                    }
+        xm.locale { |x| xm.langpack('iso3'=>'eng'); xm.langpack('iso3'=>'deu'); xm.langpack('iso3'=>'fra') }
+        xm.native('type' => 'izpack', 'name' => 'ShellLink.dll')
+          xm.conditions { |j|
+            xm.condition('type' => 'variable', 'id'=>'is32bit') { |x| xm.name('SYSTEM_sun_arch_data_model'); xm.value('32') }
+            xm.condition('type' => 'variable', 'id'=>'is64bit') { |x| xm.name('SYSTEM_sun_arch_data_model'); xm.value('64') }
+                        }
+        xm.resources{ |x|
+                      xm.res('id' =>'TargetPanel.dir', 'src' => tgtPanel)
+                      xm.res('id' =>'BSFActionsSpec.xml', 'src' => _('rsc/BSFActionsSpec.xml'))
+                      xm.res('id' =>'copyConfiguration.bsh', 'src' => _('rsc/copyConfiguration.bsh'))
+                      xm.res('id' =>'patchForLogback.bsh', 'src' => _('rsc/patchForLogback.bsh'))
+                      xm.res('id' =>'unzipDemoDB.bsh', 'src' => _('rsc/unzipDemoDB.bsh'))
+                      xm.res('id' =>'packsLang.xml_eng', 'src' => _('rsc/i18n/packsLang.xml_eng'))
+                      xm.res('id' =>'packsLang.xml_fra', 'src' => _('rsc/i18n/packsLang.xml_fra'))
+                      xm.res('id' =>'HTMLLicencePanel.licence', 'src' => _('rsc/license.html'))
+                      xm.res('id' =>'HTMLInfoPanel.info', 'src' => _('rsc/info.html'), 'parse'=>'yes', 'type'=>'xml')
+                      xm.res('id' =>'HTMLInfoPanel.info_fra', 'src' => _('rsc/info_fra.html'), 'parse'=>'yes', 'type'=>'xml')
+                      xm.res('id' =>'HTMLInfoPanel.info_eng', 'src' => _('rsc/info_eng.html'), 'parse'=>'yes', 'type'=>'xml')
+                      xm.res('id' =>'medelexis-logo.png', 'src' => _('rsc/elexis-logo.png'))
+                      xm.res('id' =>'Win_shortcutSpec.xml', 'src' => _('rsc/Shortcuts_Windows.xml'))
+                      xm.res('id' =>'Unix_shortcutSpec.xml', 'src' => _('rsc/Shortcuts_Linux.xml'))
+                      }
+        xm.jar('src' => _('rsc/deps/apache/commons-logging/1.1.1/commons-logging-1.1.1.jar'), 'stage' => 'both')
+        xm.jar('src' => _('rsc/deps/bsh/bsh/2.0b4/bsh-2.0b4.jar'), 'stage' => 'both')
+        xm.jar('src' => _('rsc/deps/apache/bsf/2.4.0/bsf-2.4.0.jar'), 'stage' => 'both')
+        xm.jar('src' => _('rsc/deps/apache/commons-io/1.4/commons-io-1.4.jar'), 'stage' => 'both')
+        xm.listeners{ |x| xm.listener('installer' => 'BSFInstallerListener', 'uninstaller' => 'BSFUninstallerListener') }
+        xm.summarylogfilepath('$INSTALL_PATH/Uninstaller/MySummary.htm')
+        xm.packs {
+        xm.pack('name' => 'Dokumentation', 'required' => 'no', 'preselected'=>'yes') {
+          xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins.')
+          xm.file('src'=> File.join(DeployElexis, 'dox'), 'targetdir' =>"$INSTALL_PATH/documentation")
+                                                                              }
+        xm.pack('name' => 'DemoDB', 'required' => 'no', 'preselected'=>'no') {
+          xm.description('DemoDB. Nützlich, um Elexis kennen zu lernen.')
+          xm.singlefile('src'=> demoZipFile, 'target' =>"$USER_HOME/elexis/demoDB_#{parent.version}.zip")
+                                    }
+          allPacks.each { |aPack| aPack.emitIzPackXML(xm) }
+          platforms.each { |tgtPlatform|
+            tRsc    = tgtPlatform['os_specific']
+            xm.pack('name' =>platform2path(tgtPlatform,'.'), 'condition'=>tgtPlatform['condition'], 'required' => 'yes') {
+            |x| xm.description(tgtPlatform['description'])
+                xm.executable('targetfile' => tgtPlatform['executable'], 'keep' => 'true')
+                xm.singlefile('src' => tgtPanel, 'target' => "$INSTALL_PATH/#{tgtPlatform['condition']}")
+                tgtPlatform['os_files'].each { |jar| xm.singlefile('src' => jar, 'target' => jar.sub(File.dirname(jar), '$INSTALL_PATH/plugins')) }
+                (Dir.glob(File.join(tRsc, '.*')) + Dir.glob(File.join(tRsc, '**', '*'))).each { |fileOrDir|
+                        next if File.directory?(fileOrDir)
+                        xm.singlefile('src' => fileOrDir, 'target' =>  fileOrDir.sub(tRsc, '$INSTALL_PATH'))
+                }
+              }
+            }
+          }
+        }
       xm.target!().close
     end
 
@@ -509,15 +527,15 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
   allCommonJars.each{ |x| task($myInstXml => x.to_s); task('app' => x.to_s) }
 
   allProjects.each{ |x|
-  $tgtBase = platform2path(getDefaultPlatform, '.')
-  $tgtPath = destRoot = File.join(project.path_to(:target), $tgtBase)
-  task 'app' =>  project(x).package(:plugin) do
-      jarname = project(x).package(:plugin).to_s
-      destDir = File.join(project.path_to(:target), $tgtBase, 'plugins')
-      FileUtils.makedirs(destDir, :verbose => Buildr.application.options.trace) if !File.directory?(destDir)
-      destName = File.join(destDir, File.basename(jarname))
-      Buildr::Eclipse.installPlugin(jarname.to_s, destDir, $tgtBase)
-  end
+    $tgtBase = platform2path(getDefaultPlatform, '.')
+    $tgtPath = destRoot = File.join(project.path_to(:target), $tgtBase)
+    task 'app' =>  project(x).package(:plugin) do
+        jarname = project(x).package(:plugin).to_s
+        destDir = File.join(project.path_to(:target), $tgtBase, 'plugins')
+        FileUtils.makedirs(destDir, :verbose => Buildr.application.options.trace) if !File.directory?(destDir)
+        destName = File.join(destDir, File.basename(jarname))
+        Buildr::Eclipse.installPlugin(jarname.to_s, destDir, $tgtBase)
+    end
     }
   task(:package => 'app')
   task('app').enhance do
