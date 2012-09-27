@@ -9,8 +9,6 @@ import java.io.*;
 import java.util.zip.*;
 
 void unzipDemoDb (String filename, String where) {
-  print(filename);
-  print(where);
   BufferedOutputStream dest = null;
   FileInputStream fis = new FileInputStream(filename);
   CheckedInputStream checksum = new CheckedInputStream(fis, new Adler32());
@@ -43,7 +41,7 @@ void unzipDemoDb (String filename, String where) {
   print("Checksum: "+checksum.getChecksum().getValue());
 }
 
-void unpackDemoDB(String where) {
+void unpackDemoDB(String where, String destination) {
     FilenameFilter selectDemoDB = new FilenameFilter() {
 	public boolean accept(File dir, String name) {
 	    return name.endsWith(".zip") && name.startsWith("demoDB");
@@ -51,17 +49,33 @@ void unpackDemoDB(String where) {
     };
    File dirName = new File(where);
    demoDB = dirName.listFiles(selectDemoDB);
-   unzipDemoDb(demoDB[0].toString(), where);
+   if (demoDB == null)
+   {
+     error("directory " + where + " does not exists");
+     exit();
+   }
+   if (demoDB == null || demoDB.length == 0)
+   {
+      error("could not find demoDb in "+ where);
+      exit();
+   }
+   else
+   {
+     print("Installing "+ demoDB[0].toString() + " in "+ where);
+     unzipDemoDb(demoDB[0].toString(), destination);
+   }
 }
 
 void afterPack() {
-  print("(beanshell)  "+ getSourceFileInfo() + " after pack " + pack.name + " inst " +  idata.getVariable("INSTALL_PATH") );
-  dirName = idata.getVariable("USER_HOME") + idata.getVariable("FILE_SEPARATOR") + idata.getVariable("APP_NAME");
-  print("Will install demoDB into "+ dirName);
-  unpackDemoDB(dirName);
+  dirName = idata.getVariable("INSTALL_PATH");
+  destination = idata.getVariable("USER_HOME") + idata.getVariable("FILE_SEPARATOR") + "elexis" ;
+  print("(beanshell)  "+ getSourceFileInfo() + " after pack " + pack.name + " inst " +  dirName);
+  print("unzpack demoDB.zip into " +  dirName);
+  unpackDemoDB(dirName, destination);
 }
 
 if (false && idata == void) // idata is not defined, we want to test
 {
-  unpackDemoDB(bsh.cwd);
+  print("Testing script in pwd " + bsh.cwd);
+  unpackDemoDB(bsh.cwd, System.getProperty("user.home") +"/elexis");
 }
