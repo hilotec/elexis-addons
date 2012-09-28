@@ -18,11 +18,14 @@
 #   -destination /tmp/unpacked
 
   require 'buildrizpack'
-  DeployElexis = File.expand_path(File.join(Dir.pwd, 'deploy'))
-  layout[:target] = DeployElexis
+  layout[:target] = Elexis::get_deploy_dir
   ProductInfoFile = _('branding.product')
   $myInstXml = File.join(path_to(:target), 'installer.xml')
-  package(:izpack, :file=> "deploy/elexis-#{project.parent.version}-installer.jar").input = $myInstXml
+  packFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}.#{Buildr::Eclipse.qualifier}-installer.jar")
+  packFileShort =  File.join(Elexis::get_deploy_dir, "elexis-installer.jar")
+  task(packFileShort => packFile)  do FileUtils.ln_s(File.basename(packFile), packFileShort, :force => true) end
+  task(:package => packFileShort)
+  package(:izpack, :file=> packFile).input = $myInstXml
   package(:izpack).izpackVersion = '4.3.5'
   package(:izpack).include($myInstXml)
   task($myInstXml => task(:doc))
@@ -415,20 +418,6 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
         end
     }
 
-def addPackIfProjectExists(installerXml, projectname, izPackName, izPackDescription)
-  begin
-    jarName = project(projectname).package(:plugin).to_s
-    task($myInstXml => jarName)
-    installerXml.pack('name' => izPackName, 'required' => 'no', 'preselected'=>'no') {
-      installerXml.file('src'=> jarName, 'targetdir' => File.join('$INSTALL_PATH','plugins'))
-      installerXml.description(izPackDescription)
-    }
-  rescue
-    puts "izpack: Skipping #{izPackName} at #{Time.now}"
-    # probably project not defined
-  end
-end
-
     allProjects.each{ |x| file($myInstXml => project(x).package(:plugin).to_s) }
     allCommonJars.each{ |x| file($myInstXml => x.to_s) }
     task($myInstXml => [ demoZipFile , project.parent.task(:doc)]) do
@@ -500,7 +489,7 @@ end
 #          xm.singlefile('src'=> demoZipFile, 'target' =>"$USER_HOME/elexis/demoDB_#{parent.version}.zip")
          xm.singlefile('src'=> demoZipFile, 'target' =>"$INSTALL_PATH/demoDB_#{parent.version}.zip")
                                     }
- addPackIfProjectExists(xm, 'com.hilotec.elexis.kgview', 'strukturiertere Erfassung der KG (von Antoine Kaufmann)',
+ Elexis::addPackIfProjectExists(project, xm, 'com.hilotec.elexis.kgview', 'strukturiertere Erfassung der KG (von Antoine Kaufmann)',
                         %(Plugin fuer eine etwas strukturiertere Erfassung der KG. Die Daten dafuer
 werden wo moeglich in die Elexis-Felder gespeichert (bei den Feldern pro
 Patient, die im Patientenblatt schon vorhanden sind), der Rest (die
@@ -515,7 +504,7 @@ Elexis Artikel).
 Die Medikamentenkarte sollte in Zukunft wohl als eigenes Plugin entwickelt
 werden.) )
 
-        addPackIfProjectExists(xm, 'com.jsigle.noatext_jsl', 'Text-Plugin (noa-libre) (von Jörg Sigle)',
+        Elexis::addPackIfProjectExists(project, xm, 'com.jsigle.noatext_jsl', 'Text-Plugin (noa-libre) (von Jörg Sigle)',
                                %(Ein TextPlugin für Elexis, aktualisiert auf Basis von noa-libre, mit verbesserter Stabilität.
 Name des Plugins: com.jsigle.noatext_jsl.
 
@@ -529,22 +518,22 @@ Status: BETA.
 
 Lizenz: Vorläufig GPL Version 2.1) )
 
-        addPackIfProjectExists(xm, 'ch.medelexis.text.templator', 'Medelexis Text Templator (von Gerry Weirich)',
+        Elexis::addPackIfProjectExists(project, xm, 'ch.medelexis.text.templator', 'Medelexis Text Templator (von Gerry Weirich)',
                                %(Das Elexis Textsystem ist zwar recht flexibel und Leistungsfähig,
 hat dafür aber auch den Nachteil, nicht unter allen  Betriebssystemen gleichermassen gut zu funktionieren. zum Beispiel Mac OXS und Ubuntu/Gnome.
 
 Dieses Plugin ersetzt das Standard-Textsystem gegen ein schablonenbasiertes Konzept, welches unter allen Betriebssystemen funktioniert, dafür aber etwas weniger flexibel ist.
 Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen von vorhandenen bzw. vorher erstellten Dokumenten verwendet, durch Ersetzen von definierten Textstellen gezielt verändert und wieder abgespeichert, so dass sie anschliessend halbautomatisch wieder vom dafür geeigneten systemeigenen Programm weiterverarbeitet werden können. Die Konfiguration ist somit jetzt ein zweistufiger Prozess: Für jedes Dokument muss eine Vorlage und ein Übersetzungsschema erstellt werden. S. weiter unten unter Konfiguration. Somit spielt weder die Textverarbeitung noch das Zielsystem eine Rolle. Das Konzept sollte mit Microsoft Word ebenso funktionieren können, wie mit MacWrite oder KNotepad, oder eben mit OpenOffice. Das einzige was man braucht, ist ein passender Schablonenprozessor.) )
 
-          addPackIfProjectExists(xm, 'com.hilotec.elexis.opendocument', 'Text-Plugin OpenDocument (von Antoine Kaufmann)',
+          Elexis::addPackIfProjectExists(project, xm, 'com.hilotec.elexis.opendocument', 'Text-Plugin OpenDocument (von Antoine Kaufmann)',
                         %(Freies alternatives Text-Plugin fuer Elexis. Sollte mit jeder Textverarbeitung
 funktionieren, welche das OpenDocument-Format unterstützt. Das Plugin generiert
 ODT-Files und öffnet sie danach mit dem konfigurierten Programm.) )
 
         xm.pack('name' => 'Dokumentation', 'required' => 'no', 'preselected'=>'yes') {
-          Dir.glob(File.join(DeployElexis, 'dox', '*')).each { |dir| xm.file('src'=> dir, 'targetdir' =>"$INSTALL_PATH/Dokumentation") }
+          Dir.glob(File.join(Elexis::get_deploy_dir, 'dox', '*')).each { |dir| xm.file('src'=> dir, 'targetdir' =>"$INSTALL_PATH/Dokumentation") }
           xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins.')
-                                                                                     }
+                                                                                     } unless Wikitext::skipDoc
           allPacks.each { |aPack| aPack.emitIzPackXML(xm) }
           platforms.each { |tgtPlatform|
             tRsc    = tgtPlatform['os_specific']
@@ -614,7 +603,7 @@ check task('app'), "application should exist in #{$tgtPath}" do
   File.should exist(File.join($tgtPath, 'configuration', 'config.ini'))
   File.should exist(File.join($tgtPath, '.eclipseproduct'))
   File.should exist(File.join($tgtPath, 'elexis.ini'))
-  File.should exist(File.join($tgtPath, 'about.html'))
+  # File.should exist(File.join($tgtPath, 'about.html')) # Does not exists under windows
   (Dir.glob(File.join($tgtPath, 'elexis*')).size == 2).should be_true # elexis or elexis.exe and elexis.ini
   (Dir.glob(File.join($tgtPath, 'plugins', '*')).size > 10).should be_true
   (Dir.glob(File.join($tgtPath, 'plugins', '*/*')).size >5).should be_true

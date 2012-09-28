@@ -68,7 +68,8 @@ void unpackDemoDB(String where, String destination) {
 
 void afterPack() {
   dirName = idata.getVariable("INSTALL_PATH");
-  destination = idata.getVariable("USER_HOME") + idata.getVariable("FILE_SEPARATOR") + "elexis" ;
+//  destination = idata.getVariable("USER_HOME") + idata.getVariable("FILE_SEPARATOR") + "elexis" ;
+  destination = idata.getVariable("INSTALL_PATH");
   print("(beanshell)  "+ getSourceFileInfo() + " after pack " + pack.name + " inst " +  dirName);
   print("unzpack demoDB.zip into " +  dirName);
   unpackDemoDB(dirName, destination);
