@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service:service category="feature" id="ch.elexis.archie.wzw" name="WZW-Statistik" provider="weirich@elexis.ch" type="Statistik" version="2.0.0" xmlns:service="http://www.medelexis.ch/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ">
+<?xml version='1.0' encoding='UTF-8'?>
+<service:service category='feature' id='ch.elexis.archie.wzw' name='WZW-Statistik' provider='weirich@elexis.ch' xsi:schemaLocation='http://www.medelexis.ch/services ../medelexis-commons/rsc/service.xsd ' xmlns:service='http://www.medelexis.ch/services' type='Statistik' version='2.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
   <service:conditions>
   	<service:roles>
-  		<service:role priceClass="fixed-low" available="true"
-  			daysperpayment="365" name="default">
-  			<service:pricePerMandator amount="50.00" currency="CHF" />
+  		<service:role available='true' daysperpayment='365' name='default' priceClass='fixed-low'>
+  			<service:pricePerMandator amount='50.00' currency='CHF'/>
   		</service:role>
   	</service:roles>
   </service:conditions>
   <service:description>Archie-Client zur Erstellung von Statistiken, die für WZW-Verfahren wichtig sein können</service:description>
   <service:depends>ch.medelexis.nucleus ch.unibe.iam.scg.archie</service:depends>
-</service:service>
+<service:docURL>http://www.medelexis.ch/plugins_doc/2.1.7/WZW-Statistik/whatisit.pdf</service:docURL></service:service>
