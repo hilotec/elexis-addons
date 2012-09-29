@@ -21,9 +21,12 @@
   layout[:target] = Elexis::get_deploy_dir
   ProductInfoFile = _('branding.product')
   $myInstXml = File.join(path_to(:target), 'installer.xml')
-  packFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}.#{Buildr::Eclipse.qualifier}-installer.jar")
+  packFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}-installer.jar")
   packFileShort =  File.join(Elexis::get_deploy_dir, "elexis-installer.jar")
-  task(packFileShort => packFile)  do FileUtils.ln_s(File.basename(packFile), packFileShort, :force => true) end
+  task(packFileShort => package(:izpack))  do
+    FileUtils.rm(packFileShort) if File.exists?(packFileShort)
+    FileUtils.ln_s(File.basename(packFile), packFileShort, :force => true, :verbose => true)
+  end
   task(:package => packFileShort)
   package(:izpack, :file=> packFile).input = $myInstXml
   package(:izpack).izpackVersion = '4.3.5'
