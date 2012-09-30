@@ -95,11 +95,12 @@
     libPack = BuildrIzPack::Pack.new('Eclipse-Bibliotheken', 'Eclipse Bibliotheken, welche von Elexis Plug-Ins benutzt werden', { 'required' => 'yes' })
     chPack = BuildrIzPack::Pack.new('Schweiz (deutsch)', 'Abrechnungs- und Diagnosesysteme Schweiz' )
 
-    def addPackIfProject(osJars, name, description, jars)
+    def addPackIfProject(osJars, name, description, projectNames)
       begin
         pack = BuildrIzPack::Pack.new(name, description)
         # TODO: Pack.new add third parameter { 'preselected' => false}
-        jars.each{ |jar|
+        projectNames.each{ |name|
+                    jar = project(name).package(:plugin).to_s
                     pack.addFile(jar, "$INSTALL_PATH/plugins/#{File.basename(jar)}")
                     osJars << jar
                   }
@@ -128,15 +129,14 @@ Medikamentenliste enthalten sind (verknuepfen aber auch nur auf normale
 Elexis Artikel).
 Die Medikamentenkarte sollte in Zukunft wohl als eigenes Plugin entwickelt
 werden.),
-        [ project('ch.elexis.icpc').package(:plugin).to_s,
-          project('com.hilotec.elexis.kgview').package(:plugin).to_s,]
+        [ 'ch.elexis.icpc', 'com.hilotec.elexis.kgview',]
     )
 
     allPacks << addPackIfProject(osJars, 'Text-Plugin OpenDocument (von Antoine Kaufmann)',
                      %(Freies alternatives Text-Plugin fuer Elexis. Sollte mit jeder Textverarbeitung
   funktionieren, welche das OpenDocument-Format unterstützt. Das Plugin generiert
   ODT-Files und öffnet sie danach mit dem konfigurierten Programm.),
-      [ project('com.hilotec.elexis.opendocument').package(:plugin).to_s ]
+      [ 'com.hilotec.elexis.opendocument' ]
     )
 
     allPacks << addPackIfProject(osJars, 'Text-Plugin (noa-libre) (von Jörg Sigle)',
@@ -152,7 +152,7 @@ Status: BETA.
         unkritischer Umgebung und gute Backups dringend empfohlen!
 
 Lizenz: Vorläufig GPL Version 2.1) ,
-      [ project('com.jsigle.noatext_jsl').package(:plugin).to_s ]
+      [ 'com.jsigle.noatext_jsl' ]
     )
 
     allPacks << addPackIfProject(osJars, 'Medelexis Text Templator (von Gerry Weirich)',
@@ -161,7 +161,7 @@ hat dafür aber auch den Nachteil, nicht unter allen  Betriebssystemen gleicherm
 
 Dieses Plugin ersetzt das Standard-Textsystem gegen ein schablonenbasiertes Konzept, welches unter allen Betriebssystemen funktioniert, dafür aber etwas weniger flexibel ist.
 Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen von vorhandenen bzw. vorher erstellten Dokumenten verwendet, durch Ersetzen von definierten Textstellen gezielt verändert und wieder abgespeichert, so dass sie anschliessend halbautomatisch wieder vom dafür geeigneten systemeigenen Programm weiterverarbeitet werden können. Die Konfiguration ist somit jetzt ein zweistufiger Prozess: Für jedes Dokument muss eine Vorlage und ein Übersetzungsschema erstellt werden. S. weiter unten unter Konfiguration. Somit spielt weder die Textverarbeitung noch das Zielsystem eine Rolle. Das Konzept sollte mit Microsoft Word ebenso funktionieren können, wie mit MacWrite oder KNotepad, oder eben mit OpenOffice. Das einzige was man braucht, ist ein passender Schablonenprozessor.),
-      [ project('ch.medelexis.text.templator').package(:plugin).to_s ]
+      [ 'ch.medelexis.text.templator' ]
     )
     allPacks.reject! { |item| item == nil } # Remove nil packages, if a project was not defined!
 
