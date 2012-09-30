@@ -13,8 +13,10 @@
    </configIni>
 
    <launcherArgs>
-      <programArgs>-consoleLog -debug -console</programArgs>
-      <vmArgs>-Xms40m -Xmx512m -XX:MaxPermSize=256m</vmArgs>
+      <programArgs>-consoleLog -debug</programArgs>
+      <vmArgs>-Xms256m
+-Xmx768m
+-XX:MaxPermSize=256m</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 

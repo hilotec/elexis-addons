@@ -18,20 +18,20 @@
 #   -destination /tmp/unpacked
 
   require 'buildrizpack'
-  layout[:target] = Elexis::get_deploy_dir
+  layout[:target] = File.join(Elexis::get_deploy_dir, 'elexis-os')
   ProductInfoFile = _('branding.product')
-  $myInstXml = File.join(path_to(:target), 'installer.xml')
-  packFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}-installer.jar")
-  packFileShort =  File.join(Elexis::get_deploy_dir, "elexis-installer.jar")
-  task(packFileShort => package(:izpack))  do
-    FileUtils.rm(packFileShort) if File.exists?(packFileShort)
-    FileUtils.ln_s(File.basename(packFile), packFileShort, :force => true, :verbose => true)
-  end
-  task(:package => packFileShort)
-  package(:izpack, :file=> packFile).input = $myInstXml
+  elexis_inst_xml = File.join(path_to(:target), 'elexis_installer.xml')
+  elexisPackFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}-installer.jar")
+  elexisPackFileShort =  File.join(Elexis::get_deploy_dir, "elexis-installer.jar")
+  task(:package => elexisPackFileShort)
+  package(:izpack, :file=> elexisPackFile).input = elexis_inst_xml
   package(:izpack).izpackVersion = '4.3.5'
-  package(:izpack).include($myInstXml)
-  task($myInstXml => task(:doc))
+  package(:izpack).include(elexis_inst_xml)
+  task(elexis_inst_xml => task(:doc))
+  task(elexisPackFileShort => package(:izpack))  do
+    FileUtils.rm(elexisPackFileShort) if File.exists?(elexisPackFileShort)
+    FileUtils.ln_s(File.basename(elexisPackFile), elexisPackFileShort, :force => true, :verbose => true)
+  end
 
   Macosx_x86_64  =  { 'osgi.os' => 'macosx', 'osgi.ws' => 'cocoa', 'osgi.arch' => 'x86_64',
                       'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac',
@@ -95,39 +95,79 @@
     libPack = BuildrIzPack::Pack.new('Eclipse-Bibliotheken', 'Eclipse Bibliotheken, welche von Elexis Plug-Ins benutzt werden', { 'required' => 'yes' })
     chPack = BuildrIzPack::Pack.new('Schweiz (deutsch)', 'Abrechnungs- und Diagnosesysteme Schweiz' )
 
-class  BuildrIzPack::Pack
-
-  def addEclipseJar(jarname)
-    @@run ||= 0
-    @@run += 1
-    if Buildr::Eclipse.mustUnpackJar(jarname) then
-      baseDir = File.join(Dir.tmpdir, 'buildr', @@run.to_s)
-      # tgtDir =  File.join(baseDir, File.basename(jarname, '.jar'))
-      tgtDir = baseDir
-      FileUtils.rm_rf(tgtDir, :verbose => Buildr.application.options.trace) if File.exists?(tgtDir)  # be sure to remove old things
-      Buildr::Eclipse.installPlugin(jarname.to_s, tgtDir)
-      files = (Dir.glob(File.join(tgtDir, '**','*')) + Dir.glob(File.join(tgtDir, '**','.*'))).sort.uniq
-      files.each{ |x|
-                  next if File.directory?(x)
-                  path = x.sub(baseDir, File.join('$INSTALL_PATH','plugins'))
-                  addFile(x, path)
-                }
-      return
+    def addPackIfProject(osJars, name, description, jars)
+      begin
+        pack = BuildrIzPack::Pack.new(name, description)
+        # TODO: Pack.new add third parameter { 'preselected' => false}
+        jars.each{ |jar|
+                    pack.addFile(jar, "$INSTALL_PATH/plugins/#{File.basename(jar)}")
+                    osJars << jar
+                  }
+        return pack
+      rescue => details
+        puts "izpack rescue addPackIfProject: Skipping #{name} at #{Time.now}"
+        p details
+        p caller
+        # probably project not defined
+        return nil
+      end
     end
 
-    base = File.basename(jarname)
-    if !Buildr::Eclipse.adaptName(base).eql?(base)
-      addFile(jarname, File.join(@defaultPath, Buildr::Eclipse.adaptName(base)))
-    else
-      addFile(jarname)
-    end
-  end
+    osJars = []
+    allPacks << addPackIfProject(osJars, 'strukturiertere Erfassung der KG (von Antoine Kaufmann)',
+                             %(Plugin fuer eine etwas strukturiertere Erfassung der KG. Die Daten dafuer
+werden wo moeglich in die Elexis-Felder gespeichert (bei den Feldern pro
+Patient, die im Patientenblatt schon vorhanden sind), der Rest (die
+Textfelder und Zeit pro Konsultation werden in einer separaten Tabelle
+abgelegt (dadurch fehlt aber Momentan noch die "Revisionsverwaltung", der
+Eintraege)).
 
-end
+Der Teil mit der Medikamentenkarte benutzt die Elexis-Interne Fixmedikation,
+funktioniert aber Momentan nur mit Medikamenten die in der Favoriten-
+Medikamentenliste enthalten sind (verknuepfen aber auch nur auf normale
+Elexis Artikel).
+Die Medikamentenkarte sollte in Zukunft wohl als eigenes Plugin entwickelt
+werden.),
+        [ project('ch.elexis.icpc').package(:plugin).to_s,
+          project('com.hilotec.elexis.kgview').package(:plugin).to_s,]
+    )
 
-    allPacks << kernPack
-    allPacks << libPack
+    allPacks << addPackIfProject(osJars, 'Text-Plugin OpenDocument (von Antoine Kaufmann)',
+                     %(Freies alternatives Text-Plugin fuer Elexis. Sollte mit jeder Textverarbeitung
+  funktionieren, welche das OpenDocument-Format unterstützt. Das Plugin generiert
+  ODT-Files und öffnet sie danach mit dem konfigurierten Programm.),
+      [ project('com.hilotec.elexis.opendocument').package(:plugin).to_s ]
+    )
+
+    allPacks << addPackIfProject(osJars, 'Text-Plugin (noa-libre) (von Jörg Sigle)',
+      %(Ein TextPlugin für Elexis, aktualisiert auf Basis von noa-libre, mit verbesserter Stabilität.
+Name des Plugins: com.jsigle.noatext_jsl.
+
+Ausführliche Informationen auf: http://www.jsigle.com/prog/elexis#NOAText_jsl
+
+Status: BETA.
+        Keinerlei Gewährleistung!
+        Verwendung ausschliesslich auf eigene Verantwortung!
+        Sachkundiger Anwender, eigene Funktionstests in
+        unkritischer Umgebung und gute Backups dringend empfohlen!
+
+Lizenz: Vorläufig GPL Version 2.1) ,
+      [ project('com.jsigle.noatext_jsl').package(:plugin).to_s ]
+    )
+
+    allPacks << addPackIfProject(osJars, 'Medelexis Text Templator (von Gerry Weirich)',
+      %(Das Elexis Textsystem ist zwar recht flexibel und Leistungsfähig,
+hat dafür aber auch den Nachteil, nicht unter allen  Betriebssystemen gleichermassen gut zu funktionieren. zum Beispiel Mac OXS und Ubuntu/Gnome.
+
+Dieses Plugin ersetzt das Standard-Textsystem gegen ein schablonenbasiertes Konzept, welches unter allen Betriebssystemen funktioniert, dafür aber etwas weniger flexibel ist.
+Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen von vorhandenen bzw. vorher erstellten Dokumenten verwendet, durch Ersetzen von definierten Textstellen gezielt verändert und wieder abgespeichert, so dass sie anschliessend halbautomatisch wieder vom dafür geeigneten systemeigenen Programm weiterverarbeitet werden können. Die Konfiguration ist somit jetzt ein zweistufiger Prozess: Für jedes Dokument muss eine Vorlage und ein Übersetzungsschema erstellt werden. S. weiter unten unter Konfiguration. Somit spielt weder die Textverarbeitung noch das Zielsystem eine Rolle. Das Konzept sollte mit Microsoft Word ebenso funktionieren können, wie mit MacWrite oder KNotepad, oder eben mit OpenOffice. Das einzige was man braucht, ist ein passender Schablonenprozessor.),
+      [ project('ch.medelexis.text.templator').package(:plugin).to_s ]
+    )
+    allPacks.reject! { |item| item == nil } # Remove nil packages, if a project was not defined!
+
     allPacks << chPack
+    allPacks << libPack
+    allPacks << kernPack
     allProjects = (kernProjects + chProjects)
     allProjects.each {
       |proj|
@@ -162,8 +202,6 @@ end
     def platform2path(platformHash, separator=File::SEPARATOR)
       res = "#{platformHash['osgi.os']}#{separator}#{platformHash['osgi.ws']}#{separator}#{platformHash['osgi.arch']}"
     end
-
-    $kernPack = kernPack
 
     # Find an artifact given by its name
     #   return jar if founc in the array of jars given (e.g. jar produced by project)
@@ -341,7 +379,7 @@ osgi.bundles=#{product['configurations'].sort.join(',')}
         File.open(htmlFile, 'w+'){|f| f.write(inhalt) }
       end
     end if files.size > 0
-    task($myInstXml => htmlFiles)
+    task(elexis_inst_xml => htmlFiles)
     # What we want:
     # Copy all common stuff from ../elexis-base/BuildElexis/rsc into _+'rsc'  e.g. *.html, i18n
     # Copy specific elexis.<os> from ../elexis-base/BuildElexis/rsc/os into _+'target/{os}/rsc'
@@ -395,7 +433,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
         jars2copy.each{ |jar| task dest => jar }
         tRsc    = File.join(osPath, platform2path(tgtPlatform,'.'))
         tgtPlatform['os_specific'] = tRsc
-        task $myInstXml => tRsc
+        task elexis_inst_xml => tRsc
         task tRsc do
             if !File.directory?(tRsc)
             FileUtils.makedirs(tRsc)
@@ -421,17 +459,19 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
         end
     }
 
-    allProjects.each{ |x| file($myInstXml => project(x).package(:plugin).to_s) }
-    allCommonJars.each{ |x| file($myInstXml => x.to_s) }
-    task($myInstXml => [ demoZipFile , project.parent.task(:doc)]) do
+    allProjects.each{ |x| file(elexis_inst_xml => project(x).package(:plugin).to_s) }
+    allCommonJars.each{ |x| file(elexis_inst_xml => x.to_s) }
+    task(elexis_inst_xml => osJars + [ demoZipFile,
+                              project.parent.task(:doc),
+                              ]) do
       allProjects.each{ |x| project(x).package(:plugin).invoke }
       FileUtils.makedirs(path_to(:target), :verbose => Buildr.application.options.trace) if !File.directory?(path_to(:target))
       kernProjects.each{ |x| kernPack.addEclipseJar(project(x).package(:plugin).to_s) }
       chProjects.each{ |x| chPack.addEclipseJar(project(x).package(:plugin).to_s) }
       allCommonJars.each{ |x| libPack.addEclipseJar(x.to_s) }
-      tgtPanel = File.join(path_to(:target), 'TargetPanel.txt')
+      tgtPanel = File.join(path_to(:target), 'TargetPanel.txt.opensource')
       Buildr::write(tgtPanel, "$SYSTEM_user_home/elexis/bin/elexis-#{project.parent.version}")
-      xm = Builder::XmlMarkup.new(:target=>File.open($myInstXml, 'w+'), :indent => 2)
+      xm = Builder::XmlMarkup.new(:target=>File.open(elexis_inst_xml, 'w+'), :indent => 2)
       xm.instruct! :xml, :version => '1.0', :encoding => 'utf-8', :standalone => "yes"
       xm.comment! %(Created by #{__FILE__} #{Time.now}
       * Copyright by Gerry Weirich 2006 - 2012.
@@ -446,7 +486,6 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
                           xm.authors{ |x| xm.author('name' => "www.elexis.ch", 'email' => 'info@elexis.ch') }
                           xm.url('http://www.elexis.ch')
                           }
-        xm.tag!('info') { xm.appversion(project.parent.version); xm.appname(project.parent.name) }
         xm.guiprefs('width' => '800', 'height' => '600', 'resizable' => 'yes')
         xm.variables { |x| xm.variable('name' => 'appversion', 'value' => "#{project.parent.version}") }
         xm.panels { |x| xm.panel('classname' => 'HTMLInfoPanel')
@@ -489,50 +528,8 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
         xm.packs {
         xm.pack('name' => 'DemoDB', 'required' => 'no', 'preselected'=>'no') {
           xm.description('DemoDB. Nützlich, um Elexis kennen zu lernen.')
-#          xm.singlefile('src'=> demoZipFile, 'target' =>"$USER_HOME/elexis/demoDB_#{parent.version}.zip")
          xm.singlefile('src'=> demoZipFile, 'target' =>"$INSTALL_PATH/demoDB_#{parent.version}.zip")
-                                    }
- Elexis::addPackIfProjectExists(project, xm, 'com.hilotec.elexis.kgview', 'strukturiertere Erfassung der KG (von Antoine Kaufmann)',
-                        %(Plugin fuer eine etwas strukturiertere Erfassung der KG. Die Daten dafuer
-werden wo moeglich in die Elexis-Felder gespeichert (bei den Feldern pro
-Patient, die im Patientenblatt schon vorhanden sind), der Rest (die
-Textfelder und Zeit pro Konsultation werden in einer separaten Tabelle
-abgelegt (dadurch fehlt aber Momentan noch die "Revisionsverwaltung", der
-Eintraege)).
-
-Der Teil mit der Medikamentenkarte benutzt die Elexis-Interne Fixmedikation,
-funktioniert aber Momentan nur mit Medikamenten die in der Favoriten-
-Medikamentenliste enthalten sind (verknuepfen aber auch nur auf normale
-Elexis Artikel).
-Die Medikamentenkarte sollte in Zukunft wohl als eigenes Plugin entwickelt
-werden.) )
-
-        Elexis::addPackIfProjectExists(project, xm, 'com.jsigle.noatext_jsl', 'Text-Plugin (noa-libre) (von Jörg Sigle)',
-                               %(Ein TextPlugin für Elexis, aktualisiert auf Basis von noa-libre, mit verbesserter Stabilität.
-Name des Plugins: com.jsigle.noatext_jsl.
-
-Ausführliche Informationen auf: http://www.jsigle.com/prog/elexis#NOAText_jsl
-
-Status: BETA.
-        Keinerlei Gewährleistung!
-        Verwendung ausschliesslich auf eigene Verantwortung!
-        Sachkundiger Anwender, eigene Funktionstests in
-        unkritischer Umgebung und gute Backups dringend empfohlen!
-
-Lizenz: Vorläufig GPL Version 2.1) )
-
-        Elexis::addPackIfProjectExists(project, xm, 'ch.medelexis.text.templator', 'Medelexis Text Templator (von Gerry Weirich)',
-                               %(Das Elexis Textsystem ist zwar recht flexibel und Leistungsfähig,
-hat dafür aber auch den Nachteil, nicht unter allen  Betriebssystemen gleichermassen gut zu funktionieren. zum Beispiel Mac OXS und Ubuntu/Gnome.
-
-Dieses Plugin ersetzt das Standard-Textsystem gegen ein schablonenbasiertes Konzept, welches unter allen Betriebssystemen funktioniert, dafür aber etwas weniger flexibel ist.
-Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen von vorhandenen bzw. vorher erstellten Dokumenten verwendet, durch Ersetzen von definierten Textstellen gezielt verändert und wieder abgespeichert, so dass sie anschliessend halbautomatisch wieder vom dafür geeigneten systemeigenen Programm weiterverarbeitet werden können. Die Konfiguration ist somit jetzt ein zweistufiger Prozess: Für jedes Dokument muss eine Vorlage und ein Übersetzungsschema erstellt werden. S. weiter unten unter Konfiguration. Somit spielt weder die Textverarbeitung noch das Zielsystem eine Rolle. Das Konzept sollte mit Microsoft Word ebenso funktionieren können, wie mit MacWrite oder KNotepad, oder eben mit OpenOffice. Das einzige was man braucht, ist ein passender Schablonenprozessor.) )
-
-          Elexis::addPackIfProjectExists(project, xm, 'com.hilotec.elexis.opendocument', 'Text-Plugin OpenDocument (von Antoine Kaufmann)',
-                        %(Freies alternatives Text-Plugin fuer Elexis. Sollte mit jeder Textverarbeitung
-funktionieren, welche das OpenDocument-Format unterstützt. Das Plugin generiert
-ODT-Files und öffnet sie danach mit dem konfigurierten Programm.) )
-
+        }
         xm.pack('name' => 'Dokumentation', 'required' => 'no', 'preselected'=>'yes') {
           Dir.glob(File.join(Elexis::get_deploy_dir, 'dox', '*')).each { |dir| xm.file('src'=> dir, 'targetdir' =>"$INSTALL_PATH/Dokumentation") }
           xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins.')
@@ -563,7 +560,7 @@ ODT-Files und öffnet sie danach mit dem konfigurierten Programm.) )
       kernProjects.each{ |x| kernPack.addEclipseJar(project(x).package(:plugin).to_s) }
       allCommonJars.each{ |x| libPack.addEclipseJar(x.to_s) }
   end
-  allCommonJars.each{ |x| task($myInstXml => x.to_s); task('app' => x.to_s) }
+  allCommonJars.each{ |x| task(elexis_inst_xml => x.to_s); task('app' => x.to_s) }
 
   allProjects.each{ |x|
     $tgtBase = platform2path(getDefaultPlatform, '.')
@@ -612,25 +609,18 @@ check task('app'), "application should exist in #{$tgtPath}" do
   (Dir.glob(File.join($tgtPath, 'plugins', '*/*')).size >5).should be_true
 end
 
-def checkOne(what)
-  check package, "installer.xml: #{$myInstXml} should contain #{what}" do
-    File.should exist($myInstXml)
-    content = IO.readlines($myInstXml).join('')
-    content.index(what).should_not be_nil
-  end
-end
-checkOne('installation')
-checkOne('$INSTALL_PATH/plugins/ch.elexis.h2.connector_')
-checkOne('$INSTALL_PATH/plugins/ch.elexis.mysql.connector')
-checkOne('$INSTALL_PATH/plugins/ch.elexis.core_')
-checkOne('$INSTALL_PATH/plugins/ch.rgw.utility_')
-checkOne('$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.win32.win32.x86_1')
-checkOne('$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1')
-checkOne('$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_1')
-checkOne('$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1')
-checkOne('$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.cocoa.macosx_1')
-checkOne('$INSTALL_PATH/plugins/org.eclipse.ui.forms_')
-checkOne('demoDB_elexis_')
-checkOne('Win_shortcutSpec.xml')
-checkOne('ShortcutPanel')
-checkOne('$INSTALL_PATH/configuration/logback.xml')
+IzPack::checkOne(project, elexis_inst_xml, 'installation')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/ch.elexis.h2.connector_')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/ch.elexis.mysql.connector')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/ch.elexis.core_')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/ch.rgw.utility_')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.win32.win32.x86_1')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_1')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.cocoa.macosx_1')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.ui.forms_')
+IzPack::checkOne(project, elexis_inst_xml, 'demoDB_elexis_')
+IzPack::checkOne(project, elexis_inst_xml, 'Win_shortcutSpec.xml')
+IzPack::checkOne(project, elexis_inst_xml, 'ShortcutPanel')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/configuration/logback.xml')
