@@ -13,6 +13,7 @@
 <unit id="org.eclipse.equinox.executable.feature.group" version="3.5.1.v20111216-1653-7P7NFUIFIbaUcU77s0KQWHw5HZTZ"/>
 <unit id="org.eclipse.equinox.executable" version="3.5.1.v20111216-1653-7P7NFUIFIbaUcU77s0KQWHw5HZTZ"/>
 <unit id="org.eclipse.platform.sdk" version="3.7.2.M20120208-0800"/>
+<unit id="org.eclipse.jdt.feature.group" version="3.7.2.v20120120-1414-7z8gFcuFMP7BW5XTz0jLTnz0l9B1"/>
 <unit id="org.eclipse.pde.junit.runtime.standalone.feature.group" version="1.0.101.r37x_v20111215-7a7xFBcFAhs4csLgXwCVrYe6585B"/>
 <repository location="http://download.eclipse.org/eclipse/updates/3.7"/>
 </location>
@@ -23,6 +24,7 @@
 <unit id="org.apache.commons.lang.source" version="2.4.0.v201005080502"/>
 <unit id="org.apache.log4j" version="1.2.15.v201012070815"/>
 <unit id="org.apache.log4j.source" version="1.2.15.v201012070815"/>
+<unit id="org.apache.xerces" version="2.9.0.v201101211617"/>
 <unit id="ch.qos.logback.classic" version="1.0.0.v20111214-2030"/>
 <unit id="ch.qos.logback.classic.source" version="1.0.0.v20111214-2030"/>
 <unit id="ch.qos.logback.core" version="1.0.0.v20111214-2030"/>
@@ -40,6 +42,8 @@
 <unit id="org.slf4j.log4j" version="1.6.4.v20120130-2120"/>
 <unit id="org.slf4j.log4j.source" version="1.6.4.v20120130-2120"/>
 <unit id="javax.ws.rs" version="1.1.1.v20101004-1200"/>
+<unit id="javax.xml" version="1.3.4.v201005080400"/>
+<unit id="org.jdom" version="1.1.1.v201101151400"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
 </location>
 <location includeAllPlatforms="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -47,5 +51,9 @@
 <repository location="http://ageto.github.com/gyrex-jaxrs-application/"/>
 </location>
 <location path="/opt/downloads/delta-3.7.2/" type="Directory"/>
+<location includeAllPlatforms="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.scala-ide.sdt.feature.feature.group" version="2.0.2.v-2_09-201207120929-81d0972"/>
+<repository location="http://download.scala-ide.org/releases-29/stable/site"/>
+</location>
 </locations>
 </target>
