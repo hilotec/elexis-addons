@@ -1,3 +1,21 @@
+Changelog for 2.1.7.rc3
+f30d549a4f0f: 2012-10-17: Niklaus Giger: RM: Added some more jars in desktop.dev.target
+8aeb55525d6f: 2012-10-17: Niklaus Giger: RM: removed non usable plug-in ch.marlovits.*
+3c1d0fe620ba: 2012-10-16: thomashu: [1196] added libraries for REST access to target
+
+Changelog for 2.1.7.rc2
+d8d2b77317e3: 2012-09-30: Niklaus Giger: #632: Use package name string and not packages (cope with not installed packages)
+cef214d4b507: 2012-09-30: Niklaus Giger: RM: Fixes für OpenSource Installer mit Hilotec KG, div. Text-Plugins
+6d7d6d3a155f: 2012-09-30: Niklaus Giger: #632: Remove unused elexis*.xml
+d8470e8f0dad: 2012-09-30: Niklaus Giger: #632: Bring build.properties in sync with Gerry's ant
+6d15543e0d87: 2012-09-29: Niklaus Giger: #632: Fixes creating installer
+7c67581448a9: 2012-09-29: Niklaus Giger: #1172: Fixed docURL in medelexis.xml
+153261dfb42d: 2012-09-28: Niklaus Giger: RM: small fixes for Installer
+b75a692d7d65: 2012-09-27: Niklaus Giger: RM: Added more choices for OpenSource installer
+c8c2cd736ced: 2012-09-25: Niklaus Giger: #632: Fixes for building appl with Apache Buildr
+97c6b5ef7664: 2012-09-22: Niklaus Giger: RM: must add more Plug-Ins for logback
+1800b024dc28: 2012-09-22: Niklaus Giger: RM: Cleanup unused bin/*.jar in Bundle-Classpath
+
 Changelog for 2.1.7.rc0
 78708c60129c: 2012-08-16: marcode79: [951] Context menu in stickynotes does not activate copy/paste action
 34927c8dfa05: 2012-07-22: Niklaus Giger: Fixes to make MacOSX-product runnable
