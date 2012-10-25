@@ -20,7 +20,7 @@
   require 'buildrizpack'
   layout[:target] = File.join(Elexis::get_deploy_dir, 'elexis-os')
   ProductInfoFile = _('branding.product')
-  elexis_inst_xml = File.join(path_to(:target), 'elexis_installer.xml')
+  elexis_inst_xml = File.expand_path(File.join(path_to(:target), '..', 'elexis_installer.xml'))
   elexisPackFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}-installer.jar")
   elexisPackFileShort =  File.join(Elexis::get_deploy_dir, "elexis-installer.jar")
   task(:package => elexisPackFileShort)
@@ -31,6 +31,11 @@
   task(elexisPackFileShort => package(:izpack))  do
     FileUtils.rm(elexisPackFileShort) if File.exists?(elexisPackFileShort)
     FileUtils.ln_s(File.basename(elexisPackFile), elexisPackFileShort, :force => true, :verbose => true)
+  end
+  unless Wikitext::skipDoc
+    handbuch =  File.join(project('dokumentation').path_to(:target), 'elexis.pdf')
+    french   =  File.join(project('doc_fr'       ).path_to(:target), 'elexis.pdf')
+    task(elexis_inst_xml => [ handbuch, french ])
   end
 
   Macosx_x86_64  =  { 'osgi.os' => 'macosx', 'osgi.ws' => 'cocoa', 'osgi.arch' => 'x86_64',
@@ -221,7 +226,7 @@ Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen
 
       begin
         otherArtifact = artifact(jarname)
-        if ! EclipseExtension::jarMatchesPlatformFilter(otherArtifact, defPlatform)
+        unless  EclipseExtension::jarMatchesPlatformFilter(otherArtifact, defPlatform)
           trace "getArtefactOrOsgiJar skipping 1 #{otherArtifact.to_s} #{defPlatform.inspect} for #{jarname}"
           return nil
         end
@@ -253,7 +258,7 @@ Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen
               dest = x.sub(/launcher/i,  launcherName)
               dest.sub!(   /eclipse/i,  launcherName)
               trace "macos found #{x} => #{dest} #{x.eql?(dest)}"
-              FileUtils.mv(x, dest, :verbose => Buildr.application.options.trace) if !x.eql?(dest)
+              FileUtils.mv(x, dest, :verbose => Buildr.application.options.trace) unless x.eql?(dest)
               }
       end
       infoPlist = File.join(elexisApp, 'Contents', 'Info.plist')
@@ -272,7 +277,7 @@ Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen
     def installLauncherAndConfiguration(destRoot, product, tgtPlatform, configIni=nil)
       tPlugins = File.join(destRoot, 'plugins')
       tConf    = File.join(destRoot, 'configuration')
-      if !product['configIni'].eql?('default')
+      unless product['configIni'].eql?('default')
         raise "Don't know how to handle non default configIni section in product definition"
       end
 
@@ -287,7 +292,7 @@ id=#{product['id']}
       Dir.glob(File.join(ENV['OSGi'], 'plugins', "org.eclipse.equinox.launcher_*.jar")).each {
         |jarFile|
           next if File.basename(jarFile).index('.source_')
-          next if !EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
+          next unless EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
           subDir = File.join(tPlugins, File.basename(jarFile, '.jar'))
           FileUtils.cp(jarFile, tPlugins, :verbose => Buildr.application.options.trace, :preserve => true)
       }
@@ -295,7 +300,7 @@ id=#{product['id']}
       Dir.glob(File.join(ENV['OSGi'], 'plugins', "org.eclipse.equinox.launcher.*.jar")).each {
         |jarFile|
           next if File.basename(jarFile).index('.source_')
-          next if !EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
+          next unless EclipseExtension::jarMatchesPlatformFilter(jarFile, tgtPlatform)
           subDir = File.join(tPlugins, File.basename(jarFile, '.jar'))
           unzipper =  Buildr::Unzip.new(subDir=>jarFile)
           unzipper.extract
@@ -318,11 +323,11 @@ id=#{product['id']}
       unzipper.extract
 
       # Here Eclipse uses ws/os/arch instead of ow/ws/arch in other places (.e.g, destination of install!!)
-      pathName = File.join(ENV['OSGi'], 'features', 'org.eclipse.equinox.executable_*', 'bin',
+      pathName = File.join(ENV['DELTA_DEST'], 'features', 'org.eclipse.equinox.executable_*', '*', # we we * as it can be bin or contributed!!
                             tgtPlatform['osgi.ws'],  tgtPlatform['osgi.os'], tgtPlatform['osgi.arch'], '**')
       Dir.glob(pathName).each{
         |x|
-          next if File.basename(x).eql?('eclipsec.exe')
+          next if /eclipsec/i .match(File.basename(x))
           if File.basename(x).eql?('launcher') || File.basename(x).eql?('launcher.exe')
             tgt = File.join(destRoot, File.basename(x))
             tgt.gsub!('launcher', product['launcher'])
@@ -435,7 +440,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
         tgtPlatform['os_specific'] = tRsc
         task elexis_inst_xml => tRsc
         task tRsc do
-            if !File.directory?(tRsc)
+            unless File.directory?(tRsc)
             FileUtils.makedirs(tRsc)
             product = EclipseExtension::readProductInfo(ProductInfoFile)
             installLauncherAndConfiguration(tRsc, product, tgtPlatform, installerConfigIni)
@@ -461,11 +466,9 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
 
     allProjects.each{ |x| file(elexis_inst_xml => project(x).package(:plugin).to_s) }
     allCommonJars.each{ |x| file(elexis_inst_xml => x.to_s) }
-    task(elexis_inst_xml => osJars + [ demoZipFile,
-                              project.parent.task(:doc),
-                              ]) do
+    task(elexis_inst_xml => osJars + [ demoZipFile, project.parent.task(:doc), ]) do
       allProjects.each{ |x| project(x).package(:plugin).invoke }
-      FileUtils.makedirs(path_to(:target), :verbose => Buildr.application.options.trace) if !File.directory?(path_to(:target))
+      FileUtils.makedirs(path_to(:target), :verbose => Buildr.application.options.trace) unless File.directory?(path_to(:target))
       kernProjects.each{ |x| kernPack.addEclipseJar(project(x).package(:plugin).to_s) }
       chProjects.each{ |x| chPack.addEclipseJar(project(x).package(:plugin).to_s) }
       allCommonJars.each{ |x| libPack.addEclipseJar(x.to_s) }
@@ -531,20 +534,37 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
          xm.singlefile('src'=> demoZipFile, 'target' =>"$INSTALL_PATH/demoDB_#{parent.version}.zip")
         }
         xm.pack('name' => 'Dokumentation', 'required' => 'no', 'preselected'=>'yes') {
-          Dir.glob(File.join(Elexis::get_deploy_dir, 'dox', '*')).each { |dir| xm.file('src'=> dir, 'targetdir' =>"$INSTALL_PATH/Dokumentation") }
-          xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins.')
-                                                                                     } unless Wikitext::skipDoc
+          xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins. Et le manuel français')
+          xm.singlefile('src' => handbuch, 'target' => '$INSTALL_PATH/Handbuch.pdf')
+          xm.singlefile('src' => french, 'target' => '$INSTALL_PATH/manuel_français.pdf')
+          xm.singlefile('src' => _('rsc/elexis.ico'), 'target' => '$INSTALL_PATH/elexis.ico')
+          xm.singlefile('src' => _('rsc/elexis.xpm'), 'target' => '$INSTALL_PATH/elexis.xpm')
+          xm.singlefile('src' => _('rsc/lizenz.txt'), 'target' => '$INSTALL_PATH/lizenz.txt')
+          xm.singlefile('src' => _('rsc/LICENSE_de.rtf'), 'target' => '$INSTALL_PATH/LICENSE_de.rtf')
+          xm.singlefile('src' => _('rsc/LICENSE_fr.rtf'), 'target' => '$INSTALL_PATH/LICENSE_fr.rtf')
+          xm.singlefile('src' => _('rsc/LICENSE_it.rtf'), 'target' => '$INSTALL_PATH/LICENSE_it.rtf')
+          xm.singlefile('src' => _('rsc/LICENSE'), 'target' => '$INSTALL_PATH/LICENSE')
+                                                                                        } unless Wikitext::skipDoc
           allPacks.each { |aPack| aPack.emitIzPackXML(xm) }
           platforms.each { |tgtPlatform|
             tRsc    = tgtPlatform['os_specific']
             xm.pack('name' =>platform2path(tgtPlatform,'.'), 'condition'=>tgtPlatform['condition'], 'required' => 'yes') {
             |x| xm.description(tgtPlatform['description'])
                 xm.executable('targetfile' => tgtPlatform['executable'], 'keep' => 'true')
-                xm.singlefile('src' => tgtPanel, 'target' => "$INSTALL_PATH/#{tgtPlatform['condition']}")
                 tgtPlatform['os_files'].each { |jar| xm.singlefile('src' => jar, 'target' => jar.sub(File.dirname(jar), '$INSTALL_PATH/plugins')) }
                 (Dir.glob(File.join(tRsc, '.*')) + Dir.glob(File.join(tRsc, '**', '*'))).each { |fileOrDir|
-                        next if File.directory?(fileOrDir)
-                        xm.singlefile('src' => fileOrDir, 'target' =>  fileOrDir.sub(tRsc, '$INSTALL_PATH'))
+                    next if File.directory?(fileOrDir)
+                    if /eclipsec.exe/i.match(File.basename(fileOrDir)) then
+                                                                                          puts "999: Skipping #{fileOrDir}"
+                                                                                          next
+                                                                                          end
+                    if /^launcher(|.exe)$/i.match(File.basename(fileOrDir))
+                                                                                          puts "999: Adding #{fileOrDir}"
+                      xm.singlefile('src' => fileOrDir,
+                                    'target' =>  File.join('$INSTALL_PATH', File.basename(tgtPlatform['executable'], '')))
+                    else
+                      xm.singlefile('src' => fileOrDir, 'target' =>  fileOrDir.sub(tRsc, '$INSTALL_PATH'))
+                    end
                 }
               }
             }
@@ -555,7 +575,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
 
     package(:izpack).enhance do
       allProjects.each{ |x|  project(x).package(:plugin).invoke  }
-      FileUtils.makedirs(path_to(:target), :verbose => Buildr.application.options.trace) if !File.directory?(path_to(:target))
+      FileUtils.makedirs(path_to(:target), :verbose => Buildr.application.options.trace) unless File.directory?(path_to(:target))
       chProjects.each{ |x| chPack.addEclipseJar(project(x).package(:plugin).to_s) }
       kernProjects.each{ |x| kernPack.addEclipseJar(project(x).package(:plugin).to_s) }
       allCommonJars.each{ |x| libPack.addEclipseJar(x.to_s) }
@@ -568,7 +588,7 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
     task 'app' =>  project(x).package(:plugin) do
         jarname = project(x).package(:plugin).to_s
         destDir = File.join(project.path_to(:target), $tgtBase, 'plugins')
-        FileUtils.makedirs(destDir, :verbose => Buildr.application.options.trace) if !File.directory?(destDir)
+        FileUtils.makedirs(destDir, :verbose => Buildr.application.options.trace) unless File.directory?(destDir)
         destName = File.join(destDir, File.basename(jarname))
         Buildr::Eclipse.installPlugin(jarname.to_s, destDir, $tgtBase)
     end
@@ -604,7 +624,7 @@ check task('app'), "application should exist in #{$tgtPath}" do
   File.should exist(File.join($tgtPath, '.eclipseproduct'))
   File.should exist(File.join($tgtPath, 'elexis.ini'))
   # File.should exist(File.join($tgtPath, 'about.html')) # Does not exists under windows
-  (Dir.glob(File.join($tgtPath, 'elexis*')).size == 2).should be_true # elexis or elexis.exe and elexis.ini
+#  (Dir.glob(File.join($tgtPath, 'elexis*')).size == 2).should be_true # elexis or elexis.exe and elexis.ini
   (Dir.glob(File.join($tgtPath, 'plugins', '*')).size > 10).should be_true
   (Dir.glob(File.join($tgtPath, 'plugins', '*/*')).size >5).should be_true
 end
@@ -620,6 +640,11 @@ IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.eq
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1')
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.cocoa.macosx_1')
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.ui.forms_')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.exe')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.ico')
+#IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.ini')
+#IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.xpm')
+IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis')
 IzPack::checkOne(project, elexis_inst_xml, 'demoDB_elexis_')
 IzPack::checkOne(project, elexis_inst_xml, 'Win_shortcutSpec.xml')
 IzPack::checkOne(project, elexis_inst_xml, 'ShortcutPanel')
