@@ -20,23 +20,24 @@
   require 'buildrizpack'
   layout[:target] = File.join(Elexis::get_deploy_dir, 'elexis-os')
   ProductInfoFile = _('branding.product')
-  elexis_inst_xml = File.expand_path(File.join(path_to(:target), '..', 'elexis_installer.xml'))
+  elexis_inst_xml = File.join(path_to(:target), 'elexis_installer.xml')
   elexisPackFile = File.join(Elexis::get_deploy_dir, "elexis-#{project.parent.version}-installer.jar")
   elexisPackFileShort =  File.join(Elexis::get_deploy_dir, "elexis-installer.jar")
   task(:package => elexisPackFileShort)
   package(:izpack, :file=> elexisPackFile).input = elexis_inst_xml
   package(:izpack).izpackVersion = '4.3.5'
   package(:izpack).include(elexis_inst_xml)
-  task(elexis_inst_xml => task(:doc))
+  task(elexis_inst_xml => [ task(:doc),  project.parent.task(:doc)] )
   task(elexisPackFileShort => package(:izpack))  do
     FileUtils.rm(elexisPackFileShort) if File.exists?(elexisPackFileShort)
     FileUtils.ln_s(File.basename(elexisPackFile), elexisPackFileShort, :force => true, :verbose => true)
   end
-  unless Wikitext::skipDoc
-    handbuch =  File.join(project('dokumentation').path_to(:target), 'elexis.pdf')
-    french   =  File.join(project('doc_fr'       ).path_to(:target), 'elexis.pdf')
-    task(elexis_inst_xml => [ handbuch, french ])
-  end
+#  unless Wikitext::skipDoc
+#    handbuch =  File.join(project('dokumentation').path_to(:target), 'elexis.pdf')
+#    french   =  File.join(project('doc_fr'       ).path_to(:target), 'elexis.pdf')
+#    task(elexis_inst_xml => [ handbuch, french ])
+#    task(elexis_inst_xml => [ handbuch ])
+#  end
 
   Macosx_x86_64  =  { 'osgi.os' => 'macosx', 'osgi.ws' => 'cocoa', 'osgi.arch' => 'x86_64',
                       'executable' => '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac',
@@ -176,6 +177,7 @@ Anstatt OpenOffice direkt ins Elexis-Fenster einzubinden, werden hier Schablonen
     allProjects = (kernProjects + chProjects)
     allProjects.each {
       |proj|
+        task(elexis_inst_xml => project(proj).task(:doc)) # for the pack 'Dokumentation'
         dependencies << project(proj)
         jars << project(proj).package(:plugin).to_s if project(proj).package(:plugin)
         project(proj).dependencies.each {|aDep|
@@ -535,8 +537,8 @@ eclipse.vmargs=-XX:PermSize=126M -XX:MaxPermSize=257M
         }
         xm.pack('name' => 'Dokumentation', 'required' => 'no', 'preselected'=>'yes') {
           xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins. Et le manuel français')
-          xm.singlefile('src' => handbuch, 'target' => '$INSTALL_PATH/Handbuch.pdf')
-          xm.singlefile('src' => french, 'target' => '$INSTALL_PATH/manuel_français.pdf')
+#          xm.singlefile('src' => handbuch, 'target' => '$INSTALL_PATH/elexis.pdf')
+#          xm.singlefile('src' => french, 'target' => '$INSTALL_PATH/manuel_français.pdf')
           xm.singlefile('src' => _('rsc/elexis.ico'), 'target' => '$INSTALL_PATH/elexis.ico')
           xm.singlefile('src' => _('rsc/elexis.xpm'), 'target' => '$INSTALL_PATH/elexis.xpm')
           xm.singlefile('src' => _('rsc/lizenz.txt'), 'target' => '$INSTALL_PATH/lizenz.txt')
@@ -641,7 +643,8 @@ IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.eq
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.cocoa.macosx_1')
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/plugins/org.eclipse.ui.forms_')
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.exe')
-IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.ico')
+# IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.ico')
+# #IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/Dokumentation/ch.elexis/script-show.pdf')
 #IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.ini')
 #IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis.xpm')
 IzPack::checkOne(project, elexis_inst_xml, '$INSTALL_PATH/elexis')
