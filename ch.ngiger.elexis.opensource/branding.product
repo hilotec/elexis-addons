@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Branding2" uid="Branding2" id="ch.ngiger.elexis.branding.Branding2" application="ch.elexis.ElexisApp" version="1.0.0.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="Branding" uid="Branding" id="ch.ngiger.elexis.branding.Branding" application="ch.elexis.ElexisApp" version="1.0.0.qualifier" useFeatures="false" includeLaunchers="true">
 
    <aboutInfo>
       <text>

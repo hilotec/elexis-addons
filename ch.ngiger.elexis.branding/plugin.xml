@@ -2,11 +2,11 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         id="Branding2"
+         id="Branding"
          point="org.eclipse.core.runtime.products">
       <product
             application="ch.elexis.ElexisApp"
-            name="ch.ngiger.elexis.branding.Branding2">
+            name="ch.ngiger.elexis.branding.Branding">
          <property
                name="windowImages"
                value="platform:/plugin/ch.elexis/rsc/elexis2_16.gif,platform:/plugin/ch.elexis/rsc/elexis32_2.gif,platform:/plugin/ch.elexis/rsc/elexis48.gif">
@@ -21,7 +21,7 @@
          </property>
          <property
                name="appName"
-               value="Branding2">
+               value="Branding">
          </property>
          <property
                name="preferenceCustomization"

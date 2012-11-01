@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Branding2
+Bundle-Name: Branding
 Bundle-Localization: plugin
 Bundle-SymbolicName: ch.ngiger.elexis.branding;singleton:=true
 Bundle-Version: 1.0.0.qualifier
