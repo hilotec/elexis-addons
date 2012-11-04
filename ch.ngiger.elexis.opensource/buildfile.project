@@ -26,7 +26,8 @@ package(:izpack).izpackVersion = '4.3.5'
 package(:izpack).include(install_xml)
 task(packFileShort => package(:izpack))  do
   FileUtils.rm(packFileShort) if File.exists?(packFileShort)
-  FileUtils.ln_s(File.basename(packFile), packFileShort, :force => true, :verbose => true)
+  # Cannot create a symbolic link under windows
+  FileUtils.ln_s(File.basename(packFile), packFileShort, :force => true, :verbose => true) unless /mingw|bccwin|wince|cygwin|mswin32/i.match(RbConfig::CONFIG['host_os'])
 end
 
 task(install_xml => [ task(:doc),  project.parent.task(:doc)] )

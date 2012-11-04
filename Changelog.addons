@@ -1,4 +1,6 @@
 Changelog for 2.1.7.rc3
+9545067d54f7: 2012-11-04: Niklaus Giger: RM: Fix wrong .classpath/.project in ch.elexis.regiomed.estudio
+596a1e1afd86: 2012-11-04: Niklaus Giger: #1197: Fixed config.ini. ch.qos.logback starts correctly now
 01fb72d5ec98: 2012-11-02: Niklaus Giger: #1217: Added medelexis.xml
 23f8f794a446: 2012-11-01: oliver.egger: Added ch.docbox.elexis from Oliver Egger
 8a165b14fa86: 2012-11-01: Niklaus Giger: #1197: Add starter-mac
