@@ -30,12 +30,17 @@ task(packFileShort => package(:izpack))  do
 end
 
 task(install_xml => [ task(:doc),  project.parent.task(:doc)] )
-#  unless Wikitext::skipDoc
-#    handbuch =  File.join(project('dokumentation').path_to(:target), 'elexis.pdf')
-#    french   =  File.join(project('doc_fr'       ).path_to(:target), 'elexis.pdf')
-#    task(install_xml => [ handbuch, french ])
-#    task(install_xml => [ handbuch ])
-#  end
+unless Wikitext::skipDoc
+  handbuch =  File.join(project.parent.path_to(:target), 'doc', 'elexis.pdf')
+  french   =  File.join(project.parent.path_to(:target), 'doc', 'doc_fr', 'elexis.pdf')
+  task(install_xml => [ project('dokumentation').task('doc'), project('doc_fr').task('doc') ])
+end
+
+@os_p = File.expand_path(File.join(_, '..','..','elexis-addons', 'ch.ngiger.elexis.opensource'))
+puts "Setup: Medelexis-Build gets some files from opensource in #{@os_p}"
+def os_p(path)
+  return File.join(@os_p, path)
+end
 
 product = EclipseExtension::readProductInfo(ProductInfoFile)
 allPacks = []
@@ -317,8 +322,8 @@ task(install_xml =>  [ test_installation, project.parent.task(:doc), demoZipFile
   xm.pack('name' => 'Dokumentation', 'required' => 'no', 'preselected'=>'yes') {
     xm.description('Dokumentation. Enthält Handbuch und die Dokumentation vieler zusätzlicher Plug-Ins. Et le manuel français')
     Dir.glob(File.join(Elexis::get_deploy_dir, 'dox', '*')).each { |dir| xm.file('src'=> dir, 'targetdir' =>"$INSTALL_PATH/Dokumentation") }
-#    xm.singlefile('src' => handbuch, 'target' => '$INSTALL_PATH/elexis.pdf')
-#    xm.singlefile('src' => french, 'target' => '$INSTALL_PATH/manuel_français.pdf')
+    xm.singlefile('src' => handbuch, 'target' => '$INSTALL_PATH/elexis.pdf')
+    xm.singlefile('src' => french, 'target' => '$INSTALL_PATH/manuel_français.pdf')
     xm.singlefile('src' => _('rsc/elexis.ico'), 'target' => '$INSTALL_PATH/elexis.ico')
     xm.singlefile('src' => _('rsc/elexis.xpm'), 'target' => '$INSTALL_PATH/elexis.xpm')
     xm.singlefile('src' => _('rsc/lizenz.txt'), 'target' => '$INSTALL_PATH/lizenz.txt')
@@ -334,16 +339,10 @@ task(install_xml =>  [ test_installation, project.parent.task(:doc), demoZipFile
       |x| xm.description(tgtPlatform['description'])
           xm.executable('targetfile' => tgtPlatform['executable'], 'keep' => 'true')
           if /macinstall/i.match(tgtPlatform['condition'])
-            xm.singlefile('src' => _('rsc/elexis.xpm'),
-                        'target' =>  File.join('$INSTALL_PATH', 'elexis.xpm'))
-            xm.singlefile('src' => _('rsc/macosx/starter-mac.ini'),
-                        'target' =>  File.join('$INSTALL_PATH', 'elexis.app', 'Contents', 'MacOS', 'starter-mac.ini'))
-            xm.singlefile('src' => _('rsc/macosx/starter-mac'),
-                        'target' =>  File.join('$INSTALL_PATH', 'elexis.app', 'Contents', 'MacOS', 'starter-mac'))
-            xm.singlefile('src' => _('rsc/macosx/starter-mac.ini'),
-                        'target' =>  File.join('$INSTALL_PATH', 'starter-mac.ini'))
-            xm.singlefile('src' => _('rsc/macosx/starter-mac'),
-                        'target' =>  File.join('$INSTALL_PATH', 'starter-mac'))
+            xm.singlefile('src' => os_p('rsc/macosx/starter-mac.ini'),
+                        'target' =>  File.join('$INSTALL_PATH', product['launcher']+'.app', 'Contents', 'MacOS', product['launcher']+'ini'))
+            xm.singlefile('src' => os_p('rsc/macosx/starter-mac'),
+                        'target' =>  File.join('$INSTALL_PATH', product['launcher']+'.app', 'Contents', 'MacOS', product['launcher']))
           end
           tgtPlatform['os_files'].each { |jar| xm.singlefile('src' => jar, 'target' => jar.sub(File.dirname(jar), '$INSTALL_PATH/plugins')) }
           (Dir.glob(File.join(tRsc, '.*')) + Dir.glob(File.join(tRsc, '**', '*'))).each { |fileOrDir|
@@ -398,8 +397,8 @@ IzPack::checkAbsent(project, install_xml, '$INSTALL_PATH/laucher.exe')
 
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/configuration/logback.xml')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis"')
-IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac')
-IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.app/Contents/MacOS/starter-mac.ini')
+IzPack::checkOne(project, install_xml, "$INSTALL_PATH/elexis.app/Contents/MacOS/#{product['launcher']}")
+IzPack::checkOne(project, install_xml, "$INSTALL_PATH/elexis.app/Contents/MacOS/#{product['launcher']}.ini")
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.exe')
 # IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.ico')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.ini')
@@ -417,8 +416,6 @@ IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/org.eclipse.equino
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/org.eclipse.ui.forms_')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/org.slf4j.api_')
-IzPack::checkOne(project, install_xml, '$INSTALL_PATH/starter-mac')
-IzPack::checkOne(project, install_xml, '$INSTALL_PATH/starter-mac.ini')
 IzPack::checkOne(project, install_xml, 'ShortcutPanel')
 IzPack::checkOne(project, install_xml, 'Win_shortcutSpec.xml')
 IzPack::checkOne(project, install_xml, 'installation')
