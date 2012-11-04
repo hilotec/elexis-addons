@@ -1,4 +1,11 @@
 Changelog for 2.1.7.rc3
+01fb72d5ec98: 2012-11-02: Niklaus Giger: #1217: Added medelexis.xml
+23f8f794a446: 2012-11-01: oliver.egger: Added ch.docbox.elexis from Oliver Egger
+8a165b14fa86: 2012-11-01: Niklaus Giger: #1197: Add starter-mac
+921019918cda: 2012-11-01: Niklaus Giger: #1197: Erstellen installer teilweise nach elexis-bootstrap/task/izpack.rake ausgelagert
+b4b1449ac285: 2012-10-28: Niklaus Giger: #1209: Dokumentation unvollständig
+14fff354b122: 2012-10-25: Niklaus Giger: #1197: remove launcher.exe/eclipsec.exe from Installer. Cleanup documentation
+d9f324d86262: 2012-10-17: Niklaus Giger: RM: Changelog updated
 f30d549a4f0f: 2012-10-17: Niklaus Giger: RM: Added some more jars in desktop.dev.target
 8aeb55525d6f: 2012-10-17: Niklaus Giger: RM: removed non usable plug-in ch.marlovits.*
 3c1d0fe620ba: 2012-10-16: thomashu: [1196] added libraries for REST access to target
