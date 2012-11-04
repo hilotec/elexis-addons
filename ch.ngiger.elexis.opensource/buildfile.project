@@ -185,9 +185,15 @@ osPath = File.join(project.path_to(:target), 'os')
 izRsc = File.join(project.path_to(:target), 'rsc')
 dest = project.path_to(:target, "elexis-#{version}-installer.jar")
 # productBundles = product['configurations'].sort.join(',')
-# were osgi.bundles=ch.qos.logback.classic@start,ch.qos.logback.core@start,org.eclipse.core.runtime@start,org.eclipse.equinox.common@2:start,org.eclipse.update.configurator@3:start,org.ekkescorner.logging.osgi@start,org.slf4j.api@start,org.slf4j.ext@start,org.slf4j.jul@start,org.slf4j.log4j@start
-productBundles = 'org.eclipse.core.runtime@start,org.eclipse.update.configurator@3:start,org.eclipse.equinox.common@2:start,org.eclipse.osgi.services@2:start
-'
+# ----------------------------------------------------------------------------------------------------------------------------------
+# I spent several hours trying to create with the traditional Eclipse IDE an „Eclipse product” which starts logging at start level 2.
+# In vain. The problem is that the fragment ch.qos.logback.slf4 has as host org.slf4j.api.
+# And when you try to start at start level org.slf4j.api early, you must also specify to load start level 2.
+# And I did not find a solution how to do this in Indigo (3.7.2) via the GUI
+# Using buildr.apache.org I simply force the osgi.bundles properties, by adding the following line to configuration/config.ini.
+# ----------------------------------------------------------------------------------------------------------------------------------
+
+productBundles = 'org.eclipse.core.runtime@start,org.eclipse.update.configurator@3:start,org.eclipse.equinox.common@2:start,ch.qos.logback.classic@2:start,ch.qos.logback.core@2:start,ch.qos.logback.slf4j@2,org.slf4j.api@2:start,org.slf4j.jul@2,org.eclipse.osgi.services@2:start,org.ekkescorner.logging.osgi@2:start,LogBackend@3:start'
 installerConfigIni = %(#Product Runtime Configuration File (installerConfigIni)
 # created by buildr.apache.org at #{Time.now}"
 eclipse.application=#{product['application']}
