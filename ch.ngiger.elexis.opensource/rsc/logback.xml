@@ -7,6 +7,10 @@
   
   Contributors:
       Niklaus Giger <niklaus.giger@member.fsf.org> - initial API and implementation
+
+  See also http://logback.qos.ch/documentation.html especially
+  http://logback.qos.ch/manual/configuration.html
+  
 -->
 <configuration scan="true" debug="true">
   <contextName>elexis</contextName> 
