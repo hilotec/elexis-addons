@@ -1,0 +1,108 @@
+---
+- !ruby/object:Info
+  id: ch.elexis.connect.mythic
+  name: Elexis-Connect-Mythic
+  responsible: support@medelexis.ch
+  type: Geräteanbindung
+  category: feature
+  description: Verbindung von Elexis zum Hämatologiegerät Mythic 18
+- !ruby/object:Info
+  id: ch.elexis.impfplan
+  name: Impfkontrolle und Impfempfehlungen
+  responsible: support@medelexis.ch
+  type: KG-Führung
+  category: feature
+  description: Ein Plugin zum Verwalten von Impfungen und erstellen von Impfempfehlungen,
+    sowie Drucken von Impfausweisen
+  docURL: http://www.rgw.ch/elexis/dox/elexis-impfplan.html
+- !ruby/object:Info
+  id: ch.elexis.scala.runtime
+  name: Scala Runtime
+  responsible: weirich@elexis.ch
+  type: Basis-System
+  category: invisible
+  description: Dienst zum EInbinden von Scala plugins
+- !ruby/object:Info
+  id: ch.elexis.global_inbox
+  name: Universal-Eingangsbox
+  responsible: weirich@elexis.ch
+  type: KG-Führung
+  category: feature
+  description: Globale Eingangsbox für Dokumente aller Art
+  docURL: http://www.rgw.ch/elexis/dox/inbox/global-inbox.html
+- !ruby/object:Info
+  id: ch.elexis.archie.wzw
+  name: WZW-Statistik
+  responsible: weirich@elexis.ch
+  type: Statistik
+  category: feature
+  description: Archie-Client zur Erstellung von Statistiken, die für WZW-Verfahren
+    wichtig sein können
+  docURL: ! '# has doc inside plugin'
+- !ruby/object:Info
+  id: ch.docbox.elexis
+  name: Zugriff auf docbox
+  responsible: support@medelexis.ch
+  type: KG-Führung
+  category: feature
+  description: Via docbox Patienten an Spitäler und Ärzte überweisen
+  docURL: ! '# has doc inside plugin'
+- !ruby/object:Info
+  id: de.ralfebert.rcputils
+  name: RCP Utils
+  responsible: office@medevit.at
+  type: Basis-System
+  category: feature
+  description: RCP Utilities von Ralf Ebert
+- !ruby/object:Info
+  id: de.fhdo.elexis.perspective
+  name: Elexis-Perspektiven
+  responsible: Bernhard.Rimatzki@fh-dortmund.de
+  type: Organisation
+  category: feature
+  description: Hilfsmittel zum Speichern und Laden von Perspektiven
+  docURL: ! '# has doc inside plugin'
+- !ruby/object:Info
+  id: at.medevit.elexis.properties
+  name: Elexis Properties
+  responsible: office@medevit.at
+  type: Basis-System
+  category: feature
+  description: Elexis Properties
+- !ruby/object:Info
+  id: at.medevit.elexis.medietikette
+  name: Elexis Medikamenten Etikette
+  responsible: office@medevit.at
+  type: Basis-System
+  category: feature
+  description: Elexis Medikamenten Etikette
+- !ruby/object:Info
+  id: Waelti.Statistics
+  name: Statistics M. Wälti
+  responsible: support@medelexis.ch
+  type: Statistik
+  category: feature
+  description: Einige einfache Statistik-Abfragen
+- !ruby/object:Info
+  id: ch.medelexis.text.templator
+  name: Alternatives Schablonenbasiertes Textsystem
+  responsible: weirich@elexis.ch
+  type: Dokumentenverwaltung
+  category: feature
+  description: Textsystem für alle Betriebssysteme inkl. Mac (BETA!)
+  docURL: http://www.rgw.ch/elexis/dox/templator/medelexis-text-templator.html
+- !ruby/object:Info
+  id: ch.elexis.archie.patientstatistik
+  name: Statistik pro Patient
+  responsible: weirich@elexis.ch
+  type: Statistik
+  category: feature
+  description: Anzeige von statistischen Daten pro Patient
+- !ruby/object:Info
+  id: ch.elexis.stickynotes
+  name: Haftnotizen
+  responsible: weirich@elexis.ch
+  type: Organisation
+  category: feature
+  description: Haftnotizen für beliebigen Patientspezifischen, nicht an eine Konsultation
+    gebundenen Freitext
