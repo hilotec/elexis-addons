@@ -398,7 +398,6 @@ end
 # define some integration tests
 #--------------------------------------------------------------------------------------------
 
-# IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.xpm')
 IzPack::checkAbsent(project, install_xml, '$INSTALL_PATH/eclipsec.exe')
 IzPack::checkAbsent(project, install_xml, '$INSTALL_PATH/laucher.exe')
 
@@ -407,9 +406,9 @@ IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis"')
 IzPack::checkOne(project, install_xml, "$INSTALL_PATH/elexis.app/Contents/MacOS/#{product['launcher']}")
 IzPack::checkOne(project, install_xml, "$INSTALL_PATH/elexis.app/Contents/MacOS/#{product['launcher']}.ini")
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.exe')
-# IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.ico')
+# IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.ico') 
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.ini')
-IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.xpm')
+IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis.xpm') unless Wikitext::skipDoc
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/LogBackend_')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/ch.elexis.core_')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/ch.elexis.h2.connector_')
