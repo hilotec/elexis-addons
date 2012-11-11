@@ -13,7 +13,6 @@
    </configIni>
 
    <launcherArgs>
-      <programArgs>-consoleLog -debug</programArgs>
       <vmArgs>-Xms256m
 -Xmx768m
 -XX:MaxPermSize=256m</vmArgs>
@@ -31,8 +30,10 @@
       </win>
    </launcher>
 
+
    <vm>
    </vm>
+
 
    <plugins>
       <plugin id="LogBackend"/>
@@ -48,7 +49,6 @@
       <plugin id="ch.elexis.importer.div"/>
       <plugin id="ch.elexis.labortarif.ch2009"/>
       <plugin id="ch.elexis.mysql.connector"/>
-      <plugin id="ch.elexis.noatext"/>
       <plugin id="ch.elexis.postgresql.connector"/>
       <plugin id="ch.elexis.scripting.beanshell"/>
       <plugin id="ch.medelexis.text.templator"/>
