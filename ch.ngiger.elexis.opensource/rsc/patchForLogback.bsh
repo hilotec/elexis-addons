@@ -11,7 +11,14 @@ import org.apache.commons.io.FileUtils;
 
 void afterPack() {
   print("(beanshell)  "+ getSourceFileInfo() + " after pack " + pack.name + " INSTALL_PATH " +  idata.getVariable("INSTALL_PATH") + " USER_HOME " +  idata.getVariable("USER_HOME") );
-  appendLogbackToConfig(idata.getVariable("INSTALL_PATH")+"/elexis.ini", idata.getVariable("INSTALL_PATH")+"/configuration/logback.xml");
+  print(" ISO3_LANG " +  idata.getVariable("ISO3_LANG") );
+  print(" APP_NAME " +  idata.getVariable("APP_NAME") );
+  print(" HOST_NAME " +  idata.getVariable("HOST_NAME") );
+  iniName =idata.getVariable("INSTALL_PATH")+
+            idata.getVariable("FILE_SEPARATOR")+
+            "elexis.ini";
+  appendLogbackToConfig(iniName, idata.getVariable("INSTALL_PATH")+"/configuration/logback.xml");
+  updateLanguageInConfig(iniName, idata.getVariable("ISO3_LANG"));
 }
 
 void appendLogbackToConfig(iniName, logbackXmlPath)
@@ -36,9 +43,58 @@ void appendLogbackToConfig(iniName, logbackXmlPath)
       System.exit(2);
   }
 }
+import org.apache.commons.lang.StringUtils;
+void updateLanguageInConfig(iniName, iso3)
+{
+  langCode = new String("unknown");
+  if (iso3.equals("fra")) { langCode = "fr"; }
+  if (iso3.equals("eng")) { langCode = "en"; }
+  if (iso3.equals("deu")) { langCode = "de"; }
+  bufferedReader = new BufferedReader(new FileReader(iniName));
+  inhalt = new String();
+  langFound  = false;
+  langDef    = "-Duser.language=";
+  regionFound = false;
+  regionDef = "-Duser.region=";
+  regionCode = "CH";
+  if (bufferedReader != null) {
+    String line;
+    // Keep on looping while line is not null, readLine will return null when it reaches the end of the file and the loop will stop.
+    while ((line = bufferedReader.readLine()) != null) {
+      if (line.contains(langDef)) {
+        inhalt += langDef + langCode + "\n";
+        regionFound = true;
+      }
+      else if (line.contains(regionDef)) {
+        inhalt += regionDef + regionCode + "\n";
+        langFound = true;
+      }
+      else {
+        inhalt += line + "\n";
+      }
+    }
+    if (!langFound)
+        inhalt += langDef + langCode + "\n";
+    if (!regionFound)
+        inhalt += regionDef + regionCode + "\n";
+    bufferedReader.close();
+  }
+  iniFile = new File(iniName);
+  if (!langCode.equals("unknown") && iniFile.canWrite())
+  {
+    fw = new FileWriter(iniName); //append
+    fw.write(inhalt);
+    fw.close();
+    print("updateLanguageInConfig append "+ tst + " -> " + langCode + " to " + iniName);
+  } else {
+    print("updateLanguageInConfig failed as "+iniName+ " cannot be written!!");
+    System.exit(2);
+  }
+}
+
 // next lines for debugging
 if (false && idata == void) // idata is not defined, we want to test
 {
   addClassPath("/opt/ch.elexis/ngiger-utilities-comm/lib/commons-io-1.4.jar");
-  appendLogbackToConfig("deploy/linux.gtk.x86_64/elexis.ini", "/home/niklaus/elexis/logback.xml");
+  appendLogbackToConfig("deploy/elexis-opensource/linux.gtk.x86_64/elexis.ini", "/home/niklaus/elexis/logback.xml");
 }

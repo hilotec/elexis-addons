@@ -293,7 +293,7 @@ task(install_xml =>  [ test_installation, project.parent.task(:doc), demoZipFile
                     xm.panel('classname' => 'FinishPanel')
 
                 }
-    xm.locale { |x| xm.langpack('iso3'=>'eng'); xm.langpack('iso3'=>'deu'); xm.langpack('iso3'=>'fra') }
+    xm.locale { |x| xm.langpack('iso3'=>'deu'); xm.langpack('iso3'=>'eng'); xm.langpack('iso3'=>'fra') }
     xm.native('type' => 'izpack', 'name' => 'ShellLink.dll')
     xm.conditions { |j|
       xm.condition('type' => 'variable', 'id'=>'is32bit') { |x| xm.name('SYSTEM_sun_arch_data_model'); xm.value('32') }
@@ -401,6 +401,18 @@ end
 IzPack::checkAbsent(project, install_xml, '$INSTALL_PATH/eclipsec.exe')
 IzPack::checkAbsent(project, install_xml, '$INSTALL_PATH/laucher.exe')
 
+if Dir.glob('**/ch.elexis.icpc/.project').size == 1
+  IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/ch.elexis.icpc-')
+end
+if Dir.glob('**/com.hilotec.elexis.opendocument/.project').size == 1
+  IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/com.hilotec.elexis.opendocument-')
+end
+if Dir.glob('**/noatext/.project').size == 1
+  IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/com.jsigle.noatext_jsl-')
+end
+if Dir.glob('**/ch.medelexis.text.templator/.project').size == 1
+  IzPack::checkOne(project, install_xml, '$INSTALL_PATH/plugins/ch.medelexis.text.templator-')
+end
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/configuration/logback.xml')
 IzPack::checkOne(project, install_xml, '$INSTALL_PATH/elexis"')
 IzPack::checkOne(project, install_xml, "$INSTALL_PATH/elexis.app/Contents/MacOS/#{product['launcher']}")

@@ -30,10 +30,8 @@
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
       <plugin id="LogBackend"/>
@@ -123,6 +121,8 @@
       <plugin id="org.slf4j.ext" autoStart="true" startLevel="0" />
       <plugin id="org.slf4j.jul" autoStart="true" startLevel="0" />
       <plugin id="org.slf4j.log4j" autoStart="true" startLevel="0" />
+      <property name="user.language" value="de" />
+      <property name="user.region" value="CH" />
    </configurations>
 
 </product>
