@@ -12,6 +12,7 @@ Require-Bundle: ch.elexis;bundle-version="2.1.1",
  org.eclipse.ui;bundle-version="3.5.0",
  ch.elexis.core;bundle-version="0.0.2"
 Bundle-ClassPath: .,
+ rsc/,
  lib/commons-codec-1.4.jar,
  lib/jna.jar,
  lib/platform.jar,
