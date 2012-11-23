@@ -25,6 +25,8 @@
 <unit id="org.apache.log4j" version="1.2.15.v201012070815"/>
 <unit id="org.apache.log4j.source" version="1.2.15.v201012070815"/>
 <unit id="org.apache.xerces" version="2.9.0.v201101211617"/>
+<unit id="org.apache.xml.serializer" version="2.7.1.v201005080400"/>
+<unit id="org.apache.xml.resolver" version="1.2.0.v201005080400"/>
 <unit id="ch.qos.logback.classic" version="1.0.0.v20111214-2030"/>
 <unit id="ch.qos.logback.classic.source" version="1.0.0.v20111214-2030"/>
 <unit id="ch.qos.logback.core" version="1.0.0.v20111214-2030"/>
