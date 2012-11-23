@@ -243,7 +243,7 @@ public class DocboxCDA {
 	}
 	
 	public void addComponentToBody(String title, String text, String docboxSectionCode){
-		POCDMT000040Component3 component = getComponent(title, null, docboxSectionCode);
+		POCDMT000040Component3 component = getComponent(stripNonValidXMLCharacters(title), null, stripNonValidXMLCharacters(docboxSectionCode));
 		component.getSection().setText(getStrucDocTextWithBreaks(text));
 		listComponent.add(component);
 	}
@@ -904,7 +904,7 @@ public class DocboxCDA {
 	 * Administrative Angaben Eintritt nüchtern [ja|nein|unbekannt]
 	 */
 	public boolean addEintrittNuechtern(Boolean value){
-		addComponentToBody("Eintritt nüchtern", value, "AEN");
+		addComponentToBody(null, value, "AEN");
 		return true;
 	}
 	
@@ -946,7 +946,7 @@ public class DocboxCDA {
 	 * (Klinik/Datum): String
 	 */
 	public boolean addFruehereAufenthalte(String name){
-		addComponentToBody("Fürhere Aufenthalte im Spital (Klinik/Datum)", name, "AFAS");
+		addComponentToBody(null, name, "AFAS");
 		return true;
 	}
 	
@@ -962,7 +962,7 @@ public class DocboxCDA {
 	 * Administrative Angaben Patient muss Präoperativ zum Hausarzt APH [ja|nein|unbekannt]
 	 */
 	public boolean addPraeoperativHausarzt(Boolean value){
-		addComponentToBody("Patient muss präoperativ zum Hauszarzt", value, "APH");
+		addComponentToBody(null, value, "APH");
 		return true;
 	}
 	
@@ -978,7 +978,7 @@ public class DocboxCDA {
 	 * Leistung/Fragestellung Hinzufügen einer gewünschten Leistungen
 	 */
 	public boolean addGewuenschteLeistung(String nameLeistung, String codeLeistung){
-		listComponent.add(this.getComponent("Gewünschte Leistung", nameLeistung, codeLeistung,
+		listComponent.add(this.getComponent(null, nameLeistung, codeLeistung,
 			getOidDocboxLeistungId()));
 		return true;
 	}
@@ -987,7 +987,7 @@ public class DocboxCDA {
 	 * Leistung/Fragestellung Ergänzungen zur Leistung LE Text
 	 */
 	public boolean addErgaenzungenLeistung(String name){
-		addComponentToBody("Ergänzungen zur Leistung", name, "LE");
+		addComponentToBody(null, name, "LE");
 		return true;
 	}
 	
@@ -1027,7 +1027,7 @@ public class DocboxCDA {
 	 * Leistung/Fragestellung Persönliche Anamnese LAP String
 	 */
 	public boolean addPerseoenlicheAnamnese(String name){
-		addComponentToBody("Persönliche Anamnese", name, "LAP");
+		addComponentToBody(null, name, "LAP");
 		return true;
 	}
 
@@ -1047,15 +1047,45 @@ public class DocboxCDA {
 			text += "Rechts:";
 		}
 		text += name;
-		addComponentToBody("Gewünschte Körperregion", text, "LK");
+		addComponentToBody(null, text, "LK");
 		return true;
 	}
+	
+	  /**
+     * This method ensures that the output String has only
+     * valid XML unicode characters as specified by the
+     * XML 1.0 standard. For reference, please see
+     * <a href="http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char">the
+     * standard</a>. This method will return an empty
+     * String if the input is null or empty.
+     *
+     * @param in The String whose non-valid characters we want to remove.
+     * @return The in String, stripped of non-valid characters.
+     */
+    public String stripNonValidXMLCharacters(String in) {
+        StringBuffer out = new StringBuffer(); // Used to hold the output.
+        char current; // Used to reference the current character.
+
+        if (in == null || ("".equals(in))) return ""; // vacancy test.
+        for (int i = 0; i < in.length(); i++) {
+            current = in.charAt(i); // NOTE: No IndexOutOfBoundsException caught here; it should not happen.
+            if ((current == 0x9) ||
+                (current == 0xA) ||
+                (current == 0xD) ||
+                ((current >= 0x20) && (current <= 0xD7FF)) ||
+                ((current >= 0xE000) && (current <= 0xFFFD)) ||
+                ((current >= 0x10000) && (current <= 0x10FFFF)))
+                out.append(current);
+        }
+        return out.toString();
+    }    
 
 	private StrucDocText getStrucDocTextWithBreaks(String[] text) {
 		StrucDocText strucDocText = new StrucDocText();
 		if (text != null) {
 			for (int i = 0; i < text.length; ++i) {
-				strucDocText.getContent().add(text[i]);
+				String textAdd = stripNonValidXMLCharacters(text[i]);
+				strucDocText.getContent().add(textAdd);
 				if (i != text.length - 1) {
 					strucDocText.getContent().add(new StrucDocBr());
 				}
@@ -1147,7 +1177,7 @@ public class DocboxCDA {
 	 * Klinische Angaben Schilddrüsen-Überfunktion KSCHILD [ja|nein|unbekannt]
 	 */
 	public boolean addSchilddruesenUeberfunktion(Boolean value){
-		addComponentToBody("Schilddrüsen - Überfunktion", value, "KSCHILD");
+		addComponentToBody(null, value, "KSCHILD");
 		return true;
 	}
 	
@@ -1187,7 +1217,7 @@ public class DocboxCDA {
 	 * Klinische Angaben Gehörimplantat KGEHÖRIMPL [ja|nein|unbekannt]
 	 */
 	public boolean addGehoerimplantat(Boolean value){
-		addComponentToBody("Gehörimplantat", value, "KGEHÖRIMPL");
+		addComponentToBody(null, value, "KGEHÖRIMPL");
 		return true;
 	}
 	
@@ -1272,7 +1302,7 @@ public class DocboxCDA {
 	 * @return String
 	 */
 	public boolean addAnaesthesie(String[] liste){
-		POCDMT000040Component3 component = getComponent("Anästhesie", null, "KANÄSTHESIE");
+		POCDMT000040Component3 component = getComponent(null, null, "KANÄSTHESIE");
 		component.getSection().setText(this.getStrucDocTextWithBreaks(liste));
 		listComponent.add(component);
 		return true;
@@ -1283,7 +1313,7 @@ public class DocboxCDA {
 	 * [ja|nein|unbekannt]
 	 */
 	public boolean addAnaesthesieSprechstunde(Boolean value){
-		addComponentToBody("Bitte zur Anästhesieprechstunde aufbieten", value,
+		addComponentToBody(null, value,
 			"KANÄSTHESIEAUFBIETEN");
 		return true;
 	}
@@ -1312,7 +1342,7 @@ public class DocboxCDA {
 	 * @return String
 	 */
 	public boolean addDatumAufgebotAenderung(String value){
-		addComponentToBody("Änderung Datum Aufgebot", value, "MDATUMAUFGEBOTÄNDERUNG");
+		addComponentToBody(null, value, "MDATUMAUFGEBOTÄNDERUNG");
 		return true;
 	}
 	

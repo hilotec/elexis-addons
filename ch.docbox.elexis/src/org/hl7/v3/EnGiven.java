@@ -31,10 +31,9 @@ public class EnGiven
     extends ENXP
 {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 3878156440813337467L;
 
 
 }

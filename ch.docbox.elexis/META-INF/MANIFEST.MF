@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ch.docbox.elexis
 Bundle-SymbolicName: ch.docbox.elexis;singleton:=true
-Bundle-Version: 2.1.6
+Bundle-Version: 2.1.7
 Bundle-Vendor: visionary on behalf of argomed
 Bundle-ActivationPolicy: lazy
 Require-Bundle: ch.elexis;bundle-version="2.1.1",

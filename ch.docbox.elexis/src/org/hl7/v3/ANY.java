@@ -53,14 +53,16 @@ import javax.xml.bind.annotation.XmlValue;
     GLISTPQ.class,
     BIN.class
 })
-public abstract class ANY implements Serializable{
+public class ANY implements Serializable{
 
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	@XmlValue protected String content;
+	
+	@XmlValue 
+	protected String content;
     
     public void setContent(String content) {
     	this.content = content;

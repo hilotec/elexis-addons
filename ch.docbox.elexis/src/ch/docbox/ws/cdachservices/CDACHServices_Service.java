@@ -1,9 +1,8 @@
 
 package ch.docbox.ws.cdachservices;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Logger;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
@@ -23,18 +22,9 @@ public class CDACHServices_Service
 {
 
     public final static URL CDACHSERVICES_WSDL_LOCATION;
-    private final static Logger logger = Logger.getLogger(ch.docbox.ws.cdachservices.CDACHServices_Service.class.getName());
 
     static {
-    	URL baseUrl = ch.docbox.ws.cdachservices.CDACHServices_Service.class.getResource("");
-    	URL url = null;
-        try {
-    		url = new URL(baseUrl+"/CDACHServices.wsdl");
-        } catch (MalformedURLException e) {
-            logger.warning("Failed to create URL for the wsdl Location: 'file:wsdl/CDACHServicesTest.wsdl', retrying as a local file");
-            logger.warning(e.getMessage());
-        }
-        CDACHSERVICES_WSDL_LOCATION = url;
+        CDACHSERVICES_WSDL_LOCATION = CDACHServices_Service.class.getResource("/rsc/ch/docbox/ws/cdachservices/CDACHServices.wsdl");
     }
 
     public CDACHServices_Service(URL wsdlLocation, QName serviceName) {

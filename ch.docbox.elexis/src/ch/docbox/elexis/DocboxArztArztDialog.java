@@ -16,7 +16,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,6 +60,7 @@ import org.hl7.v3.POCDMT000040RecordTarget;
 
 import ch.docbox.cdach.DocboxCDA;
 import ch.docbox.ws.cdachservices.CDACHServices;
+import ch.docbox.ws.cdachservices.CDACHServices_Service;
 import ch.elexis.Desk;
 import ch.elexis.Hub;
 import ch.elexis.StringConstants;
@@ -364,11 +364,7 @@ public class DocboxArztArztDialog extends TitleAreaDialog {
 		ByteArrayInputStream stream = new ByteArrayInputStream(xmlData);
 		StreamSource src = new StreamSource(stream);
 		
-		URL xsl = null;
-		URL baseUrl = ch.docbox.ws.cdachservices.CDACHServices_Service.class.getResource("");
-		try {
-			xsl = new URL(baseUrl + "/ArztArzt.xsl");
-		} catch (MalformedURLException e) {}
+		URL xsl = CDACHServices_Service.class.getResource("/rsc/ch/docbox/ws/cdachservices/ArztArzt.xsl");
 		
 		try {
 			Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, pdfOut);

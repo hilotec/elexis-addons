@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -49,10 +48,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ED", propOrder = {
-    "reference",
-    "thumbnail"
-})
+// JAVA7JAXBCONFLICTWITHANY	@XmlType(name = "ED", propOrder = {
+// JAVA7JAXBCONFLICTWITHANY	    "reference",
+// JAVA7JAXBCONFLICTWITHANY	    "thumbnail"
+// JAVA7JAXBCONFLICTWITHANY	})
 @XmlSeeAlso({
     Thumbnail.class,
     ST.class
@@ -65,8 +64,8 @@ public class ED
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected TEL reference;
-    protected Thumbnail thumbnail;
+// JAVA7JAXBCONFLICTWITHANY	protected TEL reference;
+// JAVA7JAXBCONFLICTWITHANY	    protected Thumbnail thumbnail;
     @XmlAttribute
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String mediaType;
@@ -80,53 +79,7 @@ public class ED
     @XmlAttribute
     protected IntegrityCheckAlgorithm integrityCheckAlgorithm;
 
-    /**
-     * Gets the value of the reference property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TEL }
-     *     
-     */
-    public TEL getReference() {
-        return reference;
-    }
 
-    /**
-     * Sets the value of the reference property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TEL }
-     *     
-     */
-    public void setReference(TEL value) {
-        this.reference = value;
-    }
-
-    /**
-     * Gets the value of the thumbnail property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Thumbnail }
-     *     
-     */
-    public Thumbnail getThumbnail() {
-        return thumbnail;
-    }
-
-    /**
-     * Sets the value of the thumbnail property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Thumbnail }
-     *     
-     */
-    public void setThumbnail(Thumbnail value) {
-        this.thumbnail = value;
-    }
 
     /**
      * Gets the value of the mediaType property.

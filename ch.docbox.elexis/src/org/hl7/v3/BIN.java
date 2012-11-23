@@ -1,11 +1,14 @@
 
 package org.hl7.v3;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 
 /**
@@ -37,13 +40,27 @@ import javax.xml.bind.annotation.XmlType;
     ED.class
 })
 public abstract class BIN
-    extends ANY
+    implements Serializable
 {
+	
 
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	@XmlValue 
+	protected String content;
+    
+    public void setContent(String content) {
+    	content =  content.replace((char) 26, ' ');
+    	this.content = content;
+    }
+    
+    public String content() {
+    	return content;
+    }	
+	
 	@XmlAttribute
     protected BinaryDataEncoding representation;
 

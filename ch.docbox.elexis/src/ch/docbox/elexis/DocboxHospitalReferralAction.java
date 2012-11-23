@@ -239,12 +239,14 @@ public class DocboxHospitalReferralAction extends DocboxAction {
 		POCDMT000040Custodian custodian =
 			docboxCDA.getCustodian(null, null, null, null, null, null);
 		
-		log.log("Invoking addReferral...", Log.DEBUGMSG);
-		
+		log.log("Invoking addReferral for patient "+patient.getVorname()+" "+patient.getName(), Log.DEBUGMSG);
+	
 		ClinicalDocumentType _addReferral_document = new ClinicalDocumentType();
 		_addReferral_document.setClinicalDocument(docboxCDA.getClinicalDocument("", recordTarget,
 			author, custodian, null, docboxCDA.getCodeReferral(), null, null));
 		
+			
+		log.log(docboxCDA.marshallIntoString(_addReferral_document.getClinicalDocument()),Log.DEBUGMSG);
 		
 		byte[] _addReferral_attachment = new byte[0];
 		javax.xml.ws.Holder<java.lang.Boolean> _addReferral_success =
@@ -294,8 +296,10 @@ public class DocboxHospitalReferralAction extends DocboxAction {
 		if (fall != null) {
 			if ("UVG".equals(fall.getAbrechnungsSystem())) {
 				try {
-					docboxCDA.addUnfallversicherung(fall.getRequiredContact("Kostenträger")
-						.getLabel());
+					if (fall.getRequiredContact("Kostenträger")!=null) {
+						docboxCDA.addUnfallversicherung(fall.getRequiredContact("Kostenträger")
+							.getLabel());
+					}
 				} catch (Exception e) {
 					log.log(e,"addUnfallversicherung", Log.DEBUGMSG);
 					ExHandler.handle(e);
@@ -310,7 +314,9 @@ public class DocboxHospitalReferralAction extends DocboxAction {
 			}
 			if ("KVG".equals(fall.getAbrechnungsSystem())) {
 				try {
-					docboxCDA.addKrankenkasse(fall.getRequiredContact("Kostenträger").getLabel());
+					if (fall.getRequiredContact("Kostenträger")!=null) {
+						docboxCDA.addKrankenkasse(fall.getRequiredContact("Kostenträger").getLabel());
+					}
 				} catch (Exception e) {
 					log.log(e,"addKrankenkasse", Log.DEBUGMSG);
 					ExHandler.handle(e);
