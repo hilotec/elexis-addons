@@ -1,3 +1,15 @@
+Changelog for 2.1.7.0
+
+96b496cda7b3: 2012-11-23: Niklaus Giger: #1246: pdfBills/fop_wrapper installierbar machen
+f900964c7857: 2012-11-23: oliver_egger: 2.1.7: windows java7 fix bei überwesiung patientendaten an docbox (encoding, hl7 jaxb serialisierung)
+2aa6820c52a7: 2012-11-16: Niklaus Giger: #1249: add rsc to ch.docbox.elexis classpath
+dbf6741b0311: 2012-11-15: Niklaus Giger: #1249: Add two missing files to docbox
+49b928c68543: 2012-11-15: Niklaus Giger: #1222: correct typo in ch.elexis.archie.patientstatistik
+62d8f17a9605: 2012-11-15: Niklaus Giger: 1222: Beanshell corrects now properties for selected language/region
+8d0cf079c57a: 2012-11-15: jsigle: Neuer Splash.bmp von Jürg Sigle
+72fa03331a64: 2012-11-11: Niklaus Giger: #632: no consoleLog/debug nor noatext by default
+0ff003723bdc: 2012-11-08: Niklaus Giger: #632: Fix problem when no documentation is create
+
 Changelog for 2.1.7.rc3
 9545067d54f7: 2012-11-04: Niklaus Giger: RM: Fix wrong .classpath/.project in ch.elexis.regiomed.estudio
 596a1e1afd86: 2012-11-04: Niklaus Giger: #1197: Fixed config.ini. ch.qos.logback starts correctly now
